@@ -14,5 +14,6 @@ namespace ContextWeaver.Interfaces;
 public interface IFileAnalyzer
 {
     bool CanAnalyze(FileInfo file);
+    Task InitializeAsync(IEnumerable<FileInfo> files);
     Task<FileAnalysisResult> AnalyzeAsync(FileInfo file);
 }

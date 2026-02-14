@@ -19,41 +19,103 @@ namespace ContextWeaver.Analyzers;
 /// </summary>
 public class CSharpFileAnalyzer : IFileAnalyzer
 {
+    private CSharpCompilation? _globalCompilation;
+    private Dictionary<string, SyntaxTree> _syntaxTrees = new();
+
     public bool CanAnalyze(FileInfo file)
     {
         return file.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase);
     }
 
+    public async Task InitializeAsync(IEnumerable<FileInfo> files)
+    {
+        var csFiles = files.Where(CanAnalyze).ToList();
+        var trees = new List<SyntaxTree>();
+
+        foreach (var file in csFiles)
+        {
+            var content = await File.ReadAllTextAsync(file.FullName);
+            var tree = CSharpSyntaxTree.ParseText(content, path: file.FullName); // Path es importante para mapear luego
+            trees.Add(tree);
+            _syntaxTrees[file.FullName] = tree;
+        }
+
+        _globalCompilation = CSharpCompilation.Create("ContextWeaverAnalysis")
+            .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+            .AddSyntaxTrees(trees);
+
+        // Extraer todos los tipos definidos en el proyecto para el filtro
+        GetAllProjectTypesFromCompilation(_globalCompilation);
+    }
+    
+    private HashSet<string> _allProjectTypes = new();
+
+    private void GetAllProjectTypesFromCompilation(CSharpCompilation compilation)
+    {
+        // Helper simple para recorrer el namespace global y extraer tipos
+        var stack = new Stack<INamespaceSymbol>();
+        stack.Push(compilation.GlobalNamespace);
+
+        while (stack.Count > 0)
+        {
+            var ns = stack.Pop();
+            foreach (var member in ns.GetMembers())
+            {
+                if (member is INamespaceSymbol childNs)
+                {
+                    stack.Push(childNs);
+                }
+                else if (member is ITypeSymbol typeSymbol)
+                {
+                    _allProjectTypes.Add(typeSymbol.Name);
+                }
+            }
+        }
+    }
+
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
-        var content = await File.ReadAllTextAsync(file.FullName);
-        var tree = CSharpSyntaxTree.ParseText(content);
+        if (!_syntaxTrees.TryGetValue(file.FullName, out var tree))
+        {
+            // Fallback si por alguna razón no se inicializó (ej. archivo nuevo creado durante ejecución, aunque raro en CLI)
+            var content = await File.ReadAllTextAsync(file.FullName);
+            tree = CSharpSyntaxTree.ParseText(content);
+        }
+
         var root = tree.GetRoot();
+        var contentText = root.ToFullString();
 
-        // Se necesita una Compilación para obtener el SemanticModel.
-        var compilation = CSharpCompilation.Create("ContextWeaverAnalysis")
-            .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
-            .AddSyntaxTrees(tree);
-        var semanticModel = compilation.GetSemanticModel(tree);
-
-        var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(content);
+        // Usar SemanticModel global si está disponible, sino crear uno local.
+        SemanticModel semanticModel;
+        if (_globalCompilation != null)
+        {
+            semanticModel = _globalCompilation.GetSemanticModel(tree);
+        }
+        else
+        {
+            var compilation = CSharpCompilation.Create("ContextWeaverAnalysis")
+                .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                .AddSyntaxTrees(tree);
+            semanticModel = compilation.GetSemanticModel(tree);
+        }
+            
+        var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(contentText);
         var publicApiSignatures = ExtractPublicApiSignatures(root);
-        var usings = ExtractUsingStatements(root); // Los Usings se extraen igual
-        // Extraer las dependencias de clase.
+        var usings = ExtractUsingStatements(root); 
+        // Extraer las dependencias de clase usando el modelo semántico (global o local)
         var classDependencies = ExtractClassDependencies(root, semanticModel);
 
         return new FileAnalysisResult
         {
-            LinesOfCode = content.Split('\n').Length,
-            CodeContent = content,
+            LinesOfCode = contentText.Split('\n').Length,
+            CodeContent = contentText,
             Language = "csharp",
-            Usings = usings, // <-- Asignado a la nueva propiedad
-            ClassDependencies = classDependencies, // <-- Asignar el resultado
+            Usings = usings,
+            ClassDependencies = classDependencies,
             Metrics =
             {
                 { "CyclomaticComplexity", complexity },
                 { "PublicApiSignatures", publicApiSignatures }
-                // "Usings" ya no va en Metrics
             }
         };
     }
@@ -173,8 +235,9 @@ public class CSharpFileAnalyzer : IFileAnalyzer
 
                 // ✅ FIX: El filtro principal. Solo nos interesan las dependencias a otros tipos del proyecto.
                 // También se excluyen tipos del sistema y se asegura que el nombre no esté vacío.
+                // Usamos _allProjectTypes para validar si el destino pertenece al proyecto.
                 if (!string.IsNullOrWhiteSpace(targetTypeName) &&
-                    projectTypeNames.Contains(targetTypeName) &&
+                    _allProjectTypes.Contains(targetTypeName) &&
                     targetTypeName != sourceTypeName)
                     dependencies.Add($"{sourceTypeName} --> {targetTypeName}");
             }

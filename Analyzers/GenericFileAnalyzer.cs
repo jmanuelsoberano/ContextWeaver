@@ -27,6 +27,11 @@ public class GenericFileAnalyzer : IFileAnalyzer
         return _supportedExtensions.Contains(file.Extension.ToLower());
     }
 
+    public Task InitializeAsync(IEnumerable<FileInfo> files)
+    {
+        return Task.CompletedTask;
+    }
+
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
         var content = await File.ReadAllTextAsync(file.FullName);

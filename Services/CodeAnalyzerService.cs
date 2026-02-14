@@ -42,9 +42,16 @@ public class CodeAnalyzerService
             .Where(f => settings.IncludedExtensions.Contains(f.Extension.ToLowerInvariant()))
             .ToList();
 
-        // 3. Analizar archivos
-        var analysisResults = new List<FileAnalysisResult>();
-        foreach (var file in allFiles)
+        // 3. Inicializar Analizadores (Pre-carga de contexto global)
+        foreach (var analyzer in _analyzers)
+        {
+            await analyzer.InitializeAsync(allFiles);
+        }
+
+        // 4. Analizar archivos (Paralelizado)
+        var analysisResults = new System.Collections.Concurrent.ConcurrentBag<FileAnalysisResult>();
+        
+        await Parallel.ForEachAsync(allFiles, async (file, ct) =>
         {
             var analyzer = _analyzers.FirstOrDefault(a => a.CanAnalyze(file));
             if (analyzer != null)
@@ -54,13 +61,14 @@ public class CodeAnalyzerService
                     .Replace(Path.DirectorySeparatorChar, '/').TrimStart('/');
                 analysisResults.Add(result);
             }
-        }
+        });
 
-        // 4. Calcular inestabilidad (responsabilidad delegada)
-        var instabilityMetrics = _instabilityCalculator.Calculate(directory.Name, analysisResults);
+        // 5. Calcular inestabilidad (responsabilidad delegada)
+        var resultsList = analysisResults.ToList();
+        var instabilityMetrics = _instabilityCalculator.Calculate(directory.Name, resultsList);
 
-        // 5. Generar y escribir el reporte
-        var reportContent = generator.Generate(directory, analysisResults, instabilityMetrics);
+        // 6. Generar y escribir el reporte
+        var reportContent = generator.Generate(directory, resultsList, instabilityMetrics);
         await File.WriteAllTextAsync(outputFile.FullName, reportContent);
 
         Console.WriteLine($"✅ Reporte en formato '{format}' generado exitosamente en: {outputFile.FullName}");
