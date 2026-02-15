@@ -125,3 +125,23 @@ DTO extendido para soportar las nuevas funcionalidades:
 ## 4. Conclusión
 
 ContextWeaver ha evolucionado de una herramienta de concatenación simple a un generador de documentación técnica avanzado. La corrección de la extracción de dependencias y la adición de diagramas detallados (especialmente con soporte PlantUML y distinción de interfaces) lo convierten en una herramienta potente para entender bases de código legacy o complejas rápidamente.
+### 4. Análisis Avanzado para LLMs
+**Estado:** RESOLVED
+**Impacto:** Alto (Mejora la comprensión semántica por parte de la IA).
+
+**Solución Implementada:**
+1.  **Enriquecimiento Semántico:**
+    -   Se extraen **modificadores** (`sealed`, `abstract`), **interfaces** implementadas y **atributos** clave.
+    -   Se renderizan en el `Repo Map` justo debajo de la definición de la clase, proporcionando contexto inmediato sobre el "rol" del código.
+2.  **Profundidad de Anidamiento (`MaxNestingDepth`):**
+    -   Se calcula la profundidad máxima de bloques lógicos (`if`, `for`, `try`, etc.).
+    -   Esta métrica ayuda a identificar complejidad cognitiva que podría dificultar el razonamiento de un LLM.
+3.  **Referencias Entrantes Textuales ("Used By"):**
+    -   Se lista explícitamente qué otros archivos dependen del archivo actual.
+    -   Proporciona contexto instantáneo sobre el impacto de los cambios.
+
+**Verificación:**
+-   Comprobado en `verification_report_v10.md` mediante auto-análisis.
+-   `CSharpFileAnalyzer` muestra correctamente `Implements: IFileAnalyzer`.
+-   `NestingWalker` muestra una profundidad adecuada.
+-   `CodeAnalyzerService` muestra múltiples referencias en "Used By".

@@ -479,13 +479,57 @@ public class MarkdownReportGenerator : IReportGenerator
             // ✅ NUEVO: Diagrama de Contexto
             contentBuilder.Append(GenerateFileContextDiagram(result, typeKindMap));
 
+            // ✅ NUEVO (3): Referencias Entrantes Textuales ("Used By")
+            if (result.IncomingDependencies != null && result.IncomingDependencies.Any())
+            {
+                // Agrupamos por archivo origen para no repetir
+                var usedByFiles = result.IncomingDependencies
+                    .Select(d => d.Split(new[] { "-->", "-.->" }, StringSplitOptions.None)[0].Trim())
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
+
+                if (usedByFiles.Any())
+                {
+                    contentBuilder.AppendLine($"**Used By:** {string.Join(", ", usedByFiles)}");
+                    contentBuilder.AppendLine();
+                }
+            }
+
             // --- NUEVA SECCIÓN DE REPO MAP ---
             if (result.Metrics.TryGetValue("PublicApiSignatures", out var publicApiObj) &&
                 publicApiObj is List<string> publicApi)
             {
                 contentBuilder.AppendLine("### Repo Map: Extraer solo firmas públicas y imports de cada archivo");
                 contentBuilder.AppendLine("#### API Publica:");
-                foreach (var signature in publicApi) contentBuilder.AppendLine(signature);
+                foreach (var signature in publicApi) 
+                {
+                    contentBuilder.AppendLine(signature);
+                    
+                    // ✅ NUEVO (1): Enriquecimiento Semántico debajo de la definición de clase/tipo
+                    // La firma suele ser "- class MyClass : Base". Extraemos el nombre para buscar en el diccionario.
+                    var lineTrimmed = signature.TrimStart('-', ' ');
+                    var firstWord = lineTrimmed.Split(' ').FirstOrDefault();
+                    // Heurística simple: si empieza por class/interface/struct/record/enum, el siguiente es el nombre.
+                    if (IsTypeKeyword(firstWord)) 
+                    {
+                        var parts = lineTrimmed.Split(new[]{' ', ':'}, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2)
+                        {
+                            var typeName = parts[1];
+                            // Renderizar semántica si existe
+                            if (result.DefinedTypeSemantics != null && result.DefinedTypeSemantics.TryGetValue(typeName, out var semantics))
+                            {
+                                if (semantics.Modifiers.Any()) 
+                                    contentBuilder.AppendLine($"    - Modifiers: {string.Join(", ", semantics.Modifiers)}");
+                                if (semantics.Attributes.Any()) 
+                                    contentBuilder.AppendLine($"    - Attributes: {string.Join(", ", semantics.Attributes)}");
+                                if (semantics.Interfaces.Any()) 
+                                    contentBuilder.AppendLine($"    - Implements: {string.Join(", ", semantics.Interfaces)}");
+                            }
+                        }
+                    }
+                }
                 contentBuilder.AppendLine(); // Línea en blanco para separación
             }
 
@@ -620,6 +664,11 @@ public class MarkdownReportGenerator : IReportGenerator
         // Fallback: heuristic detection
         if (typeName.StartsWith("I") && typeName.Length > 1 && char.IsUpper(typeName[1])) return ("interface", "");
         return ("class", "");
+    }
+
+    private bool IsTypeKeyword(string keyword)
+    {
+        return keyword == "class" || keyword == "interface" || keyword == "struct" || keyword == "record" || keyword == "enum";
     }
 
     #endregion

@@ -74,4 +74,12 @@ public static class CSharpMetricsCalculator
             base.VisitBinaryExpression(node);
         }
     }
+
+
+    public static int CalculateMaxNestingDepth(SyntaxNode root)
+    {
+        var walker = new NestingWalker();
+        walker.Visit(root);
+        return walker.MaxDepth;
+    }
 }

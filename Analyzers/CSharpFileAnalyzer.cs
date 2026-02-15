@@ -87,28 +87,68 @@ public class CSharpFileAnalyzer : IFileAnalyzer
         }
             
         var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(contentText);
+        var maxNestingDepth = CSharpMetricsCalculator.CalculateMaxNestingDepth(root);
         var publicApiSignatures = ExtractPublicApiSignatures(root);
         var usings = ExtractUsingStatements(root); 
         // Extraer las dependencias de clase usando el modelo semántico (global o local)
         var classDependencies = ExtractClassDependencies(root, semanticModel);
 
-        // Extraer tipos definidos con su tipo (class, interface, etc.)
+        // Extraer tipos definidos con su semántica enriquecida
         var definedTypes = new List<string>();
         var definedTypeKinds = new Dictionary<string, string>();
+        var definedTypeSemantics = new Dictionary<string, TypeSemantics>();
 
         foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
         {
             var name = typeDecl.Identifier.Text;
             definedTypes.Add(name);
             definedTypeKinds[name] = typeDecl.Keyword.Text;
+            
+            // Semántica: Modificadores
+            var modifiers = typeDecl.Modifiers.Select(m => m.Text).ToList();
+            
+            // Semántica: Interfaces
+            var interfaces = new List<string>();
+            if (typeDecl.BaseList != null)
+            {
+                foreach (var unused in typeDecl.BaseList.Types)
+                {
+                    // Nota: Aquí solo tomamos el texto crudo. Para mayor precisión se podría usar SemanticModel.
+                    // Pero para "Repo Map" visual es suficiente y más rápido así.
+                    interfaces.Add(unused.ToString());
+                }
+            }
+
+            // Semántica: Atributos
+            var attributes = new List<string>();
+            foreach (var attrList in typeDecl.AttributeLists)
+            {
+                foreach (var attr in attrList.Attributes)
+                {
+                    attributes.Add($"[{attr.Name}]");
+                }
+            }
+
+            definedTypeSemantics[name] = new TypeSemantics(modifiers, interfaces, attributes);
         }
 
-        // También incluir Enums
+        // También incluir Enums (con semántica vacía o básica)
         foreach (var enumDecl in root.DescendantNodes().OfType<EnumDeclarationSyntax>())
         {
             var name = enumDecl.Identifier.Text;
             definedTypes.Add(name);
             definedTypeKinds[name] = "enum";
+            // Enums solo suelen tener modificadores (public, internal) y atributos.
+            var modifiers = enumDecl.Modifiers.Select(m => m.Text).ToList();
+             var attributes = new List<string>();
+            foreach (var attrList in enumDecl.AttributeLists)
+            {
+                foreach (var attr in attrList.Attributes)
+                {
+                    attributes.Add($"[{attr.Name}]");
+                }
+            }
+            definedTypeSemantics[name] = new TypeSemantics(modifiers, new List<string>(), attributes);
         }
 
         return new FileAnalysisResult
@@ -120,9 +160,11 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             ClassDependencies = classDependencies,
             DefinedTypes = definedTypes,
             DefinedTypeKinds = definedTypeKinds,
+            DefinedTypeSemantics = definedTypeSemantics,
             Metrics =
             {
                 { "CyclomaticComplexity", complexity },
+                { "MaxNestingDepth", maxNestingDepth },
                 { "PublicApiSignatures", publicApiSignatures }
             }
         };

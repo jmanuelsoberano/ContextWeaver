@@ -25,12 +25,16 @@ desafío al:
     - **Soporte Dual**: Genera diagramas tanto en **Mermaid** como en **PlantUML**.
     - **Granularidad Inteligente**: Crea diagramas de dependencias a nivel global, por módulo y diagramas de contexto específicos por archivo.
     - **Semántica Rica**: Distingue visualmente entre `class`, `interface`, `record`, `struct` y `enum`.
-5. **Identificar "Hotspots"**: Destaca automáticamente los 5 archivos con mayor tamaño (LOC) y mayor acoplamiento (
+5. **Contexto Semántico Enriquecido para LLMs**:
+    - **Taxonomía Automática**: Extrae modificadores (`abstract`, `sealed`), interfaces implementadas y atributos clave para dar contexto inmediato sobre el rol del código.
+    - **Detección de Complejidad Cognitiva**: Calcula la métrica `MaxNestingDepth` para alertar sobre lógica profundamente anidada.
+    - **Referencias Entrantes ("Used By")**: Lista explícitamente qué archivos dependen del código actual, facilitando el análisis de impacto.
+6. **Identificar "Hotspots"**: Destaca automáticamente los 5 archivos con mayor tamaño (LOC) y mayor acoplamiento (
    número de imports), permitiendo enfocar la atención en áreas críticas.
-6. **Análisis de Inestabilidad Arquitectónica (Métrica de Robert C. Martin)**: Calcula la métrica de Inestabilidad (I =
+7. **Análisis de Inestabilidad Arquitectónica (Métrica de Robert C. Martin)**: Calcula la métrica de Inestabilidad (I =
    Ce / (Ca + Ce)) a nivel de módulos (carpetas/proyectos) para ayudar a entender la dirección y la salud de las
    dependencias arquitectónicas. Identifica módulos estables (núcleo) e inestables (implementaciones).
-7. **Configuración Flexible y por Proyecto**: La herramienta busca un archivo `.contextweaver.json` en el directorio
+8. **Configuración Flexible y por Proyecto**: La herramienta busca un archivo `.contextweaver.json` en el directorio
    analizado para usar configuraciones específicas del proyecto. Si no lo encuentra, utiliza la configuración global por
    defecto, permitiendo una gran adaptabilidad.
 

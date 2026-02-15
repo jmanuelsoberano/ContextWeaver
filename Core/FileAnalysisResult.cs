@@ -43,4 +43,14 @@ public class FileAnalysisResult
             return parts.Length > 1 ? parts[0] : "Root";
         }
     }
+
+
+    // ✅ NUEVA PROPIEDAD: Semántica enriquecida para Taxonomía (Modificadores, Interfaces, Atributos).
+    public Dictionary<string, TypeSemantics> DefinedTypeSemantics { get; set; } = new();
 }
+
+public record TypeSemantics(
+    List<string> Modifiers,
+    List<string> Interfaces,
+    List<string> Attributes
+);

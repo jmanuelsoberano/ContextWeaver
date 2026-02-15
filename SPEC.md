@@ -129,8 +129,9 @@ El reporte `analysis_report.md` contiene las siguientes secciones ordenadas:
 7.  **Contenido de Archivos**:
     *   Ruta del archivo.
     *   **Diagrama de Contexto**: Mini-gráfico (Mermaid y PlantUML) mostrando dependencias directas del archivo.
-    *   **Repo Map**: Resumen de API pública e imports.
-    *   **Métricas**: LOC, Complejidad.
+    *   **Referencias Entrantes**: Lista "Used By" con los archivos que dependen de este.
+    *   **Repo Map**: Resumen de API pública e imports, enriquecido con semántica (modificadores, interfaces, atributos).
+    *   **Métricas**: LOC, Complejidad Ciclomática, Profundidad Máxima de Anidamiento.
     *   **Código Fuente**: Bloque de código completo con resaltado de sintaxis.
 
 ## 5. Requisitos No Funcionales
