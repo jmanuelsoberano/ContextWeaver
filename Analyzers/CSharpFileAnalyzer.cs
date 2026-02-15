@@ -92,10 +92,24 @@ public class CSharpFileAnalyzer : IFileAnalyzer
         // Extraer las dependencias de clase usando el modelo semántico (global o local)
         var classDependencies = ExtractClassDependencies(root, semanticModel);
 
-        // Extraer tipos definidos
-        var definedTypes = root.DescendantNodes().OfType<TypeDeclarationSyntax>()
-            .Select(t => t.Identifier.Text)
-            .ToList();
+        // Extraer tipos definidos con su tipo (class, interface, etc.)
+        var definedTypes = new List<string>();
+        var definedTypeKinds = new Dictionary<string, string>();
+
+        foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+        {
+            var name = typeDecl.Identifier.Text;
+            definedTypes.Add(name);
+            definedTypeKinds[name] = typeDecl.Keyword.Text;
+        }
+
+        // También incluir Enums
+        foreach (var enumDecl in root.DescendantNodes().OfType<EnumDeclarationSyntax>())
+        {
+            var name = enumDecl.Identifier.Text;
+            definedTypes.Add(name);
+            definedTypeKinds[name] = "enum";
+        }
 
         return new FileAnalysisResult
         {
@@ -105,6 +119,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             Usings = usings,
             ClassDependencies = classDependencies,
             DefinedTypes = definedTypes,
+            DefinedTypeKinds = definedTypeKinds,
             Metrics =
             {
                 { "CyclomaticComplexity", complexity },

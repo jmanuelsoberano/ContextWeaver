@@ -237,14 +237,22 @@ public class MarkdownReportGenerator : IReportGenerator
         graphBuilder.AppendLine("### Alternativa: PlantUML");
         graphBuilder.AppendLine("```plantuml");
         graphBuilder.AppendLine("@startuml");
-        graphBuilder.AppendLine("skinparam componentStyle uml2");
+        // ✅ FIX: Usar 'class'/'interface'/'enum' según corresponda.
+        // Ocultar miembros vacíos para que se vean como cajas simples si no hay detalles.
+        graphBuilder.AppendLine("hide empty members");
+        
+        var typeKindMap = BuildTypeKindMap(results);
         graphBuilder.AppendLine();
 
         foreach (var module in modules.OrderBy(m => m.Key))
             if (module.Value.Any())
             {
                 graphBuilder.AppendLine($"package \"{module.Key}\" {{");
-                foreach (var className in module.Value.OrderBy(n => n)) graphBuilder.AppendLine($"  component {className}");
+                foreach (var className in module.Value.OrderBy(n => n)) 
+                {
+                     var keyword = GetPlantUMLKeyword(className, typeKindMap);
+                     graphBuilder.AppendLine($"  {keyword} {className}");
+                }
                 graphBuilder.AppendLine("}");
                 graphBuilder.AppendLine();
             }
@@ -324,6 +332,20 @@ public class MarkdownReportGenerator : IReportGenerator
                 sb.AppendLine("### PlantUML");
                 sb.AppendLine("```plantuml");
                 sb.AppendLine($"@startuml {moduleName}");
+                sb.AppendLine("hide empty members");
+                
+                // ✅ FIX: Declarar clases/interfaces explícitamente.
+                // Usamos typeKindMap que necesitamos construir aquí también, o pasarlo.
+                // Como este método no recibe el mapa, lo construimos localmente (costo bajo).
+                var typeKindMap = BuildTypeKindMap(results);
+
+                foreach (var cls in relatedClasses.OrderBy(c => c))
+                {
+                    var keyword = GetPlantUMLKeyword(cls, typeKindMap);
+                    sb.AppendLine($"{keyword} {cls}");
+                }
+                sb.AppendLine();
+
                 foreach (var dep in moduleDependencies.OrderBy(d => d))
                 {
                     var plantUmlDep = dep.Replace("-.->", "..>").Replace("-->", "-->");
@@ -341,7 +363,10 @@ public class MarkdownReportGenerator : IReportGenerator
     /// <summary>
     ///     Genera un pequeño diagrama de contexto para un archivo específico.
     /// </summary>
-    private string GenerateFileContextDiagram(FileAnalysisResult result)
+    /// <summary>
+    ///     Genera un pequeño diagrama de contexto para un archivo específico.
+    /// </summary>
+    private string GenerateFileContextDiagram(FileAnalysisResult result, Dictionary<string, string> typeKindMap)
     {
         // Recopilar conexiones
         var connections = new HashSet<string>();
@@ -395,18 +420,29 @@ public class MarkdownReportGenerator : IReportGenerator
         sb.AppendLine("```plantuml");
         sb.AppendLine("@startuml");
         sb.AppendLine("left to right direction");
+        sb.AppendLine("hide empty members");
+
+        // Declarar clases participantes
+        var participants = new HashSet<string>();
+        foreach (var conn in connections)
+        {
+            var parts = conn.Split(new[] { "-->", "-.->" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts) participants.Add(part);
+        }
+
+        foreach (var p in participants.OrderBy(x => x))
+        {
+                var keyword = GetPlantUMLKeyword(p, typeKindMap);
+                if (result.DefinedTypes != null && result.DefinedTypes.Contains(p))
+                    sb.AppendLine($"{keyword} {p} #Pink"); // Resaltar propia
+                else
+                    sb.AppendLine($"{keyword} {p}");
+        }
+
         foreach (var conn in connections.OrderBy(c => c))
         {
             var pUml = conn.Replace("-->", "-->").Replace("-.->", "..>");
             sb.AppendLine($"  {pUml}");
-        }
-        // Resaltar nodo central en PlantUML
-        if (result.DefinedTypes != null)
-        {
-            foreach(var type in result.DefinedTypes)
-            {
-                sb.AppendLine($"  class {type} #Pink");
-            }
         }
         sb.AppendLine("@enduml");
         sb.AppendLine("```");
@@ -431,6 +467,7 @@ public class MarkdownReportGenerator : IReportGenerator
     /// </summary>
     private string GenerateFileContent(List<FileAnalysisResult> results)
     {
+        var typeKindMap = BuildTypeKindMap(results);
         var contentBuilder = new StringBuilder();
         contentBuilder.AppendLine("# Archivos");
         contentBuilder.AppendLine();
@@ -441,7 +478,7 @@ public class MarkdownReportGenerator : IReportGenerator
             contentBuilder.AppendLine();
 
             // ✅ NUEVO: Diagrama de Contexto
-            contentBuilder.Append(GenerateFileContextDiagram(result));
+            contentBuilder.Append(GenerateFileContextDiagram(result, typeKindMap));
 
             // --- NUEVA SECCIÓN DE REPO MAP ---
             if (result.Metrics.TryGetValue("PublicApiSignatures", out var publicApiObj) &&
@@ -550,6 +587,40 @@ public class MarkdownReportGenerator : IReportGenerator
             var anchor = MarkdownHelper.CreateAnchor(headerText);
             sb.AppendLine($"{indent}- [{file.Name}](#{anchor})");
         }
+    }
+
+    private Dictionary<string, string> BuildTypeKindMap(List<FileAnalysisResult> results)
+    {
+        var map = new Dictionary<string, string>();
+        foreach (var result in results)
+        {
+            if (result.DefinedTypeKinds != null)
+            {
+                foreach (var kvp in result.DefinedTypeKinds)
+                {
+                    map[kvp.Key] = kvp.Value;
+                }
+            }
+        }
+        return map;
+    }
+
+    private string GetPlantUMLKeyword(string typeName, Dictionary<string, string> typeKindMap)
+    {
+        if (typeKindMap.TryGetValue(typeName, out var kind))
+        {
+            return kind switch
+            {
+                "interface" => "interface",
+                "enum" => "enum",
+                "record" => "class", // PlantUML supports 'class X <<record>>' but class is safer fallback
+                "struct" => "class", 
+                _ => "class"
+            };
+        }
+        // Fallback: heuristic detection
+        if (typeName.StartsWith("I") && typeName.Length > 1 && char.IsUpper(typeName[1])) return "interface";
+        return "class";
     }
 
     #endregion

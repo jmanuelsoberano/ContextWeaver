@@ -29,4 +29,8 @@ public class FileAnalysisResult
 
     // ✅ NUEVA PROPIEDAD: Tipos definidos en este archivo.
     public List<string> DefinedTypes { get; set; } = new();
+
+    // ✅ NUEVA PROPIEDAD: Tipo de dato (class, interface, struct, record, enum).
+    // Key: Nombre del tipo, Value: Kind.
+    public Dictionary<string, string> DefinedTypeKinds { get; set; } = new();
 }
