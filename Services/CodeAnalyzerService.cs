@@ -63,8 +63,55 @@ public class CodeAnalyzerService
             }
         });
 
-        // 5. Calcular inestabilidad (responsabilidad delegada)
+        // 4b. Post-procesamiento: Calcular Dependencias Entrantes (Reverse Index)
         var resultsList = analysisResults.ToList();
+        var typeToFileMap = new Dictionary<string, FileAnalysisResult>();
+
+        // Construir mapa Tipo -> Archivo
+        foreach (var result in resultsList)
+        {
+            if (result.DefinedTypes != null)
+            {
+                foreach (var type in result.DefinedTypes)
+                {
+                    if (!typeToFileMap.ContainsKey(type))
+                    {
+                        typeToFileMap[type] = result;
+                    }
+                }
+            }
+        }
+
+        // Llenar IncomingDependencies
+        foreach (var result in resultsList)
+        {
+            if (result.ClassDependencies != null)
+            {
+                foreach (var dep in result.ClassDependencies)
+                {
+                    // Formato: "Source --> Target" o "Source -.-> Target"
+                    var parts = dep.Split(new[] { "-->", "-.->" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
+                    {
+                        var source = parts[0];
+                        var target = parts[1];
+
+                        if (typeToFileMap.TryGetValue(target, out var targetFile))
+                        {
+                            // Evitar auto-referencias en el diagrama de contexto si lo deseamos, 
+                            // pero para "Incoming" es útil saber si alguien TE usa.
+                            // Aquí agregamos "Source" a la lista de "Incoming" del archivo que define "Target".
+                            if (!targetFile.IncomingDependencies.Contains(source))
+                            {
+                                targetFile.IncomingDependencies.Add(source);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 5. Calcular inestabilidad (responsabilidad delegada)
         var instabilityMetrics = _instabilityCalculator.Calculate(directory.Name, resultsList);
 
         // 6. Generar y escribir el reporte

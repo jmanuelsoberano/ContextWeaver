@@ -45,33 +45,20 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             .AddSyntaxTrees(trees);
 
         // Extraer todos los tipos definidos en el proyecto para el filtro
-        GetAllProjectTypesFromCompilation(_globalCompilation);
-    }
-    
-    private HashSet<string> _allProjectTypes = new();
-
-    private void GetAllProjectTypesFromCompilation(CSharpCompilation compilation)
-    {
-        // Helper simple para recorrer el namespace global y extraer tipos
-        var stack = new Stack<INamespaceSymbol>();
-        stack.Push(compilation.GlobalNamespace);
-
-        while (stack.Count > 0)
+        // ✅ MEJORA: Solo extraer tipos de los árboles de sintaxis (código fuente), no de las referencias ensambladas.
+        foreach (var tree in trees)
         {
-            var ns = stack.Pop();
-            foreach (var member in ns.GetMembers())
+            var root = tree.GetRoot();
+            foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
-                if (member is INamespaceSymbol childNs)
-                {
-                    stack.Push(childNs);
-                }
-                else if (member is ITypeSymbol typeSymbol)
-                {
-                    _allProjectTypes.Add(typeSymbol.Name);
-                }
+                _allProjectTypes.Add(typeDecl.Identifier.Text);
             }
         }
     }
+    
+    // Ya no necesitamos recorrer la compilación global recursivamente, 
+    // lo cual incluía tipos de System por las referencias.
+    private HashSet<string> _allProjectTypes = new();
 
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
@@ -105,6 +92,11 @@ public class CSharpFileAnalyzer : IFileAnalyzer
         // Extraer las dependencias de clase usando el modelo semántico (global o local)
         var classDependencies = ExtractClassDependencies(root, semanticModel);
 
+        // Extraer tipos definidos
+        var definedTypes = root.DescendantNodes().OfType<TypeDeclarationSyntax>()
+            .Select(t => t.Identifier.Text)
+            .ToList();
+
         return new FileAnalysisResult
         {
             LinesOfCode = contentText.Split('\n').Length,
@@ -112,6 +104,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             Language = "csharp",
             Usings = usings,
             ClassDependencies = classDependencies,
+            DefinedTypes = definedTypes,
             Metrics =
             {
                 { "CyclomaticComplexity", complexity },

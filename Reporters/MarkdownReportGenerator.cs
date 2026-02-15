@@ -26,6 +26,8 @@ public class MarkdownReportGenerator : IReportGenerator
         reportBuilder.Append(GenerateInstabilityReport(instabilityMetrics));
         // Añadimos el gráfico de dependencias.
         reportBuilder.Append(GenerateDependencyGraph(sortedResults));
+        // ✅ NUEVO: Diagramas por Módulo
+        reportBuilder.Append(GenerateModuleDiagrams(sortedResults));
 
         reportBuilder.Append(GenerateDirectoryTree(sortedResults, directory.Name));
         reportBuilder.Append(GenerateFileContent(sortedResults));
@@ -235,6 +237,140 @@ public class MarkdownReportGenerator : IReportGenerator
     }
 
     /// <summary>
+    ///     Genera diagramas separados para cada módulo (carpeta de primer nivel).
+    /// </summary>
+    private string GenerateModuleDiagrams(List<FileAnalysisResult> results)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("# 🧩 Diagramas de Módulo");
+        sb.AppendLine();
+        sb.AppendLine("A continuación se presentan diagramas de dependencia detallados por cada módulo para facilitar la visualización.");
+        sb.AppendLine();
+
+        // Agrupar por módulo
+        var modules = results
+            .GroupBy(r => Path.GetDirectoryName(r.RelativePath)?.Replace('\\', '/').Split('/').LastOrDefault() ?? "Root")
+            .OrderBy(g => g.Key);
+
+        foreach (var moduleGroup in modules)
+        {
+            var moduleName = moduleGroup.Key;
+            var moduleFiles = moduleGroup.ToList();
+            var moduleDependencies = new HashSet<string>();
+            var relatedClasses = new HashSet<string>();
+
+            foreach (var file in moduleFiles)
+            {
+                if (file.ClassDependencies != null)
+                {
+                    foreach (var dep in file.ClassDependencies)
+                    {
+                        // "Source --> Target"
+                        // Solo incluimos dependencias que ORIGINAN en este módulo
+                        var parts = dep.Split(new[] { "-->", "-.->" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 2)
+                        {
+                            moduleDependencies.Add(dep);
+                            relatedClasses.Add(parts[0]);
+                            relatedClasses.Add(parts[1]);
+                        }
+                    }
+                }
+            }
+
+            if (moduleDependencies.Any())
+            {
+                sb.AppendLine($"## Módulo: {moduleName}");
+                sb.AppendLine();
+                sb.AppendLine("```mermaid");
+                sb.AppendLine("graph TD;");
+                foreach (var dep in moduleDependencies.OrderBy(d => d))
+                {
+                    sb.AppendLine($"  {dep}");
+                }
+                
+                // Estilizar clases externas al módulo diferente? Por ahora simple.
+                sb.AppendLine("```");
+                sb.AppendLine();
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Genera un pequeño diagrama de contexto para un archivo específico.
+    /// </summary>
+    private string GenerateFileContextDiagram(FileAnalysisResult result)
+    {
+        // Recopilar conexiones
+        var connections = new HashSet<string>();
+        
+        // Salientes (Outgoing)
+        if (result.ClassDependencies != null)
+        {
+            foreach (var dep in result.ClassDependencies)
+            {
+                connections.Add(dep);
+            }
+        }
+
+        // Entrantes (Incoming) - Necesitamos saber el Target para dibujar la flecha correctamente
+        // IncomingDeps dice "Quién me usa". Si yo soy "MyClass", incoming es "UserClass".
+        // La relación es "UserClass --> MyClass".
+        // Asumiendo que DefinedTypes tiene las clases de ESTE archivo.
+        if (result.IncomingDependencies != null && result.DefinedTypes != null)
+        {
+            foreach (var incoming in result.IncomingDependencies)
+            {
+                // Un archivo puede definir múltiples tipos, ¿cuál está siendo usado?
+                // Simplificación: Asumimos que conectamos con "algún tipo" de este archivo.
+                // Como no sabemos exactamente CUAL tipo de este archivo se usa (IncomingDeps es solo lista de nombres de origen),
+                // y ClassDependencies es "Source->Target".
+                // Mejor estrategia: IncomingDependencies debería ser "Source --> Target" también para ser precisos,
+                // pero lo implementamos como lista de Sources names.
+                // Vamos a inferir que apuntan al primer tipo definido o simplemente creamos un nodo genérico si hay dudas, 
+                // PERO... IncomingDependencies en FileAnalysisResult lo definimos como List<string> que son los NOMBRES DE CLASES que nos usan.
+                // Y nosotros (result) definimos ciertos tipos.
+                
+                // Para el diagrama, necesitamos "IncomingClass --> MyClass".
+                // ¿Cuál es MyClass? Cualquiera de result.DefinedTypes.
+                // Para simplificar visualización, usamos el primer tipo definido si existe, o el nombre del archivo si no.
+                var myMainType = result.DefinedTypes.FirstOrDefault() ?? Path.GetFileNameWithoutExtension(result.RelativePath);
+                
+                // Evitar duplicados si ya está en outgoing (ciclos)
+                var rel = $"{incoming} --> {myMainType}";
+                connections.Add(rel);
+            }
+        }
+
+        if (connections.Count == 0) return string.Empty;
+
+        var sb = new StringBuilder();
+        sb.AppendLine("#### Contexto");
+        sb.AppendLine("```mermaid");
+        sb.AppendLine("graph LR;"); // Left-Right para flujos de contexto suele ser mejor
+        foreach (var conn in connections.OrderBy(c => c))
+        {
+            sb.AppendLine($"  {conn}");
+        }
+        
+        // Resaltar el nodo central (tipos de este archivo)
+        if (result.DefinedTypes != null)
+        {
+            foreach(var type in result.DefinedTypes)
+            {
+                sb.AppendLine($"  style {type} fill:#f9f,stroke:#333,stroke-width:2px");
+            }
+        }
+        
+        sb.AppendLine("```");
+        sb.AppendLine();
+
+        return sb.ToString();
+    }
+
+    /// <summary>
     ///     Proporciona una descripción textual de la inestabilidad.
     /// </summary>
     private string GetInstabilityDescription(double instability)
@@ -257,6 +393,9 @@ public class MarkdownReportGenerator : IReportGenerator
         {
             contentBuilder.AppendLine($"## File: {result.RelativePath}");
             contentBuilder.AppendLine();
+
+            // ✅ NUEVO: Diagrama de Contexto
+            contentBuilder.Append(GenerateFileContextDiagram(result));
 
             // --- NUEVA SECCIÓN DE REPO MAP ---
             if (result.Metrics.TryGetValue("PublicApiSignatures", out var publicApiObj) &&

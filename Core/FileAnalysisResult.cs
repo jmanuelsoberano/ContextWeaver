@@ -22,4 +22,11 @@ public class FileAnalysisResult
     // ✅ NUEVA PROPIEDAD: Para almacenar las dependencias de clase.
     // Guardaremos las relaciones en formato "ClaseOrigen -> ClaseDestino".
     public List<string> ClassDependencies { get; set; } = new();
+
+    // ✅ NUEVA PROPIEDAD: Dependencias entrantes (Quién me usa).
+    // Se llena en el post-procesamiento.
+    public List<string> IncomingDependencies { get; set; } = new();
+
+    // ✅ NUEVA PROPIEDAD: Tipos definidos en este archivo.
+    public List<string> DefinedTypes { get; set; } = new();
 }
