@@ -1,6 +1,7 @@
 ﻿using ContextWeaver.Core;
 using ContextWeaver.Interfaces;
 using ContextWeaver.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace ContextWeaver.Services;
 
@@ -9,18 +10,21 @@ public class CodeAnalyzerService
     private readonly IEnumerable<IFileAnalyzer> _analyzers;
     private readonly IEnumerable<IReportGenerator> _generators;
     private readonly InstabilityCalculator _instabilityCalculator;
+    private readonly ILogger<CodeAnalyzerService> _logger;
     private readonly SettingsProvider _settingsProvider;
 
     public CodeAnalyzerService(
         SettingsProvider settingsProvider,
         InstabilityCalculator instabilityCalculator,
         IEnumerable<IFileAnalyzer> analyzers,
-        IEnumerable<IReportGenerator> generators)
+        IEnumerable<IReportGenerator> generators,
+        ILogger<CodeAnalyzerService> logger)
     {
         _settingsProvider = settingsProvider;
         _instabilityCalculator = instabilityCalculator;
         _analyzers = analyzers;
         _generators = generators;
+        _logger = logger;
     }
 
     public async Task AnalyzeAndGenerateReport(DirectoryInfo directory, FileInfo outputFile, string format)
@@ -28,7 +32,7 @@ public class CodeAnalyzerService
         var generator = _generators.FirstOrDefault(g => g.Format.Equals(format, StringComparison.OrdinalIgnoreCase));
         if (generator == null)
         {
-            Console.Error.WriteLine($"Error: El formato de salida '{format}' no es soportado.");
+            _logger.LogError("El formato de salida '{Format}' no es soportado.", format);
             return;
         }
 
@@ -89,22 +93,14 @@ public class CodeAnalyzerService
             {
                 foreach (var dep in result.ClassDependencies)
                 {
-                    // Formato: "Source --> Target" o "Source -.-> Target"
-                    var parts = dep.Split(new[] { "-->", "-.->" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        var source = parts[0];
-                        var target = parts[1];
+                    var relation = DependencyRelation.Parse(dep);
+                    if (relation == null) continue;
 
-                        if (typeToFileMap.TryGetValue(target, out var targetFile))
+                    if (typeToFileMap.TryGetValue(relation.Target, out var targetFile))
+                    {
+                        if (!targetFile.IncomingDependencies.Contains(relation.Source))
                         {
-                            // Evitar auto-referencias en el diagrama de contexto si lo deseamos, 
-                            // pero para "Incoming" es útil saber si alguien TE usa.
-                            // Aquí agregamos "Source" a la lista de "Incoming" del archivo que define "Target".
-                            if (!targetFile.IncomingDependencies.Contains(source))
-                            {
-                                targetFile.IncomingDependencies.Add(source);
-                            }
+                            targetFile.IncomingDependencies.Add(relation.Source);
                         }
                     }
                 }
@@ -118,6 +114,6 @@ public class CodeAnalyzerService
         var reportContent = generator.Generate(directory, resultsList, instabilityMetrics);
         await File.WriteAllTextAsync(outputFile.FullName, reportContent);
 
-        Console.WriteLine($"✅ Reporte en formato '{format}' generado exitosamente en: {outputFile.FullName}");
+        _logger.LogInformation("Reporte en formato '{Format}' generado exitosamente en: {OutputPath}", format, outputFile.FullName);
     }
 }

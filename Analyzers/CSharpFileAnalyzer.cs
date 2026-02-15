@@ -5,8 +5,7 @@ using ContextWeaver.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-// Agregado para construir cadenas
+using Microsoft.Extensions.Logging;
 
 namespace ContextWeaver.Analyzers;
 
@@ -19,6 +18,7 @@ namespace ContextWeaver.Analyzers;
 /// </summary>
 public class CSharpFileAnalyzer : IFileAnalyzer
 {
+    private readonly ILogger<CSharpFileAnalyzer> _logger;
     private CSharpCompilation? _globalCompilation;
     private Dictionary<string, SyntaxTree> _syntaxTrees = new();
 
@@ -56,21 +56,29 @@ public class CSharpFileAnalyzer : IFileAnalyzer
         }
     }
     
-    // Ya no necesitamos recorrer la compilación global recursivamente, 
-    // lo cual incluía tipos de System por las referencias.
-    private HashSet<string> _allProjectTypes = new();
+    // THREAD-SAFETY: _allProjectTypes se llena exclusivamente en InitializeAsync() (secuencial)
+    // y se lee en AnalyzeAsync() (paralelo). Esto es seguro porque CodeAnalyzerService.AnalyzeAndGenerateReport()
+    // garantiza que InitializeAsync() se completa ANTES de que Parallel.ForEachAsync invoque AnalyzeAsync().
+    // Si este orden cambia, convertir a ConcurrentDictionary<string, byte> o similar.
+    private readonly HashSet<string> _allProjectTypes = new();
+
+    public CSharpFileAnalyzer(ILogger<CSharpFileAnalyzer> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
-        if (!_syntaxTrees.TryGetValue(file.FullName, out var tree))
+        try
         {
-            // Fallback si por alguna razón no se inicializó (ej. archivo nuevo creado durante ejecución, aunque raro en CLI)
-            var content = await File.ReadAllTextAsync(file.FullName);
-            tree = CSharpSyntaxTree.ParseText(content);
-        }
+            if (!_syntaxTrees.TryGetValue(file.FullName, out var tree))
+            {
+                var content = await File.ReadAllTextAsync(file.FullName);
+                tree = CSharpSyntaxTree.ParseText(content);
+            }
 
-        var root = tree.GetRoot();
-        var contentText = root.ToFullString();
+            var root = tree.GetRoot();
+            var contentText = root.ToFullString();
 
         // Usar SemanticModel global si está disponible, sino crear uno local.
         SemanticModel semanticModel;
@@ -86,7 +94,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             semanticModel = compilation.GetSemanticModel(tree);
         }
             
-        var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(contentText);
+        var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(root);
         var maxNestingDepth = CSharpMetricsCalculator.CalculateMaxNestingDepth(root);
         var publicApiSignatures = ExtractPublicApiSignatures(root);
         var usings = ExtractUsingStatements(root); 
@@ -168,6 +176,18 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                 { "PublicApiSignatures", publicApiSignatures }
             }
         };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error al analizar {File}. Se retorna resultado parcial.", file.FullName);
+            var fallbackContent = await File.ReadAllTextAsync(file.FullName);
+            return new FileAnalysisResult
+            {
+                LinesOfCode = fallbackContent.Split('\n').Length,
+                CodeContent = fallbackContent,
+                Language = "csharp"
+            };
+        }
     }
 
     /// <summary>

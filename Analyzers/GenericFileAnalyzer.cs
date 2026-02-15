@@ -19,12 +19,11 @@ public class GenericFileAnalyzer : IFileAnalyzer
         { ".md", "markdown" }, { ".csproj", "xml" }, { ".sln", "plaintext" }
     };
 
-    private readonly string[] _supportedExtensions =
-        { ".ts", ".js", ".html", ".css", ".scss", ".json", ".md", ".csproj", ".sln" };
+
 
     public bool CanAnalyze(FileInfo file)
     {
-        return _supportedExtensions.Contains(file.Extension.ToLower());
+        return _languageMap.ContainsKey(file.Extension.ToLowerInvariant());
     }
 
     public Task InitializeAsync(IEnumerable<FileInfo> files)

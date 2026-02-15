@@ -11,16 +11,10 @@ namespace ContextWeaver.Utilities;
 /// </summary>
 public static class CSharpMetricsCalculator
 {
-    public static int CalculateCyclomaticComplexity(string code)
+    public static int CalculateCyclomaticComplexity(SyntaxNode root)
     {
-        if (string.IsNullOrWhiteSpace(code)) return 1;
+        if (root == null) return 1;
 
-        var tree = CSharpSyntaxTree.ParseText(code);
-        var root = tree.GetRoot();
-
-        // PATRÓN DE DISEÑO: Visitor (Visitante).
-        // CSharpSyntaxWalker es una implementación del patrón Visitor que nos permite
-        // recorrer el árbol de sintaxis del código y ejecutar lógica en nodos específicos.
         var walker = new ComplexityWalker();
         walker.Visit(root);
 

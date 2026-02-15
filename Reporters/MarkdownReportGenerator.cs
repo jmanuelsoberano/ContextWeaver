@@ -20,17 +20,16 @@ public class MarkdownReportGenerator : IReportGenerator
     {
         var reportBuilder = new StringBuilder();
         var sortedResults = results.OrderBy(r => r.RelativePath).ToList();
+        // H09: Calcular una sola vez y pasar como parámetro a todos los métodos que lo necesiten.
+        var typeKindMap = BuildTypeKindMap(sortedResults);
 
         reportBuilder.Append(GenerateHeader(directory));
         reportBuilder.Append(GenerateHotspots(sortedResults));
         reportBuilder.Append(GenerateInstabilityReport(instabilityMetrics));
-        // Añadimos el gráfico de dependencias.
-        reportBuilder.Append(GenerateDependencyGraph(sortedResults));
-        // ✅ NUEVO: Diagramas por Módulo
-        reportBuilder.Append(GenerateModuleDiagrams(sortedResults));
-
+        reportBuilder.Append(GenerateDependencyGraph(sortedResults, typeKindMap));
+        reportBuilder.Append(GenerateModuleDiagrams(sortedResults, typeKindMap));
         reportBuilder.Append(GenerateDirectoryTree(sortedResults, directory.Name));
-        reportBuilder.Append(GenerateFileContent(sortedResults));
+        reportBuilder.Append(GenerateFileContent(sortedResults, typeKindMap));
 
         return reportBuilder.ToString();
     }
@@ -68,7 +67,7 @@ public class MarkdownReportGenerator : IReportGenerator
                   nivel de seguridad que manejaría el repositorio original.
 
                 ## Notas
-                - Algunos archivos pueden haber sido excluidos según la configuración de ContextWeaver en `appsettings.json`.
+                - Algunos archivos pueden haber sido excluidos según la configuración de ContextWeaver en `.contextweaver.json`.
                 - Los archivos binarios no se incluyen en esta representación empaquetada.
                 - Los archivos se ordenan alfabéticamente por su ruta completa para una ordenación consistente.
 
@@ -165,7 +164,7 @@ public class MarkdownReportGenerator : IReportGenerator
     /// <summary>
     ///     ✅ VERSIÓN CORREGIDA: Genera un gráfico más limpio y con sintaxis correcta.
     /// </summary>
-    private string GenerateDependencyGraph(List<FileAnalysisResult> results)
+    private string GenerateDependencyGraph(List<FileAnalysisResult> results, Dictionary<string, string> typeKindMap)
     {
         var allDependencies = new HashSet<string>();
         var modules = new Dictionary<string, HashSet<string>>();
@@ -181,19 +180,15 @@ public class MarkdownReportGenerator : IReportGenerator
             if (result.ClassDependencies != null)
                 foreach (var dependency in result.ClassDependencies)
                 {
-                    // Formato esperado: "Source -.-> Target" o "Source --> Target"
-                    var separator = dependency.Contains("-.->") ? "-.->" : "-->";
-                    var parts = dependency.Split(new[] { separator }, StringSplitOptions.TrimEntries);
-                    if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) ||
-                        string.IsNullOrWhiteSpace(parts[1])) continue; // ✅ FIX: Ignorar enlaces malformados o vacíos
-
-                    var source = parts[0];
-                    var target = parts[1];
+                    var relation = DependencyRelation.Parse(dependency);
+                    if (relation == null) continue;
 
                     allDependencies.Add(dependency);
-                    modules[moduleName].Add(source);
+                    modules[moduleName].Add(relation.Source);
 
-                    if (target.StartsWith("I") && char.IsUpper(target[1])) interfaces.Add(target);
+                    // H13: Usar metadata real de Roslyn en vez de heurística de nombre.
+                    if (typeKindMap.TryGetValue(relation.Target, out var targetKind) && targetKind == "interface")
+                        interfaces.Add(relation.Target);
                 }
         }
 
@@ -240,7 +235,7 @@ public class MarkdownReportGenerator : IReportGenerator
         // Ocultar miembros vacíos para que se vean como cajas simples si no hay detalles.
         graphBuilder.AppendLine("hide empty members");
         
-        var typeKindMap = BuildTypeKindMap(results);
+        // typeKindMap ya fue calculado en Generate() y pasado como parámetro.
         graphBuilder.AppendLine();
 
         foreach (var module in modules.OrderBy(m => m.Key))
@@ -272,7 +267,7 @@ public class MarkdownReportGenerator : IReportGenerator
     /// <summary>
     ///     Genera diagramas separados para cada módulo (carpeta de primer nivel).
     /// </summary>
-    private string GenerateModuleDiagrams(List<FileAnalysisResult> results)
+    private string GenerateModuleDiagrams(List<FileAnalysisResult> results, Dictionary<string, string> typeKindMap)
     {
         var sb = new StringBuilder();
         sb.AppendLine("# 🧩 Diagramas de Módulo");
@@ -298,15 +293,12 @@ public class MarkdownReportGenerator : IReportGenerator
                 {
                     foreach (var dep in file.ClassDependencies)
                     {
-                        // "Source --> Target"
-                        // Solo incluimos dependencias que ORIGINAN en este módulo
-                        var parts = dep.Split(new[] { "-->", "-.->" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length == 2)
-                        {
-                            moduleDependencies.Add(dep);
-                            relatedClasses.Add(parts[0]);
-                            relatedClasses.Add(parts[1]);
-                        }
+                        var relation = DependencyRelation.Parse(dep);
+                        if (relation == null) continue;
+
+                        moduleDependencies.Add(dep);
+                        relatedClasses.Add(relation.Source);
+                        relatedClasses.Add(relation.Target);
                     }
                 }
             }
@@ -333,10 +325,7 @@ public class MarkdownReportGenerator : IReportGenerator
                 sb.AppendLine($"@startuml {moduleName}");
                 sb.AppendLine("hide empty members");
                 
-                // ✅ FIX: Declarar clases/interfaces explícitamente.
-                // Usamos typeKindMap que necesitamos construir aquí también, o pasarlo.
-                // Como este método no recibe el mapa, lo construimos localmente (costo bajo).
-                var typeKindMap = BuildTypeKindMap(results);
+                // typeKindMap ya fue calculado en Generate() y pasado como parámetro.
 
                 foreach (var cls in relatedClasses.OrderBy(c => c))
                 {
@@ -425,8 +414,10 @@ public class MarkdownReportGenerator : IReportGenerator
         var participants = new HashSet<string>();
         foreach (var conn in connections)
         {
-            var parts = conn.Split(new[] { "-->", "-.->" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            foreach (var part in parts) participants.Add(part);
+            var relation = DependencyRelation.Parse(conn);
+            if (relation == null) continue;
+            participants.Add(relation.Source);
+            participants.Add(relation.Target);
         }
 
         foreach (var p in participants.OrderBy(x => x))
@@ -464,9 +455,8 @@ public class MarkdownReportGenerator : IReportGenerator
     /// <summary>
     ///     Genera el contenido de todos los archivos con sus respectivas métricas y mapa de repositorio.
     /// </summary>
-    private string GenerateFileContent(List<FileAnalysisResult> results)
+    private string GenerateFileContent(List<FileAnalysisResult> results, Dictionary<string, string> typeKindMap)
     {
-        var typeKindMap = BuildTypeKindMap(results);
         var contentBuilder = new StringBuilder();
         contentBuilder.AppendLine("# Archivos");
         contentBuilder.AppendLine();
@@ -484,7 +474,9 @@ public class MarkdownReportGenerator : IReportGenerator
             {
                 // Agrupamos por archivo origen para no repetir
                 var usedByFiles = result.IncomingDependencies
-                    .Select(d => d.Split(new[] { "-->", "-.->" }, StringSplitOptions.None)[0].Trim())
+                    .Select(d => DependencyRelation.Parse(d))
+                    .Where(r => r != null)
+                    .Select(r => r!.Source)
                     .Distinct()
                     .OrderBy(x => x)
                     .ToList();

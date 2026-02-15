@@ -43,17 +43,11 @@ public class InstabilityCalculator
             {
                 foreach (var dep in result.ClassDependencies)
                 {
-                    // Parsear "Source --> Target" o "Source -.-> Target"
-                    var separator = dep.Contains("-.->") ? "-.->" : "-->";
-                    var parts = dep.Split(new[] { separator }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                    
-                    if (parts.Length != 2) continue;
+                    var relation = DependencyRelation.Parse(dep);
+                    if (relation == null) continue;
 
-                    var targetType = parts[1];
-
-                    if (typeToModuleMap.TryGetValue(targetType, out var targetModule))
+                    if (typeToModuleMap.TryGetValue(relation.Target, out var targetModule))
                     {
-                        // Si el módulo destino es diferente al origen, es una dependencia eferente (Ce)
                         if (!string.Equals(sourceModule, targetModule, StringComparison.OrdinalIgnoreCase))
                         {
                             moduleEfferentDependencies[sourceModule].Add(targetModule);
