@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <ApplicationIcon>ContextWeaver.ico</ApplicationIcon>
         <AssemblyName>ContextWeaver</AssemblyName>
+        <RootNamespace>ContextWeaver</RootNamespace>
 
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>contextweaver</ToolCommandName>
