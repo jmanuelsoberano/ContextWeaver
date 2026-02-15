@@ -39,9 +39,9 @@ La arquitectura general es sólida, moderna y sigue buenas prácticas de ingenie
 **Estado:** RESUELTO.
 **Solución:** `CodeAnalyzerService` ahora utiliza ejecución paralela para el análisis de archivos, mejorando significativamente el tiempo de procesamiento en proyectos grandes.
 
-#### 🟡 3. Cálculo de Inestabilidad Aproximado
-**Estado:** PENDIENTE DE MEJORA (No crítico).
-**Nota:** El cálculo sigue basándose en heurísticas de `usings`. Es suficiente para propósitos documentales, pero podría refinarse con análisis semántico profundo si se requiere precisión estricta.
+#### ✅ 3. Cálculo de Inestabilidad Aproximado
+**Estado:** RESUELTO.
+**Solución:** Se ha refactorizado `InstabilityCalculator` para utilizar las referencias de tipos reales extraídas por Roslyn (`ClassDependencies` y `DefinedTypes`) en lugar de heurísticas basadas en `usings`. Esto garantiza que solo se cuenten dependencias reales entre componentes.
 
 ---
 

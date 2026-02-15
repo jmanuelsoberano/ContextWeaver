@@ -4,55 +4,103 @@ namespace ContextWeaver.Utilities;
 
 public class InstabilityCalculator
 {
-    public Dictionary<string, (int Ca, int Ce, double Instability)> Calculate(string rootDirectoryName,
-        List<FileAnalysisResult> results)
+    public Dictionary<string, (int Ca, int Ce, double Instability)> Calculate(List<FileAnalysisResult> results)
     {
-        var moduleDependencies = new Dictionary<string, HashSet<string>>();
+        var typeToModuleMap = new Dictionary<string, string>();
         var moduleNames = new HashSet<string>();
 
-        // 1. Identificar módulos y sus dependencias eferentes
-        foreach (var result in results.Where(r => r.Usings.Any()))
+        // 1. Construir mapa: Tipo -> Módulo
+        foreach (var result in results)
         {
-            var pathParts = result.RelativePath.Split('/');
-            var currentModule = pathParts.Length > 1 ? pathParts[0] : rootDirectoryName;
-            moduleNames.Add(currentModule);
+            var moduleName = GetModuleName(result.RelativePath);
+            moduleNames.Add(moduleName);
 
-            if (!moduleDependencies.ContainsKey(currentModule))
-                moduleDependencies[currentModule] = new HashSet<string>();
-
-            foreach (var usedNamespace in result.Usings)
+            if (result.DefinedTypes != null)
             {
-                var cleanedUsedNamespace = usedNamespace.Split('.')[0];
-                var matchingModule = moduleNames.FirstOrDefault(m =>
-                    m.Equals(cleanedUsedNamespace, StringComparison.OrdinalIgnoreCase) ||
-                    usedNamespace.StartsWith($"{m}.", StringComparison.OrdinalIgnoreCase) ||
-                    usedNamespace.Contains($".{m}.", StringComparison.OrdinalIgnoreCase));
+                foreach (var type in result.DefinedTypes)
+                {
+                    // Asumimos unicidad de nombre de tipo por simplicidad en este contexto,
+                    // o "último gana" si hay duplicados (partial classes en mismo módulo ok).
+                    typeToModuleMap[type] = moduleName;
+                }
+            }
+        }
 
-                if (matchingModule != null && matchingModule != currentModule)
-                    moduleDependencies[currentModule].Add(matchingModule);
+        var moduleEfferentDependencies = new Dictionary<string, HashSet<string>>();
+        
+        // Inicializar
+        foreach (var module in moduleNames)
+        {
+            moduleEfferentDependencies[module] = new HashSet<string>();
+        }
+
+        // 2. Analizar dependencias de CLASE (Source -> Target)
+        foreach (var result in results)
+        {
+            var sourceModule = GetModuleName(result.RelativePath);
+
+            if (result.ClassDependencies != null)
+            {
+                foreach (var dep in result.ClassDependencies)
+                {
+                    // Parsear "Source --> Target" o "Source -.-> Target"
+                    var separator = dep.Contains("-.->") ? "-.->" : "-->";
+                    var parts = dep.Split(new[] { separator }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    
+                    if (parts.Length != 2) continue;
+
+                    var targetType = parts[1];
+
+                    if (typeToModuleMap.TryGetValue(targetType, out var targetModule))
+                    {
+                        // Si el módulo destino es diferente al origen, es una dependencia eferente (Ce)
+                        if (!string.Equals(sourceModule, targetModule, StringComparison.OrdinalIgnoreCase))
+                        {
+                            moduleEfferentDependencies[sourceModule].Add(targetModule);
+                        }
+                    }
+                }
             }
         }
 
         var moduleMetrics = moduleNames.ToDictionary(m => m, m => (Ca: 0, Ce: 0));
 
-        // 2. Calcular Ce (eferentes) y Ca (aferentes)
-        foreach (var (module, dependencies) in moduleDependencies)
+        // 3. Calcular Ce (Eferentes) y Ca (Aferentes)
+        foreach (var (module, dependencies) in moduleEfferentDependencies)
         {
-            moduleMetrics[module] = (moduleMetrics[module].Ca, dependencies.Count);
+            // Ce = Número de módulos de los que dependo
+            var ce = dependencies.Count;
+            var currentMetrics = moduleMetrics[module];
+            moduleMetrics[module] = (currentMetrics.Ca, ce);
+
+            // Ca = Número de módulos que dependen de mí
             foreach (var dependentModule in dependencies)
+            {
                 if (moduleMetrics.ContainsKey(dependentModule))
-                    moduleMetrics[dependentModule] = (moduleMetrics[dependentModule].Ca + 1,
-                        moduleMetrics[dependentModule].Ce);
+                {
+                    var depMetrics = moduleMetrics[dependentModule];
+                    moduleMetrics[dependentModule] = (depMetrics.Ca + 1, depMetrics.Ce);
+                }
+            }
         }
 
-        // 3. Calcular Inestabilidad (I)
+        // 4. Calcular Inestabilidad (I)
         return moduleMetrics.ToDictionary(
             kvp => kvp.Key,
             kvp =>
             {
                 var (ca, ce) = kvp.Value;
+                // I = Ce / (Ca + Ce)
+                // Range: [0, 1]. 0 = Muy Estable (Abstracto), 1 = Muy Inestable (Concreto)
                 var instability = ca + ce == 0 ? 0.0 : (double)ce / (ca + ce);
                 return (ca, ce, instability);
             });
+    }
+
+    private string GetModuleName(string relativePath)
+    {
+        var parts = relativePath.Replace('\\', '/').Split('/');
+        // Si hay carpetas, la primera es el módulo. Si está en raíz, "Core" o similar.
+        return parts.Length > 1 ? parts[0] : "Root"; 
     }
 }

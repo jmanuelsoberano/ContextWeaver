@@ -112,7 +112,7 @@ public class CodeAnalyzerService
         }
 
         // 5. Calcular inestabilidad (responsabilidad delegada)
-        var instabilityMetrics = _instabilityCalculator.Calculate(directory.Name, resultsList);
+        var instabilityMetrics = _instabilityCalculator.Calculate(resultsList);
 
         // 6. Generar y escribir el reporte
         var reportContent = generator.Generate(directory, resultsList, instabilityMetrics);
