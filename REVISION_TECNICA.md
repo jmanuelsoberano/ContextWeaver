@@ -1,6 +1,6 @@
 # Informe de Revisión y Especificación Técnica - ContextWeaver
 
-**Fecha:** 2026-02-14
+**Fecha:** 2026-02-14 (Actualizado)
 **Proyecto:** ContextWeaver
 
 ---
@@ -9,82 +9,48 @@
 
 ContextWeaver es una herramienta de consola (CLI) diseñada para analizar repositorios de código y generar un reporte consolidado en Markdown. Su objetivo principal es empaquetar el contexto de un proyecto para ser consumido por Modelos de Lenguaje (LLMs).
 
-La arquitectura general es sólida, moderna y sigue buenas prácticas de ingeniería de software en .NET (Inyección de Dependencias, Patrones de Diseño). Sin embargo, se han identificado hallazgos críticos en la lógica de análisis de dependencias que limitan la utilidad actual de dicha funcionalidad, así como oportunidades de optimización en el rendimiento.
+La arquitectura general es sólida, moderna y sigue buenas prácticas de ingeniería de software en .NET. **Tras la última iteración, se han resuelto los problemas críticos de análisis de dependencias y rendimiento.** Ahora la herramienta ofrece capacidades avanzadas de diagramación (Mermaid y PlantUML) y un análisis de contexto detallado a nivel de módulo y archivo.
 
 ---
 
-## 2. Revisión de Código (Code Review)
+## 2. Revisión de Código (Code Review) - Estado Actual
 
 ### 2.1. Puntos Fuertes (Positivos)
 
 1.  **Arquitectura Modular y Extensible**:
-    -   Uso correcto de **Inyección de Dependencias (DI)** mediante `Microsoft.Extensions.DependencyInjection`.
-    -   Implementación del **Patrón Strategy** para los analizadores (`IFileAnalyzer`) y generadores (`IReportGenerator`). Esto permite agregar soporte para nuevos lenguajes (ej. Python, Java) o formatos de salida (ej. JSON) sin modificar el núcleo de la aplicación (Principio Open/Closed).
-2.  **Uso de Roslyn**:
-    -   La utilización de la API de compilación de .NET (Roslyn) en `CSharpFileAnalyzer` es la elección correcta para un análisis robusto, en lugar de usar expresiones regulares.
-3.  **Experiencia de Usuario (UX)**:
-    -   `SettingsProvider` maneja inteligentemente la configuración: si no existe un archivo `.contextweaver.json`, crea uno por defecto automáticamente. Esto facilita enormemente el onboarding.
-4.  **Claridad del Código**:
-    -   El código es legible, bien estructurado y con comentarios explicativos que denotan una intención didáctica o de documentación clara.
+    -   Uso correcto de **Inyección de Dependencias (DI)** y **Patrón Strategy**.
+    -   Fácil extensibilidad para nuevos lenguajes y formatos.
+2.  **Análisis Robusto con Roslyn**:
+    -   Uso de la API de compilación de .NET para extracción precisa de tipos y relaciones.
+3.  **Visualización Avanzada**:
+    -   Soporte dual para **Mermaid y PlantUML**.
+    -   Diagramas granulares: Global, por Módulo y Contexto de Archivo.
+    -   Distinción semántica de tipos (`class`, `interface`, `enum`, `record`, `struct`).
+4.  **Rendimiento Optimizado**:
+    -   Procesamiento paralelo de archivos utilizando `Parallel.ForEachAsync`.
 
-### 2.2. Hallazgos Críticos (Bugs & Issues)
+### 2.2. Estado de Hallazgos Previos
 
-#### 🔴 1. Extracción de Dependencias Incompleta (Cross-File Dependencies)
-**Ubicación:** `Analyzers/CSharpFileAnalyzer.cs` (Método `ExtractClassDependencies`)
-**Severidad:** Alta
+#### ✅ 1. Extracción de Dependencias Incompleta (Cross-File Dependencies)
+**Estado:** RESUELTO.
+**Solución:** Se implementó una lógica de recolección de tipos en `CSharpFileAnalyzer` que permite identificar tipos del proyecto vs. tipos del sistema. El analizador ahora conecta correctamente dependencias entre archivos y filtra ruido del sistema (.NET framework).
 
-**Descripción:**
-El analizador intenta filtrar las dependencias para incluir solo aquellas que pertenecen al proyecto (`projectTypeNames`). Sin embargo, la lista `projectTypeNames` se construye **únicamente con los tipos declarados en el archivo actual** (`root.DescendantNodes()`).
+#### ✅ 2. Ejecución Secuencial (Performance)
+**Estado:** RESUELTO.
+**Solución:** `CodeAnalyzerService` ahora utiliza ejecución paralela para el análisis de archivos, mejorando significativamente el tiempo de procesamiento en proyectos grandes.
 
-```csharp
-// Línea 142 de CSharpFileAnalyzer.cs
-var projectTypeNames = new HashSet<string>(declaredTypeSymbols.Select(s => s.Name));
-// ...
-// Línea 177: El filtro requiere que targetTypeName esté en projectTypeNames
-if (... && projectTypeNames.Contains(targetTypeName) && ...)
-```
-
-**Consecuencia:**
-El gráfico de dependencias (`mermaid`) ignorará todas las relaciones entre clases que residan en archivos diferentes. Solo detectará relaciones entre clases definidas dentro del mismo archivo físico. Esto hace que el gráfico de dependencias sea prácticamente inútil para visualizar la arquitectura real del proyecto.
-
-**Solución Recomendada:**
-Para resolver esto, el `CodeAnalyzerService` debería realizar una "pre-pasada" para recolectar todos los nombres de tipos del proyecto antes del análisis individual, o el `CSharpFileAnalyzer` debería tener acceso a un contexto global de símbolos del proyecto (aunque esto es más complejo sin cargar toda la solución/ficheros de proyecto formalmente). Una solución intermedia es recolectar todos los nombres de archivo/clase en un paso previo y pasarlo a los analizadores.
-
-### 2.3. Oportunidades de Mejora
-
-#### 🟡 1. Ejecución Secuencial (Performance)
-**Ubicación:** `Services/CodeAnalyzerService.cs` (Línea 47)
-**Descripción:**
-El análisis de archivos se realiza de manera estrictamente secuencial dentro de un bucle `foreach` con `await`.
-```csharp
-foreach (var file in allFiles) {
-    // ...
-    var result = await analyzer.AnalyzeAsync(file); // Bloqueante secuencial
-    // ...
-}
-```
-**Recomendación:**
-Dado que el análisis de archivos es una tarea mayormente ligada a CPU (parsing) y I/O (lectura), se beneficiaría enormemente de la paralelización usando `Task.WhenAll` o `Parallel.ForEachAsync`.
-
-#### 🟡 2. Cálculo de Inestabilidad Aproximado
-**Ubicación:** `Utilities/InstabilityCalculator.cs`
-**Descripción:**
-El cálculo se basa en los `usings` del archivo y una heurística de nombres de carpetas (`pathParts`).
--   Los `usings` no siempre implican una dependencia real (pueden ser usings no utilizados).
--   Asume que la estructura de carpetas define estrictamente los "módulos", lo cual es una convención común pero no universal.
-**Recomendación:**
-Es aceptable para una herramienta ligera, pero se debe documentar que es una métrica estimativa. Para mayor precisión, se debería usar el análisis semántico de Roslyn para contar referencias reales de tipos entre namespaces.
+#### 🟡 3. Cálculo de Inestabilidad Aproximado
+**Estado:** PENDIENTE DE MEJORA (No crítico).
+**Nota:** El cálculo sigue basándose en heurísticas de `usings`. Es suficiente para propósitos documentales, pero podría refinarse con análisis semántico profundo si se requiere precisión estricta.
 
 ---
 
 ## 3. Especificación Técnica
 
 ### 3.1. Visión General del Sistema
-ContextWeaver es una aplicación de consola .NET 8.0 que escanea recursivamente un directorio, filtra archivos según configuración, analiza su contenido (sintáctico para C#, texto plano para otros) y genera un documento Markdown consolidado ("Context File") optimizado para LLMs.
+ContextWeaver escanea recursivamente un directorio, analiza código (C# vía Roslyn, otros vía texto), calcula métricas y genera un reporte Markdown con diagramas incrustados.
 
 ### 3.2. Arquitectura de Componentes
-
-El sistema sigue una arquitectura de capas simplificada con Inyección de Dependencias.
 
 #### Diagrama de Clases (Conceptual)
 
@@ -104,77 +70,48 @@ classDiagram
     class CSharpFileAnalyzer {
         +AnalyzeAsync()
     }
-    class GenericFileAnalyzer {
-        +AnalyzeAsync()
-    }
-    class IReportGenerator {
-        <<interface>>
-        +Format string
-        +Generate(results) string
-    }
     class MarkdownReportGenerator {
         +Generate()
-    }
-    class SettingsProvider {
-        +LoadSettingsFor(DirectoryInfo)
+        +GenerateModuleDiagrams()
+        +GenerateFileContextDiagram()
     }
 
     Program --> CodeAnalyzerService : USA
     CodeAnalyzerService --> IFileAnalyzer : INYECTA (Colección)
-    CodeAnalyzerService --> IReportGenerator : INYECTA (Colección)
-    CodeAnalyzerService --> SettingsProvider : USA
+    CodeAnalyzerService --> MarkdownReportGenerator : USA
     IFileAnalyzer <|.. CSharpFileAnalyzer
-    IFileAnalyzer <|.. GenericFileAnalyzer
-    IReportGenerator <|.. MarkdownReportGenerator
 ```
 
-### 3.3. Flujo de Datos
+### 3.3. Nuevas Capacidades de Diagramación
 
-1.  **Inicialización**:
-    -   `Program.cs` configura el Host y DI.
-    -   Parsea argumentos CLI (`--directory`, `--output`, `--format`).
-2.  **Configuración**:
-    -   `SettingsProvider` busca `.contextweaver.json`. Si falla, crea uno por defecto y lo carga.
-    -   Configuración incluye: `IncludedExtensions` (e.g., .cs, .ts) y `ExcludePatterns` (e.g., node_modules).
-3.  **Descubrimiento**:
-    -   Listado recursivo de archivos en el directorio objetivo.
-    -   Filtrado según configuración.
-4.  **Análisis (Core Core)**:
-    -   Iteración sobre archivos filtrados.
-    -   Selección de estrategia (`IFileAnalyzer`) según extensión.
-        -   **C#**: Parsing con Roslyn, extracción de métricas (Complejidad Ciclomática), Firmas de API pública, Usings y Dependencias de Clases.
-        -   **Genérico**: Conteo de líneas y lectura de contenido raw.
-5.  **Post-Procesamiento**:
-    -   `InstabilityCalculator`: Calcula métricas de acoplamiento (Ca, Ce, Inestabilidad) basándose en importaciones de namespaces entre carpetas raíz.
-6.  **Generación**:
-    -   `MarkdownReportGenerator` estructura el reporte final:
-        -   Resumen y Hotspots (Archivos grandes/complejos).
-        -   Tabla de Inestabilidad.
-        -   Gráfico de Dependencias (Mermaid).
-        -   Árbol de Directorios.
-        -   Contenido de Archivos (Concatenación).
+El generador de reportes ha sido enriquecido con las siguientes capacidades:
+
+1.  **Soporte Multi-Formato**: Genera bloques para `mermaid` y `plantuml` simultáneamente.
+2.  **Diagramas de Módulo**: Agrupa clases por carpetas de primer nivel (Arquitectura).
+3.  **Diagramas de Contexto**: Al inicio de cada archivo, muestra un mini-diagrama con sus dependencias directas (Entrantes y Salientes).
+4.  **Semántica de Tipos**:
+    -   Detecta y renderiza correctamente `interface` vs `class` en PlantUML.
+    -   Usa iconos/colores específicos (e.g., `#Pink` para el archivo actual).
 
 ### 3.4. Definición de Datos (Core)
 
 #### `FileAnalysisResult`
-DTO central que normaliza el resultado de cualquier analizador.
--   `RelativePath`: Ruta relativa del archivo.
--   `LinesOfCode`: Conteo físico de líneas.
--   `CodeContent`: Contenido completo del archivo.
--   `Language`: Identificador para resaltado de sintaxis (e.g., "csharp", "typescript").
--   `Usings`: Lista de importaciones detectadas.
--   `ClassDependencies`: Lista de relaciones "Origen -> Destino" (actualmente con limitaciones).
--   `Metrics`: Diccionario flexible para métricas específicas (Complejidad, Firmas API).
+DTO extendido para soportar las nuevas funcionalidades:
+-   `RelativePath`: Ruta relativa.
+-   `LinesOfCode`: Conteo de líneas.
+-   `CodeContent`: Código fuente.
+-   `DefinedTypes`: Lista de tipos declarados en el archivo.
+-   `DefinedTypeKinds`: Diccionario mapeando `NombreTipo -> Kind` (class, interface, enum, etc.).
+-   `ClassDependencies`: Lista de relaciones salientes ("Origen -> Destino").
+-   `IncomingDependencies`: Lista de relaciones entrantes (calculado post-análisis).
+-   `Metrics`: Diccionario flexible.
 
 ### 3.5. Requisitos del Entorno
 -   **Runtime**: .NET 8.0 o superior.
--   **Dependencias Clave**:
-    -   `System.CommandLine`: Para CLI.
-    -   `Microsoft.Extensions.Hosting`: Para DI y ciclo de vida.
-    -   `Microsoft.CodeAnalysis.CSharp` (Roslyn): Para análisis estático de C#.
+-   **Dependencias**: `System.CommandLine`, `Microsoft.Extensions.Hosting`, `Microsoft.CodeAnalysis.CSharp`.
 
 ---
 
 ## 4. Conclusión
 
-ContextWeaver es una herramienta con una base sólida y bien diseñada. Su mayor fortaleza es la arquitectura extensible. Su debilidad crítica actual es la lógica de análisis de dependencias entre archivos, que requiere una refactorización para ser verdaderamente útil en proyectos complejos de C#. Corrigiendo este punto y paralizando el procesamiento de archivos, la herramienta sería altamente competitiva para su propósito de generación de contexto.
+ContextWeaver ha evolucionado de una herramienta de concatenación simple a un generador de documentación técnica avanzado. La corrección de la extracción de dependencias y la adición de diagramas detallados (especialmente con soporte PlantUML y distinción de interfaces) lo convierten en una herramienta potente para entender bases de código legacy o complejas rápidamente.
