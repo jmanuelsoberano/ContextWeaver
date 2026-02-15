@@ -233,6 +233,32 @@ public class MarkdownReportGenerator : IReportGenerator
         graphBuilder.AppendLine("```");
         graphBuilder.AppendLine();
 
+        // PlantUML Version
+        graphBuilder.AppendLine("### Alternativa: PlantUML");
+        graphBuilder.AppendLine("```plantuml");
+        graphBuilder.AppendLine("@startuml");
+        graphBuilder.AppendLine("skinparam componentStyle uml2");
+        graphBuilder.AppendLine();
+
+        foreach (var module in modules.OrderBy(m => m.Key))
+            if (module.Value.Any())
+            {
+                graphBuilder.AppendLine($"package \"{module.Key}\" {{");
+                foreach (var className in module.Value.OrderBy(n => n)) graphBuilder.AppendLine($"  component {className}");
+                graphBuilder.AppendLine("}");
+                graphBuilder.AppendLine();
+            }
+
+        foreach (var dependency in allDependencies.OrderBy(d => d))
+        {
+            // Convertir sintaxis Mermaid a PlantUML
+            var plantUmlDep = dependency.Replace("-.->", "..>").Replace("-->", "-->");
+            graphBuilder.AppendLine($"  {plantUmlDep}");
+        }
+        graphBuilder.AppendLine("@enduml");
+        graphBuilder.AppendLine("```");
+        graphBuilder.AppendLine();
+
         return graphBuilder.ToString();
     }
 
@@ -282,14 +308,28 @@ public class MarkdownReportGenerator : IReportGenerator
             {
                 sb.AppendLine($"## Módulo: {moduleName}");
                 sb.AppendLine();
+                
+                // Mermaid
+                sb.AppendLine("### Mermaid");
                 sb.AppendLine("```mermaid");
                 sb.AppendLine("graph TD;");
                 foreach (var dep in moduleDependencies.OrderBy(d => d))
                 {
                     sb.AppendLine($"  {dep}");
                 }
-                
-                // Estilizar clases externas al módulo diferente? Por ahora simple.
+                sb.AppendLine("```");
+                sb.AppendLine();
+
+                // PlantUML
+                sb.AppendLine("### PlantUML");
+                sb.AppendLine("```plantuml");
+                sb.AppendLine($"@startuml {moduleName}");
+                foreach (var dep in moduleDependencies.OrderBy(d => d))
+                {
+                    var plantUmlDep = dep.Replace("-.->", "..>").Replace("-->", "-->");
+                    sb.AppendLine($"  {plantUmlDep}");
+                }
+                sb.AppendLine("@enduml");
                 sb.AppendLine("```");
                 sb.AppendLine();
             }
@@ -315,30 +355,12 @@ public class MarkdownReportGenerator : IReportGenerator
             }
         }
 
-        // Entrantes (Incoming) - Necesitamos saber el Target para dibujar la flecha correctamente
-        // IncomingDeps dice "Quién me usa". Si yo soy "MyClass", incoming es "UserClass".
-        // La relación es "UserClass --> MyClass".
-        // Asumiendo que DefinedTypes tiene las clases de ESTE archivo.
+        // Entrantes (Incoming)
         if (result.IncomingDependencies != null && result.DefinedTypes != null)
         {
             foreach (var incoming in result.IncomingDependencies)
             {
-                // Un archivo puede definir múltiples tipos, ¿cuál está siendo usado?
-                // Simplificación: Asumimos que conectamos con "algún tipo" de este archivo.
-                // Como no sabemos exactamente CUAL tipo de este archivo se usa (IncomingDeps es solo lista de nombres de origen),
-                // y ClassDependencies es "Source->Target".
-                // Mejor estrategia: IncomingDependencies debería ser "Source --> Target" también para ser precisos,
-                // pero lo implementamos como lista de Sources names.
-                // Vamos a inferir que apuntan al primer tipo definido o simplemente creamos un nodo genérico si hay dudas, 
-                // PERO... IncomingDependencies en FileAnalysisResult lo definimos como List<string> que son los NOMBRES DE CLASES que nos usan.
-                // Y nosotros (result) definimos ciertos tipos.
-                
-                // Para el diagrama, necesitamos "IncomingClass --> MyClass".
-                // ¿Cuál es MyClass? Cualquiera de result.DefinedTypes.
-                // Para simplificar visualización, usamos el primer tipo definido si existe, o el nombre del archivo si no.
                 var myMainType = result.DefinedTypes.FirstOrDefault() ?? Path.GetFileNameWithoutExtension(result.RelativePath);
-                
-                // Evitar duplicados si ya está en outgoing (ciclos)
                 var rel = $"{incoming} --> {myMainType}";
                 connections.Add(rel);
             }
@@ -348,6 +370,9 @@ public class MarkdownReportGenerator : IReportGenerator
 
         var sb = new StringBuilder();
         sb.AppendLine("#### Contexto");
+        
+        // Mermaid
+        sb.AppendLine("##### Mermaid");
         sb.AppendLine("```mermaid");
         sb.AppendLine("graph LR;"); // Left-Right para flujos de contexto suele ser mejor
         foreach (var conn in connections.OrderBy(c => c))
@@ -363,8 +388,29 @@ public class MarkdownReportGenerator : IReportGenerator
                 sb.AppendLine($"  style {type} fill:#f9f,stroke:#333,stroke-width:2px");
             }
         }
-        
         sb.AppendLine("```");
+
+        // PlantUML
+        sb.AppendLine("##### PlantUML");
+        sb.AppendLine("```plantuml");
+        sb.AppendLine("@startuml");
+        sb.AppendLine("left to right direction");
+        foreach (var conn in connections.OrderBy(c => c))
+        {
+            var pUml = conn.Replace("-->", "-->").Replace("-.->", "..>");
+            sb.AppendLine($"  {pUml}");
+        }
+        // Resaltar nodo central en PlantUML
+        if (result.DefinedTypes != null)
+        {
+            foreach(var type in result.DefinedTypes)
+            {
+                sb.AppendLine($"  class {type} #Pink");
+            }
+        }
+        sb.AppendLine("@enduml");
+        sb.AppendLine("```");
+
         sb.AppendLine();
 
         return sb.ToString();
