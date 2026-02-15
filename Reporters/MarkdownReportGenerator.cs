@@ -173,9 +173,8 @@ public class MarkdownReportGenerator : IReportGenerator
 
         foreach (var result in results)
         {
-            // ✅ FIX: Usar el nombre del directorio para agrupar, es más robusto.
-            var moduleName = Path.GetDirectoryName(result.RelativePath)?.Replace('\\', '/').Split('/').LastOrDefault();
-            if (string.IsNullOrEmpty(moduleName)) moduleName = "Core"; // Para archivos en la raíz
+            // ✅ FIX: Usar la propiedad centralizada ModuleName
+            var moduleName = result.ModuleName;
 
             if (!modules.ContainsKey(moduleName)) modules[moduleName] = new HashSet<string>();
 
@@ -250,8 +249,8 @@ public class MarkdownReportGenerator : IReportGenerator
                 graphBuilder.AppendLine($"package \"{module.Key}\" {{");
                 foreach (var className in module.Value.OrderBy(n => n)) 
                 {
-                     var keyword = GetPlantUMLKeyword(className, typeKindMap);
-                     graphBuilder.AppendLine($"  {keyword} {className}");
+                     var (keyword, stereotype) = GetPlantUMLMeta(className, typeKindMap);
+                     graphBuilder.AppendLine($"  {keyword} {className} {stereotype}");
                 }
                 graphBuilder.AppendLine("}");
                 graphBuilder.AppendLine();
@@ -281,9 +280,9 @@ public class MarkdownReportGenerator : IReportGenerator
         sb.AppendLine("A continuación se presentan diagramas de dependencia detallados por cada módulo para facilitar la visualización.");
         sb.AppendLine();
 
-        // Agrupar por módulo
+        // Agrupar por módulo usando la propiedad centralizada
         var modules = results
-            .GroupBy(r => Path.GetDirectoryName(r.RelativePath)?.Replace('\\', '/').Split('/').LastOrDefault() ?? "Root")
+            .GroupBy(r => r.ModuleName)
             .OrderBy(g => g.Key);
 
         foreach (var moduleGroup in modules)
@@ -341,8 +340,8 @@ public class MarkdownReportGenerator : IReportGenerator
 
                 foreach (var cls in relatedClasses.OrderBy(c => c))
                 {
-                    var keyword = GetPlantUMLKeyword(cls, typeKindMap);
-                    sb.AppendLine($"{keyword} {cls}");
+                    var (keyword, stereotype) = GetPlantUMLMeta(cls, typeKindMap);
+                    sb.AppendLine($"{keyword} {cls} {stereotype}");
                 }
                 sb.AppendLine();
 
@@ -432,11 +431,11 @@ public class MarkdownReportGenerator : IReportGenerator
 
         foreach (var p in participants.OrderBy(x => x))
         {
-                var keyword = GetPlantUMLKeyword(p, typeKindMap);
+                var (keyword, stereotype) = GetPlantUMLMeta(p, typeKindMap);
                 if (result.DefinedTypes != null && result.DefinedTypes.Contains(p))
-                    sb.AppendLine($"{keyword} {p} #Pink"); // Resaltar propia
+                    sb.AppendLine($"{keyword} {p} {stereotype} #Pink"); // Resaltar propia
                 else
-                    sb.AppendLine($"{keyword} {p}");
+                    sb.AppendLine($"{keyword} {p} {stereotype}");
         }
 
         foreach (var conn in connections.OrderBy(c => c))
@@ -605,22 +604,22 @@ public class MarkdownReportGenerator : IReportGenerator
         return map;
     }
 
-    private string GetPlantUMLKeyword(string typeName, Dictionary<string, string> typeKindMap)
+    private (string Keyword, string Stereotype) GetPlantUMLMeta(string typeName, Dictionary<string, string> typeKindMap)
     {
         if (typeKindMap.TryGetValue(typeName, out var kind))
         {
             return kind switch
             {
-                "interface" => "interface",
-                "enum" => "enum",
-                "record" => "class", // PlantUML supports 'class X <<record>>' but class is safer fallback
-                "struct" => "class", 
-                _ => "class"
+                "interface" => ("interface", ""),
+                "enum" => ("enum", ""),
+                "record" => ("class", "<<record>>"),
+                "struct" => ("class", "<<struct>>"),
+                _ => ("class", "")
             };
         }
         // Fallback: heuristic detection
-        if (typeName.StartsWith("I") && typeName.Length > 1 && char.IsUpper(typeName[1])) return "interface";
-        return "class";
+        if (typeName.StartsWith("I") && typeName.Length > 1 && char.IsUpper(typeName[1])) return ("interface", "");
+        return ("class", "");
     }
 
     #endregion

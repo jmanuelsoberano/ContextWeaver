@@ -43,6 +43,16 @@ La arquitectura general es sólida, moderna y sigue buenas prácticas de ingenie
 **Estado:** RESUELTO.
 **Solución:** Se ha refactorizado `InstabilityCalculator` para utilizar las referencias de tipos reales extraídas por Roslyn (`ClassDependencies` y `DefinedTypes`) en lugar de heurísticas basadas en `usings`. Esto garantiza que solo se cuenten dependencias reales entre componentes.
 
+### 2.3. Nuevas Oportunidades de Mejora (Minor)
+
+#### ✅ 1. Centralización de Lógica de Módulos
+**Estado:** RESUELTO.
+**Solución:** Se implementó la propiedad computada `ModuleName` en `FileAnalysisResult`, eliminando la duplicación de lógica en `InstabilityCalculator` y `MarkdownReportGenerator`.
+
+#### ✅ 2. Refinamiento en Visualización de Records/Structs
+**Estado:** RESUELTO.
+**Solución:** Se actualizó `MarkdownReportGenerator` para usar estereotipos de PlantUML (`<<record>>`, `<<struct>>`), mejorando la distinción visual de estos tipos.
+
 ---
 
 ## 3. Especificación Técnica

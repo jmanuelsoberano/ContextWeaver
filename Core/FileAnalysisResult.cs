@@ -33,4 +33,14 @@ public class FileAnalysisResult
     // ✅ NUEVA PROPIEDAD: Tipo de dato (class, interface, struct, record, enum).
     // Key: Nombre del tipo, Value: Kind.
     public Dictionary<string, string> DefinedTypeKinds { get; set; } = new();
+    // ✅ NUEVA PROPIEDAD COMPUTADA: Centraliza la lógica de nombre de módulo.
+    public string ModuleName
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(RelativePath)) return "Root";
+            var parts = RelativePath.Replace('\\', '/').Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 1 ? parts[0] : "Root";
+        }
+    }
 }

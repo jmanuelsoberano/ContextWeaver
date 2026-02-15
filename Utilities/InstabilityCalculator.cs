@@ -12,7 +12,7 @@ public class InstabilityCalculator
         // 1. Construir mapa: Tipo -> Módulo
         foreach (var result in results)
         {
-            var moduleName = GetModuleName(result.RelativePath);
+            var moduleName = result.ModuleName;
             moduleNames.Add(moduleName);
 
             if (result.DefinedTypes != null)
@@ -37,7 +37,7 @@ public class InstabilityCalculator
         // 2. Analizar dependencias de CLASE (Source -> Target)
         foreach (var result in results)
         {
-            var sourceModule = GetModuleName(result.RelativePath);
+            var sourceModule = result.ModuleName;
 
             if (result.ClassDependencies != null)
             {
@@ -95,12 +95,5 @@ public class InstabilityCalculator
                 var instability = ca + ce == 0 ? 0.0 : (double)ce / (ca + ce);
                 return (ca, ce, instability);
             });
-    }
-
-    private string GetModuleName(string relativePath)
-    {
-        var parts = relativePath.Replace('\\', '/').Split('/');
-        // Si hay carpetas, la primera es el módulo. Si está en raíz, "Core" o similar.
-        return parts.Length > 1 ? parts[0] : "Root"; 
     }
 }
