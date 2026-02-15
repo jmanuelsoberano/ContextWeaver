@@ -21,12 +21,16 @@ desafío al:
     - **"Repo Map" por Archivo**: Extrae las firmas públicas (API) y las dependencias (`using`/`import`) de cada archivo
       de código, ofreciendo un resumen de alto nivel.
     - **Métricas Clave**: Incluye el conteo de Líneas de Código (LOC) y Complejidad Ciclomática a nivel de archivo.
-4. **Identificar "Hotspots"**: Destaca automáticamente los 5 archivos con mayor tamaño (LOC) y mayor acoplamiento (
+4. **Visualización Arquitectónica Avanzada**:
+    - **Soporte Dual**: Genera diagramas tanto en **Mermaid** como en **PlantUML**.
+    - **Granularidad Inteligente**: Crea diagramas de dependencias a nivel global, por módulo y diagramas de contexto específicos por archivo.
+    - **Semántica Rica**: Distingue visualmente entre `class`, `interface`, `record`, `struct` y `enum`.
+5. **Identificar "Hotspots"**: Destaca automáticamente los 5 archivos con mayor tamaño (LOC) y mayor acoplamiento (
    número de imports), permitiendo enfocar la atención en áreas críticas.
-5. **Análisis de Inestabilidad Arquitectónica (Métrica de Robert C. Martin)**: Calcula la métrica de Inestabilidad (I =
+6. **Análisis de Inestabilidad Arquitectónica (Métrica de Robert C. Martin)**: Calcula la métrica de Inestabilidad (I =
    Ce / (Ca + Ce)) a nivel de módulos (carpetas/proyectos) para ayudar a entender la dirección y la salud de las
    dependencias arquitectónicas. Identifica módulos estables (núcleo) e inestables (implementaciones).
-6. **Configuración Flexible y por Proyecto**: La herramienta busca un archivo `.contextweaver.json` en el directorio
+7. **Configuración Flexible y por Proyecto**: La herramienta busca un archivo `.contextweaver.json` en el directorio
    analizado para usar configuraciones específicas del proyecto. Si no lo encuentra, utiliza la configuración global por
    defecto, permitiendo una gran adaptabilidad.
 

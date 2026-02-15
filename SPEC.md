@@ -121,10 +121,14 @@ El reporte `analysis_report.md` contiene las siguientes secciones ordenadas:
     *   Top 5 archivos por tamaño (LOC).
     *   Top 5 archivos por acoplamiento (número de `imports`).
 3.  **Análisis de Inestabilidad**: Tabla con métricas $Ca$, $Ce$, $I$ y clasificación por módulo.
-4.  **Gráfico de Dependencias**: Diagrama `Mermaid graph TD` visualizando la arquitectura (clases, módulos y relaciones).
-5.  **Estructura de Directorios**: Árbol de navegación con enlaces (anclas) a cada sección de archivo.
-6.  **Contenido de Archivos**:
+4.  **Gráfico de Dependencias**:
+    *   **Mermaid**: Diagrama `graph TD` visualizando la arquitectura.
+    *   **PlantUML**: Bloque alternativo con estereotipos ricos (`<<record>>`, `<<struct>>`).
+5.  **Diagramas de Módulo**: Secciones dedicadas con diagramas de dependencias detallados por cada carpeta de primer nivel.
+6.  **Estructura de Directorios**: Árbol de navegación con enlaces (anclas) a cada sección de archivo.
+7.  **Contenido de Archivos**:
     *   Ruta del archivo.
+    *   **Diagrama de Contexto**: Mini-gráfico (Mermaid y PlantUML) mostrando dependencias directas del archivo.
     *   **Repo Map**: Resumen de API pública e imports.
     *   **Métricas**: LOC, Complejidad.
     *   **Código Fuente**: Bloque de código completo con resaltado de sintaxis.
