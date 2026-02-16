@@ -68,17 +68,6 @@ dotnet_diagnostic.CA1305.severity = none      # Specify IFormatProvider (too ver
 dotnet_diagnostic.SA1519.severity = none
 
 
-[**/*.Tests/**/*.cs]
-dotnet_diagnostic.CA1707.severity = none
-dotnet_diagnostic.SA1512.severity = none
-dotnet_diagnostic.SA1122.severity = none
-dotnet_diagnostic.CA1822.severity = none
-dotnet_diagnostic.SA1518.severity = none
-dotnet_diagnostic.SA1202.severity = none
-dotnet_diagnostic.SA1025.severity = none
-dotnet_diagnostic.SA1201.severity = none
-dotnet_diagnostic.CA1816.severity = none
-dotnet_diagnostic.CA1861.severity = none
 
 
 # XML files
