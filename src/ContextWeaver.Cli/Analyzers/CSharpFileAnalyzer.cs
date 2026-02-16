@@ -169,11 +169,11 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             DefinedTypes = definedTypes,
             DefinedTypeKinds = definedTypeKinds,
             DefinedTypeSemantics = definedTypeSemantics,
-            Metrics =
+            Metrics = new FileMetrics
             {
-                { "CyclomaticComplexity", complexity },
-                { "MaxNestingDepth", maxNestingDepth },
-                { "PublicApiSignatures", publicApiSignatures }
+                CyclomaticComplexity = complexity,
+                MaxNestingDepth = maxNestingDepth,
+                PublicApiSignatures = publicApiSignatures
             }
         };
         }

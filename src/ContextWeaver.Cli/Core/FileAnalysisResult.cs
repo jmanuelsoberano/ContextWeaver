@@ -14,7 +14,7 @@ public class FileAnalysisResult
     public int LinesOfCode { get; set; }
     public string CodeContent { get; set; } = string.Empty;
     public string Language { get; set; } = "plaintext";
-    public Dictionary<string, object> Metrics { get; } = new();
+    public FileMetrics Metrics { get; set; } = new();
 
     // Nueva propiedad para los Usings, para tipado fuerte y fácil acceso.
     public List<string> Usings { get; set; } = new();

@@ -65,17 +65,34 @@ public class FileAnalysisResultTests
         result.DefinedTypeSemantics.Should().BeEmpty();
     }
 
-    // ─── Metrics Dictionary ───
+    // ─── Metrics (typed) ───
 
     [Fact]
-    public void Metrics_CanAddAndRetrieveValues()
+    public void Metrics_DefaultInstance_HasNullNumericMetrics()
     {
         var result = new FileAnalysisResult();
-        result.Metrics["CyclomaticComplexity"] = 5;
-        result.Metrics["MaxNestingDepth"] = 3;
 
-        result.Metrics.Should().ContainKey("CyclomaticComplexity");
-        result.Metrics["CyclomaticComplexity"].Should().Be(5);
-        result.Metrics["MaxNestingDepth"].Should().Be(3);
+        result.Metrics.Should().NotBeNull();
+        result.Metrics.CyclomaticComplexity.Should().BeNull();
+        result.Metrics.MaxNestingDepth.Should().BeNull();
+        result.Metrics.PublicApiSignatures.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Metrics_CanSetAndRetrieveTypedValues()
+    {
+        var result = new FileAnalysisResult
+        {
+            Metrics = new FileMetrics
+            {
+                CyclomaticComplexity = 5,
+                MaxNestingDepth = 3,
+                PublicApiSignatures = new List<string> { "- class Foo" }
+            }
+        };
+
+        result.Metrics.CyclomaticComplexity.Should().Be(5);
+        result.Metrics.MaxNestingDepth.Should().Be(3);
+        result.Metrics.PublicApiSignatures.Should().ContainSingle().Which.Should().Be("- class Foo");
     }
 }

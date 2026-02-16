@@ -489,9 +489,9 @@ public class MarkdownReportGenerator : IReportGenerator
             }
 
             // --- NUEVA SECCIÓN DE REPO MAP ---
-            if (result.Metrics.TryGetValue("PublicApiSignatures", out var publicApiObj) &&
-                publicApiObj is List<string> publicApi)
+            if (result.Metrics.PublicApiSignatures.Any())
             {
+                var publicApi = result.Metrics.PublicApiSignatures;
                 contentBuilder.AppendLine("### Repo Map: Extraer solo firmas públicas y imports de cada archivo");
                 contentBuilder.AppendLine("#### API Publica:");
                 foreach (var signature in publicApi) 
@@ -525,10 +525,10 @@ public class MarkdownReportGenerator : IReportGenerator
                 contentBuilder.AppendLine(); // Línea en blanco para separación
             }
 
-            if (result.Metrics.TryGetValue("Usings", out var usingsObj) && usingsObj is List<string> usings)
+            if (result.Usings.Any())
             {
                 contentBuilder.AppendLine("#### Imports:");
-                foreach (var singleUsing in usings) contentBuilder.AppendLine($"- {singleUsing}");
+                foreach (var singleUsing in result.Usings) contentBuilder.AppendLine($"- {singleUsing}");
                 contentBuilder.AppendLine(); // Línea en blanco para separación
             }
             // --- FIN NUEVA SECCIÓN ---
@@ -536,9 +536,10 @@ public class MarkdownReportGenerator : IReportGenerator
             // Información de métricas existente
             contentBuilder.AppendLine("#### Métricas");
             contentBuilder.AppendLine($"* **Lineas de Código (LOC):** {result.LinesOfCode}");
-            // Muestra otras métricas, excluyendo las que ya tratamos explícitamente como "Repo Map"
-            foreach (var metric in result.Metrics.Where(m => m.Key != "PublicApiSignatures" && m.Key != "Usings"))
-                contentBuilder.AppendLine($"* **{metric.Key}:** {metric.Value}");
+            if (result.Metrics.CyclomaticComplexity.HasValue)
+                contentBuilder.AppendLine($"* **CyclomaticComplexity:** {result.Metrics.CyclomaticComplexity.Value}");
+            if (result.Metrics.MaxNestingDepth.HasValue)
+                contentBuilder.AppendLine($"* **MaxNestingDepth:** {result.Metrics.MaxNestingDepth.Value}");
             contentBuilder.AppendLine();
 
             // Sección de Código Fuente
