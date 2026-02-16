@@ -72,7 +72,7 @@ Este proyecto aplica principios fundacionales de ingeniería de software:
 
 - **Estilo:** configurado en `.editorconfig` + StyleCop. Ejecuta `dotnet format` antes de hacer commit.
 - **Idioma y Localización:**
-  - **Documentación y Comentarios**: Español.
+  - **Documentación y Comentarios**: Español (excepto Propiedades y Constructores, que deben seguir reglas de StyleCop (English)).
   - **Términos Técnicos**: Mantener en Inglés (ej. "Helper", "Task", "Wrapper").
   - **Identificadores de Código**: Inglés (ej. `CSharpFileAnalyzer`).
   - *Nota*: Para reglas detalladas de IA, consultar `.cursorrules`.

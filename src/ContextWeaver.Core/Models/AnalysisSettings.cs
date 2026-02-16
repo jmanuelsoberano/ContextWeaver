@@ -8,9 +8,9 @@ namespace ContextWeaver.Core;
 /// </summary>
 public class AnalysisSettings
 {
-    /// <summary>Obtiene o establece la lista de extensiones de archivo a incluir en el análisis (ej. .cs, .md).</summary>
+    /// <summary>Gets or sets the list of file extensions to include in the analysis (e.g. .cs, .md).</summary>
     public string[] IncludedExtensions { get; set; } = [];
 
-    /// <summary>Obtiene o establece la lista de patrones a excluir del análisis (ej. bin, obj, .git).</summary>
+    /// <summary>Gets or sets the list of patterns to exclude from the analysis (e.g. bin, obj, .git).</summary>
     public string[] ExcludePatterns { get; set; } = [];
 }

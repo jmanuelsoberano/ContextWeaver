@@ -4,6 +4,7 @@
 - **Primary Language**: Spanish (Español).
 - **Scope**: All XML documentation (<summary>, <param>, <returns>), inline comments (`//`), and region headers (`#region`).
 - **Strict Exceptions (Keep in English)**:
+  - **Properties & Constructors**: Standard StyleCop text ("Gets or sets...", "Initializes a new instance of...").
   - **Technical Terms/Patterns**: "Helper", "Wrapper", "Handler", "Service", "Pipeline", "Middleware", "Snapshot", "Fixture".
   - **Type Names**: "Task" (when referring to `System.Threading.Tasks.Task`), "List", "Dictionary".
   - **Code Identifiers**: Variable names, method names, class names.

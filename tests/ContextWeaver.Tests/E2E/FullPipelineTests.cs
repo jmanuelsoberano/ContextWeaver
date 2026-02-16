@@ -19,9 +19,8 @@ public class FullPipelineTests : IDisposable
     private readonly string _outputPath;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FullPipelineTests"/> class.
-    ///     Inicializa una nueva instancia de la clase <see cref="FullPipelineTests"/>.
-    ///     Configura el directorio de fixtures y la ruta de salida temporal.
+    ///     Initializes a new instance of the <see cref="FullPipelineTests"/> class.
+    ///     Configures the fixture directory and temporary output path.
     /// </summary>
     public FullPipelineTests()
     {

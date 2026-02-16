@@ -8,7 +8,7 @@ namespace ContextWeaver.Core;
 /// </summary>
 public interface IReportGenerator
 {
-    /// <summary>Obtiene el identificador de formato para este generador (ej. "markdown").</summary>
+    /// <summary>Gets the format identifier for this generator (e.g. "markdown").</summary>
     string Format { get; }
 
     /// <summary>

@@ -10,7 +10,7 @@ public class MathService
     private readonly Calculator _calculator;
 
     /// <summary>
-    ///     Inicializa una nueva instancia de la clase <see cref="MathService"/>.
+    ///     Initializes a new instance of the <see cref="MathService"/> class.
     /// </summary>
     /// <param name="calculator">La instancia de la calculadora.</param>
     public MathService(Calculator calculator)
