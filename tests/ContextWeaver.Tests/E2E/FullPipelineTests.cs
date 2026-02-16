@@ -31,7 +31,8 @@ public class FullPipelineTests : IDisposable
 
     public void Dispose()
     {
-        if (File.Exists(_outputPath)) File.Delete(_outputPath);
+        if (File.Exists(_outputPath))
+            File.Delete(_outputPath);
     }
 
     private CodeAnalyzerService BuildService()
