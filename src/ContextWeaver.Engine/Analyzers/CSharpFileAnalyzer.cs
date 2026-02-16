@@ -23,7 +23,8 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     private Dictionary<string, SyntaxTree> _syntaxTrees = new();
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="CSharpFileAnalyzer"/> class.
+    /// Initializes a new instance of the <see cref="CSharpFileAnalyzer"/> class.
+    ///     Inicializa una nueva instancia de la clase <see cref="CSharpFileAnalyzer"/>.
     /// </summary>
     /// <param name="logger">Logger para diagnósticos de análisis.</param>
     public CSharpFileAnalyzer(ILogger<CSharpFileAnalyzer> logger)

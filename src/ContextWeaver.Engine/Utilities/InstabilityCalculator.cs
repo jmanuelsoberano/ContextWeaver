@@ -3,16 +3,16 @@ using ContextWeaver.Core;
 namespace ContextWeaver.Utilities;
 
 /// <summary>
-///     Calculates architectural instability metrics (I = Ce / (Ca + Ce)).
-///     Based on Robert C. Martin's package principles.
+///     Calcula métricas de inestabilidad arquitectónica (I = Ce / (Ca + Ce)).
+///     Basado en los principios de paquetes de Robert C. Martin.
 /// </summary>
 public class InstabilityCalculator
 {
     /// <summary>
-    ///     Calculates instability metrics for each module in the analysis results.
+    ///     Calcula las métricas de inestabilidad para cada módulo en los resultados del análisis.
     /// </summary>
-    /// <param name="results">List of file analysis results containing dependency information.</param>
-    /// <returns>A dictionary mapping module names to their metrics (Afferent, Efferent, Instability).</returns>
+    /// <param name="results">Lista de resultados de análisis de archivos que contienen información de dependencias.</param>
+    /// <returns>Un diccionario mapeando nombres de módulos a sus métricas (Aferente, Eferente, Inestabilidad).</returns>
     public static Dictionary<string, (int Ca, int Ce, double Instability)> Calculate(List<FileAnalysisResult> results)
     {
         var typeToModuleMap = new Dictionary<string, string>();

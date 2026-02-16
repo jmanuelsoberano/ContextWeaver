@@ -4,14 +4,14 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Utilities;
 
-/// <summary>Tests for <see cref="MarkdownHelper"/>.</summary>
+/// <summary>Pruebas para <see cref="MarkdownHelper"/>.</summary>
 public class MarkdownHelperTests
 {
     // ─── Valid Inputs (consolidated into Theory) ───
 
-    /// <summary>Verifies that valid inputs produce the expected anchor slugs.</summary>
-    /// <param name="input">The input string to convert.</param>
-    /// <param name="expected">The expected anchor slug.</param>
+    /// <summary>Verifica que las entradas válidas produzcan los slugs de anclaje esperados.</summary>
+    /// <param name="input">La cadena de entrada a convertir.</param>
+    /// <param name="expected">El slug de anclaje esperado.</param>
     [Theory]
     [InlineData("Hello World", "hello-world")]
     [InlineData("Core -- Module", "core-module")]
@@ -25,8 +25,8 @@ public class MarkdownHelperTests
 
     // ─── Null / Whitespace ───
 
-    /// <summary>Verifies that null or whitespace inputs return an empty string.</summary>
-    /// <param name="input">The input string to check.</param>
+    /// <summary>Verifica que las entradas nulas o con espacios en blanco retornen una cadena vacía.</summary>
+    /// <param name="input">La cadena de entrada a verificar.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -38,7 +38,7 @@ public class MarkdownHelperTests
 
     // ─── Edge Cases ───
 
-    /// <summary>Verifies that accented characters are removed (normalized).</summary>
+    /// <summary>Verifica que los caracteres acentuados se eliminen (normalización).</summary>
     [Fact]
     public void CreateAnchor_Accents_RemovesAccentedChars()
     {
@@ -46,14 +46,14 @@ public class MarkdownHelperTests
         MarkdownHelper.CreateAnchor("Módulo Análisis").Should().Be("mdulo-anlisis");
     }
 
-    /// <summary>Verifies that strings consisting only of special characters return an empty string.</summary>
+    /// <summary>Verifica que las cadenas que consisten solo en caracteres especiales retornen una cadena vacía.</summary>
     [Fact]
     public void CreateAnchor_AllSpecialChars_ReturnsEmpty()
     {
         MarkdownHelper.CreateAnchor("@#$%^&*()").Should().BeEmpty();
     }
 
-    /// <summary>Verifies that slashes in paths are removed, not preserved as separators.</summary>
+    /// <summary>Verifica que las barras en las rutas se eliminen, no se preserven como separadores.</summary>
     [Fact]
     public void CreateAnchor_PathLikeInput_RemovesSlashes()
     {

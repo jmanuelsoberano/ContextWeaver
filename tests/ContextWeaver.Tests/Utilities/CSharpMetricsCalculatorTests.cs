@@ -6,7 +6,7 @@ using Xunit;
 namespace ContextWeaver.Tests.Utilities;
 
 /// <summary>
-///     Tests for <see cref="CSharpMetricsCalculator"/>.
+///     Pruebas para <see cref="CSharpMetricsCalculator"/>.
 /// </summary>
 public class CSharpMetricsCalculatorTests
 {
@@ -15,7 +15,7 @@ public class CSharpMetricsCalculatorTests
 
     // ─── Cyclomatic Complexity ───
 
-    /// <summary>Verifies that an empty method has a complexity of 1.</summary>
+    /// <summary>Verifica que un método vacío tenga una complejidad de 1.</summary>
     [Fact]
     public void CyclomaticComplexity_EmptyMethod_Returns1()
     {
@@ -24,7 +24,7 @@ public class CSharpMetricsCalculatorTests
         result.Should().Be(1);
     }
 
-    /// <summary>Verifies that a null root returns the default complexity of 1.</summary>
+    /// <summary>Verifica que una raíz nula retorne la complejidad por defecto de 1.</summary>
     [Fact]
     public void CyclomaticComplexity_NullRoot_Returns1()
     {
@@ -32,7 +32,7 @@ public class CSharpMetricsCalculatorTests
         result.Should().Be(1);
     }
 
-    /// <summary>Verifies that a single if statement increases complexity by 1.</summary>
+    /// <summary>Verifica que una sentencia if simple incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_SingleIf_Returns2()
     {
@@ -46,7 +46,7 @@ class C {
         result.Should().Be(2);
     }
 
-    /// <summary>Verifies that an if-else if structure increases complexity correctly.</summary>
+    /// <summary>Verifica que una estructura if-else if incremente la complejidad correctamente.</summary>
     [Fact]
     public void CyclomaticComplexity_IfElseIf_Returns3()
     {
@@ -62,7 +62,7 @@ class C {
         result.Should().Be(3); // base(1) + if(1) + else-if(1)
     }
 
-    /// <summary>Verifies that a for loop increases complexity by 1.</summary>
+    /// <summary>Verifica que un bucle for incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_ForLoop_Returns2()
     {
@@ -76,7 +76,7 @@ class C {
         result.Should().Be(2);
     }
 
-    /// <summary>Verifies that a foreach loop increases complexity by 1.</summary>
+    /// <summary>Verifica que un bucle foreach incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_ForEach_Returns2()
     {
@@ -90,7 +90,7 @@ class C {
         result.Should().Be(2);
     }
 
-    /// <summary>Verifies that a while loop increases complexity by 1.</summary>
+    /// <summary>Verifica que un bucle while incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_While_Returns2()
     {
@@ -104,7 +104,7 @@ class C {
         result.Should().Be(2);
     }
 
-    /// <summary>Verifies that a switch statement with cases increases complexity.</summary>
+    /// <summary>Verifica que una sentencia switch con casos incremente la complejidad.</summary>
     [Fact]
     public void CyclomaticComplexity_SwitchWithThreeCases_Returns4()
     {
@@ -122,7 +122,7 @@ class C {
         result.Should().Be(4); // base(1) + 3 cases
     }
 
-    /// <summary>Verifies that the ternary operator increases complexity by 1.</summary>
+    /// <summary>Verifica que el operador ternario incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_TernaryOperator_Returns2()
     {
@@ -134,7 +134,7 @@ class C {
         result.Should().Be(2);
     }
 
-    /// <summary>Verifies that the logical AND operator increases complexity by 1.</summary>
+    /// <summary>Verifica que el operador lógico AND incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_LogicalAnd_Returns3()
     {
@@ -148,7 +148,7 @@ class C {
         result.Should().Be(3); // base(1) + if(1) + &&(1)
     }
 
-    /// <summary>Verifies that the logical OR operator increases complexity by 1.</summary>
+    /// <summary>Verifica que el operador lógico OR incremente la complejidad en 1.</summary>
     [Fact]
     public void CyclomaticComplexity_LogicalOr_Returns3()
     {
@@ -162,7 +162,7 @@ class C {
         result.Should().Be(3); // base(1) + if(1) + ||(1)
     }
 
-    /// <summary>Verifies that a complex method sums up various complexity increments correctly.</summary>
+    /// <summary>Verifica que un método complejo sume correctamente varios incrementos de complejidad.</summary>
     [Fact]
     public void CyclomaticComplexity_ComplexMethod_CountsAllBranches()
     {
@@ -184,7 +184,7 @@ class C {
 
     // ─── Max Nesting Depth ───
 
-    /// <summary>Verifies that a flat method has 0 depth.</summary>
+    /// <summary>Verifica que un método plano tenga una profundidad de 0.</summary>
     [Fact]
     public void MaxNestingDepth_FlatMethod_Returns0()
     {
@@ -198,7 +198,7 @@ class C {
         result.Should().Be(0);
     }
 
-    /// <summary>Verifies that a single if increases depth to 1.</summary>
+    /// <summary>Verifica que un solo if incremente la profundidad a 1.</summary>
     [Fact]
     public void MaxNestingDepth_SingleIf_Returns1()
     {
@@ -214,7 +214,7 @@ class C {
         result.Should().Be(1);
     }
 
-    /// <summary>Verifies that nested structures increase depth correctly.</summary>
+    /// <summary>Verifica que las estructuras anidadas incrementen la profundidad correctamente.</summary>
     [Fact]
     public void MaxNestingDepth_NestedIfInFor_Returns2()
     {
@@ -232,7 +232,7 @@ class C {
         result.Should().Be(2);
     }
 
-    /// <summary>Verifies that deeply nested structures are calculated correctly.</summary>
+    /// <summary>Verifica que las estructuras profundamente anidadas se calculen correctamente.</summary>
     [Fact]
     public void MaxNestingDepth_DeeplyNested_Returns4()
     {

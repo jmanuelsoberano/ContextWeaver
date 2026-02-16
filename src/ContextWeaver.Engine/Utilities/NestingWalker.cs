@@ -13,7 +13,7 @@ public class NestingWalker : CSharpSyntaxWalker
     private int _currentDepth;
     private int _maxDepth;
 
-    /// <summary>Gets the maximum nesting depth found during the walk.</summary>
+    /// <summary>Gets obtiene la profundidad máxima de anidamiento encontrada durante el recorrido.</summary>
     public int MaxDepth => _maxDepth;
 
     /// <inheritdoc />

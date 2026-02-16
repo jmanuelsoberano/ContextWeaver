@@ -5,15 +5,15 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Analyzers;
 
-/// <summary>Tests for <see cref="GenericFileAnalyzer"/>.</summary>
+/// <summary>Pruebas para <see cref="GenericFileAnalyzer"/>.</summary>
 public class GenericFileAnalyzerTests
 {
     private readonly GenericFileAnalyzer _analyzer = new();
 
     // ─── CanAnalyze: Supported Extensions ───
 
-    /// <summary>Verifies that supported extensions return true.</summary>
-    /// <param name="extension">The file extension to test.</param>
+    /// <summary>Verifica que las extensiones soportadas retornan true.</summary>
+    /// <param name="extension">La extensión de archivo a probar.</param>
     [Theory]
     [InlineData(".ts")]
     [InlineData(".js")]
@@ -32,8 +32,8 @@ public class GenericFileAnalyzerTests
 
     // ─── CanAnalyze: Case Insensitive ───
 
-    /// <summary>Verifies that extension matching is case-insensitive.</summary>
-    /// <param name="extension">The file extension to test.</param>
+    /// <summary>Verifica que la coincidencia de extensiones no distinga entre mayúsculas y minúsculas.</summary>
+    /// <param name="extension">La extensión de archivo a probar.</param>
     [Theory]
     [InlineData(".TS")]
     [InlineData(".Js")]
@@ -46,8 +46,8 @@ public class GenericFileAnalyzerTests
 
     // ─── CanAnalyze: Unsupported / Delegated ───
 
-    /// <summary>Verifies that unsupported or delegated extensions return false.</summary>
-    /// <param name="extension">The file extension to test.</param>
+    /// <summary>Verifica que las extensiones no soportadas o delegadas retornan false.</summary>
+    /// <param name="extension">La extensión de archivo a probar.</param>
     [Theory]
     [InlineData(".cs")]   // Handled by CSharpFileAnalyzer
     [InlineData(".py")]
@@ -65,8 +65,8 @@ public class GenericFileAnalyzerTests
 
     // ─── InitializeAsync ───
 
-    /// <summary>Verifies that initialization completes immediately.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <summary>Verifica que la inicialización se complete inmediatamente.</summary>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task InitializeAsync_CompletesImmediately()
     {
@@ -77,11 +77,11 @@ public class GenericFileAnalyzerTests
 
     // ─── AnalyzeAsync: Language Detection ───
 
-    /// <summary>Verifies that the correct language identifier is returned based on extension.</summary>
-    /// <param name="extension">The file extension.</param>
-    /// <param name="content">The file content.</param>
-    /// <param name="expectedLanguage">The expected language identifier.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <summary>Verifica que se retorne el identificador de lenguaje correcto basado en la extensión.</summary>
+    /// <param name="extension">La extensión del archivo.</param>
+    /// <param name="content">El contenido del archivo.</param>
+    /// <param name="expectedLanguage">El identificador de lenguaje esperado.</param>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Theory]
     [InlineData(".json", "{ \"key\": \"value\" }", "json")]
     [InlineData(".ts", "const x: number = 42;", "typescript")]
@@ -102,8 +102,8 @@ public class GenericFileAnalyzerTests
 
     // ─── AnalyzeAsync: Line Counting ───
 
-    /// <summary>Verifies that lines are counted correctly for multiline files.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <summary>Verifica que las líneas se cuenten correctamente para archivos multilínea.</summary>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAsync_MultilineFile_CountsLinesCorrectly()
     {
@@ -116,8 +116,8 @@ public class GenericFileAnalyzerTests
         result.LinesOfCode.Should().Be(6);
     }
 
-    /// <summary>Verifies that single-line files are counted as 1 line.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <summary>Verifica que los archivos de una sola línea se cuenten como 1 línea.</summary>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAsync_SingleLineFile_Returns1()
     {
@@ -128,8 +128,8 @@ public class GenericFileAnalyzerTests
         result.LinesOfCode.Should().Be(1);
     }
 
-    /// <summary>Verifies that empty files are counted as 1 line.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <summary>Verifica que los archivos vacíos se cuenten como 1 línea.</summary>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAsync_EmptyFile_Returns1()
     {

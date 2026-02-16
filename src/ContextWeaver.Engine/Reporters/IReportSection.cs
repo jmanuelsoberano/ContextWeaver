@@ -1,15 +1,15 @@
 namespace ContextWeaver.Reporters;
 
 /// <summary>
-///     Contract for a self-contained report section.
-///     Each implementation renders one logical block of the Markdown report.
+///     Contrato para una sección de reporte autocontenida.
+///     Cada implementación renderiza un bloque lógico del reporte Markdown.
 /// </summary>
 public interface IReportSection
 {
     /// <summary>
-    ///     Renders the section content using the provided report context.
+    ///     Renderiza el contenido de la sección usando el contexto de reporte proporcionado.
     /// </summary>
-    /// <param name="context">Context data available for report generation.</param>
-    /// <returns>The rendered markdown string for this section.</returns>
+    /// <param name="context">Datos de contexto disponibles para la generación del reporte.</param>
+    /// <returns>La cadena markdown renderizada para esta sección.</returns>
     string Render(ReportContext context);
 }

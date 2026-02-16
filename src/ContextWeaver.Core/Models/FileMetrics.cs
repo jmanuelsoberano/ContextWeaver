@@ -6,12 +6,12 @@ namespace ContextWeaver.Core;
 /// </summary>
 public class FileMetrics
 {
-    /// <summary>Gets the cyclomatic complexity of the file (C# only).</summary>
+    /// <summary>Gets obtiene la complejidad ciclomática del archivo (solo C#).</summary>
     public int? CyclomaticComplexity { get; init; }
 
-    /// <summary>Gets the maximum nesting depth found in the file (C# only).</summary>
+    /// <summary>Gets obtiene la profundidad máxima de anidamiento encontrada en el archivo (solo C#).</summary>
     public int? MaxNestingDepth { get; init; }
 
-    /// <summary>Gets the public API signatures extracted by Roslyn (C# only).</summary>
+    /// <summary>Gets obtiene las firmas de API públicas extraídas por Roslyn (solo C#).</summary>
     public List<string> PublicApiSignatures { get; init; } = new();
 }

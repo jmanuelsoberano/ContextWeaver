@@ -15,7 +15,8 @@ public class SettingsProvider
     private readonly ILogger<SettingsProvider> _logger;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="SettingsProvider"/> class.
+    /// Initializes a new instance of the <see cref="SettingsProvider"/> class.
+    ///     Inicializa una nueva instancia de la clase <see cref="SettingsProvider"/>.
     /// </summary>
     /// <param name="logger">Logger para diagnósticos de configuración.</param>
     public SettingsProvider(ILogger<SettingsProvider> logger)

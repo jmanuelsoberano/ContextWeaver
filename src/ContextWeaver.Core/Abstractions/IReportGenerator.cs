@@ -8,16 +8,16 @@ namespace ContextWeaver.Core;
 /// </summary>
 public interface IReportGenerator
 {
-    /// <summary>Gets the format identifier for this generator (e.g., "markdown").</summary>
+    /// <summary>Gets obtiene el identificador de formato para este generador (ej. "markdown").</summary>
     string Format { get; }
 
     /// <summary>
-    ///     Generates the report content based on the analysis results.
+    ///     Genera el contenido del reporte basado en los resultados del análisis.
     /// </summary>
-    /// <param name="directory">The root directory that was analyzed.</param>
-    /// <param name="results">The list of analysis results for each file.</param>
-    /// <param name="instabilityMetrics">Calculated instability metrics for modules.</param>
-    /// <returns>The generated report content as a string.</returns>
+    /// <param name="directory">El directorio raíz que fue analizado.</param>
+    /// <param name="results">La lista de resultados del análisis para cada archivo.</param>
+    /// <param name="instabilityMetrics">Métricas de inestabilidad calculadas para los módulos.</param>
+    /// <returns>El contenido del reporte generado como una cadena de texto.</returns>
     string Generate(DirectoryInfo directory, List<FileAnalysisResult> results,
         Dictionary<string, (int Ca, int Ce, double Instability)> instabilityMetrics);
 }

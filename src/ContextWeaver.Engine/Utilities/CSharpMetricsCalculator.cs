@@ -12,11 +12,11 @@ namespace ContextWeaver.Utilities;
 public static class CSharpMetricsCalculator
 {
     /// <summary>
-    ///     Calculates the cyclomatic complexity of a given syntax node.
-    ///     Starts with a base complexity of 1 and adds 1 for each control flow statement.
+    ///     Calcula la complejidad ciclomática de un nodo de sintaxis dado.
+    ///     Comienza con una complejidad base de 1 y suma 1 por cada sentencia de flujo de control.
     /// </summary>
-    /// <param name="root">The root syntax node to analyze.</param>
-    /// <returns>The calculated cyclomatic complexity.</returns>
+    /// <param name="root">El nodo raíz de sintaxis a analizar.</param>
+    /// <returns>La complejidad ciclomática calculada.</returns>
     public static int CalculateCyclomaticComplexity(SyntaxNode root)
     {
         if (root == null)
@@ -29,10 +29,10 @@ public static class CSharpMetricsCalculator
     }
 
     /// <summary>
-    ///     Calculates the maximum nesting depth of a given syntax node.
+    ///     Calcula la profundidad máxima de anidamiento de un nodo de sintaxis dado.
     /// </summary>
-    /// <param name="root">The root syntax node to analyze.</param>
-    /// <returns>The maximum nesting depth found.</returns>
+    /// <param name="root">El nodo raíz de sintaxis a analizar.</param>
+    /// <returns>La profundidad máxima de anidamiento encontrada.</returns>
     public static int CalculateMaxNestingDepth(SyntaxNode root)
     {
         var walker = new NestingWalker();

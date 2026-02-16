@@ -3,8 +3,8 @@ using System.Text;
 namespace ContextWeaver.Reporters.Sections;
 
 /// <summary>
-///     Renders the introductory header of the report.
-///     Provides context about the file format, purpose, and usage guidelines.
+///     Renderiza el encabezado introductorio del reporte.
+///     Proporciona contexto sobre el formato del archivo, propósito y pautas de uso.
 /// </summary>
 public class HeaderSection : IReportSection
 {

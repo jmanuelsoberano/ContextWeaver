@@ -6,7 +6,7 @@ using Xunit;
 namespace ContextWeaver.Tests.Utilities;
 
 /// <summary>
-///     Tests for <see cref="InstabilityCalculator"/>.
+///     Pruebas para <see cref="InstabilityCalculator"/>.
 /// </summary>
 public class InstabilityCalculatorTests
 {
@@ -25,7 +25,7 @@ public class InstabilityCalculatorTests
 
     // ─── Basic Scenarios ───
 
-    /// <summary>Verifies that empty results return an empty dictionary.</summary>
+    /// <summary>Verifica que los resultados vacíos retornen un diccionario vacío.</summary>
     [Fact]
     public void Calculate_EmptyResults_ReturnsEmptyDictionary()
     {
@@ -34,7 +34,7 @@ public class InstabilityCalculatorTests
         metrics.Should().BeEmpty();
     }
 
-    /// <summary>Verifies that a single module with no dependencies has zero instability.</summary>
+    /// <summary>Verifica que un solo módulo sin dependencias tenga cero inestabilidad.</summary>
     [Fact]
     public void Calculate_SingleModuleNoDependencies_ReturnsZeroInstability()
     {
@@ -51,7 +51,7 @@ public class InstabilityCalculatorTests
         metrics["Core"].Instability.Should().Be(0.0);
     }
 
-    /// <summary>Verifies correct Ca and Ce calculation for two modules with one dependency.</summary>
+    /// <summary>Verifica el cálculo correcto de Ca y Ce para dos módulos con una dependencia.</summary>
     [Fact]
     public void Calculate_TwoModulesWithOneDependency_CorrectCaAndCe()
     {
@@ -74,7 +74,7 @@ public class InstabilityCalculatorTests
         metrics["Utilities"].Ce.Should().Be(0);
     }
 
-    /// <summary>Verifies that a fully unstable module (I=1) is calculated correctly.</summary>
+    /// <summary>Verifica que un módulo totalmente inestable (I=1) se calcule correctamente.</summary>
     [Fact]
     public void Calculate_FullyUnstableModule_ReturnsInstability1()
     {
@@ -94,7 +94,7 @@ public class InstabilityCalculatorTests
         metrics["UI"].Instability.Should().Be(1.0);
     }
 
-    /// <summary>Verifies that a fully stable module (I=0) is calculated correctly.</summary>
+    /// <summary>Verifica que un módulo totalmente estable (I=0) se calcule correctamente.</summary>
     [Fact]
     public void Calculate_FullyStableModule_ReturnsInstability0()
     {
@@ -116,7 +116,7 @@ public class InstabilityCalculatorTests
 
     // ─── Intra-module Dependencies ───
 
-    /// <summary>Verifies that dependencies within the same module do not count towards Ce.</summary>
+    /// <summary>Verifica que las dependencias dentro del mismo módulo no cuenten para Ce.</summary>
     [Fact]
     public void Calculate_SameModuleDependency_DoesNotCountAsEfferent()
     {
@@ -138,7 +138,7 @@ public class InstabilityCalculatorTests
 
     // ─── Inheritance Dependencies ───
 
-    /// <summary>Verifies that inheritance dependencies are counted as efferent dependencies.</summary>
+    /// <summary>Verifica que las dependencias de herencia cuenten como dependencias eferentes.</summary>
     [Fact]
     public void Calculate_InheritanceDependency_CountsAsEfferent()
     {
@@ -159,7 +159,7 @@ public class InstabilityCalculatorTests
 
     // ─── Root Module ───
 
-    /// <summary>Verifies that files at the root level are assigned to a "Root" module.</summary>
+    /// <summary>Verifica que los archivos en el nivel raíz se asignen a un módulo "Root".</summary>
     [Fact]
     public void Calculate_FileAtRoot_UsesRootModuleName()
     {
@@ -174,7 +174,7 @@ public class InstabilityCalculatorTests
 
     // ─── Multiple Dependencies ───
 
-    /// <summary>Verifies instability calculation for a module with multiple dependencies.</summary>
+    /// <summary>Verifica el cálculo de inestabilidad para un módulo con múltiples dependencias.</summary>
     [Fact]
     public void Calculate_ModuleWithMultipleDependencies_CorrectInstability()
     {
@@ -203,7 +203,7 @@ public class InstabilityCalculatorTests
 
     // ─── Negative / Edge Cases ───
 
-    /// <summary>Verifies that null class dependencies list does not cause an exception.</summary>
+    /// <summary>Verifica que una lista de dependencias de clase nula no cause una excepción.</summary>
     [Fact]
     public void Calculate_NullClassDependencies_DoesNotThrow()
     {
@@ -222,7 +222,7 @@ public class InstabilityCalculatorTests
         act.Should().NotThrow();
     }
 
-    /// <summary>Verifies that null defined types list does not cause an exception.</summary>
+    /// <summary>Verifica que una lista de tipos definidos nula no cause una excepción.</summary>
     [Fact]
     public void Calculate_NullDefinedTypes_DoesNotThrow()
     {
@@ -240,7 +240,7 @@ public class InstabilityCalculatorTests
         act.Should().NotThrow();
     }
 
-    /// <summary>Verifies that dependencies to unknown types are ignored.</summary>
+    /// <summary>Verifica que las dependencias a tipos desconocidos se ignoren.</summary>
     [Fact]
     public void Calculate_DependencyToUnknownType_IsIgnoredGracefully()
     {
@@ -259,7 +259,7 @@ public class InstabilityCalculatorTests
         metrics["Core"].Ca.Should().Be(0);
     }
 
-    /// <summary>Verifies that malformed dependency strings are ignored.</summary>
+    /// <summary>Verifica que las cadenas de dependencia mal formadas se ignoren.</summary>
     [Fact]
     public void Calculate_MalformedDependencyString_IsIgnoredGracefully()
     {

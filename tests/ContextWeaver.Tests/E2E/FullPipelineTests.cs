@@ -10,7 +10,7 @@ using Xunit;
 namespace ContextWeaver.Tests.E2E;
 
 /// <summary>
-///     End-to-end tests that exercise the full analysis pipeline:
+///     Pruebas de extremo a extremo que ejercitan el pipeline completo de análisis:
 ///     SettingsProvider → Analyzers → InstabilityCalculator → MarkdownReportGenerator.
 /// </summary>
 public class FullPipelineTests : IDisposable
@@ -19,8 +19,9 @@ public class FullPipelineTests : IDisposable
     private readonly string _outputPath;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="FullPipelineTests"/> class.
-    ///     Sets up the fixture directory and temporary output path.
+    /// Initializes a new instance of the <see cref="FullPipelineTests"/> class.
+    ///     Inicializa una nueva instancia de la clase <see cref="FullPipelineTests"/>.
+    ///     Configura el directorio de fixtures y la ruta de salida temporal.
     /// </summary>
     public FullPipelineTests()
     {
@@ -58,9 +59,9 @@ public class FullPipelineTests : IDisposable
     }
 
     /// <summary>
-    ///     Verifies that the full pipeline produces a valid markdown report file.
+    ///     Verifica que el pipeline completo produce un archivo markdown válido.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ProducesValidMarkdown()
     {
@@ -84,9 +85,9 @@ public class FullPipelineTests : IDisposable
     }
 
     /// <summary>
-    ///     Verifies that C# specific analysis confirms presence of C# files and metrics.
+    ///     Verifica que el análisis específico de C# confirma la presencia de archivos C# y métricas.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsCSharpAnalysis()
     {
@@ -106,9 +107,9 @@ public class FullPipelineTests : IDisposable
     }
 
     /// <summary>
-    ///     Verifies that non-C# files (like JSON) are analyzed via GenericFileAnalyzer.
+    ///     Verifica que los archivos no-C# (como JSON) son analizados vía GenericFileAnalyzer.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsNonCSharpFiles()
     {
@@ -126,9 +127,9 @@ public class FullPipelineTests : IDisposable
     }
 
     /// <summary>
-    ///     Verifies that dependency information is correctly extracted and reported.
+    ///     Verifica que la información de dependencias es extraída y reportada correctamente.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsDependencyInfo()
     {

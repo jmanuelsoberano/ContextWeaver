@@ -1,16 +1,16 @@
 namespace ContextWeaver.Cli;
 
 /// <summary>
-///     Defines constants and aliases for CLI arguments.
+///     Define constantes y alias para los argumentos de la CLI.
 /// </summary>
 internal static class CliConstants
 {
-    /// <summary>Aliases for the directory argument.</summary>
+    /// <summary>Alias para el argumento de directorio.</summary>
     public static readonly string[] DirectoryAliases = { "-d", "--directorio" };
 
-    /// <summary>Aliases for the output file argument.</summary>
+    /// <summary>Alias para el argumento de archivo de salida.</summary>
     public static readonly string[] OutputAliases = { "-o", "--output" };
 
-    /// <summary>Aliases for the report format argument.</summary>
+    /// <summary>Alias para el argumento de formato de reporte.</summary>
     public static readonly string[] FormatAliases = { "-f", "--format" };
 }

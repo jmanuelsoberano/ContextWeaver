@@ -7,15 +7,16 @@ namespace ContextWeaver.Tests.Helpers;
 /// </summary>
 public sealed class TempFile : IDisposable
 {
-    /// <summary>Gets the full path to the temporary file.</summary>
+    /// <summary>Gets obtiene la ruta completa al archivo temporal.</summary>
     public string Path { get; }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="TempFile"/> class.
-    ///     Creates a temp file with the specified extension and content.
+    /// Initializes a new instance of the <see cref="TempFile"/> class.
+    ///     Inicializa una nueva instancia de la clase <see cref="TempFile"/>.
+    ///     Crea un archivo temporal con la extensión y contenido especificados.
     /// </summary>
-    /// <param name="extension">The file extension (e.g., ".txt").</param>
-    /// <param name="content">The initial content of the file.</param>
+    /// <param name="extension">La extensión del archivo (e.g., ".txt").</param>
+    /// <param name="content">El contenido inicial del archivo.</param>
     public TempFile(string extension, string content = "")
     {
         var tempPath = System.IO.Path.GetTempFileName();

@@ -3,8 +3,8 @@ using ContextWeaver.Core;
 namespace ContextWeaver.Reporters;
 
 /// <summary>
-///     Shared context passed to every <see cref="IReportSection"/>.
-///     Built once by the orchestrator, avoiding redundant computation across sections.
+///     Contexto compartido pasado a cada <see cref="IReportSection"/>.
+///     Construido una vez por el orquestador, evitando cálculos redundantes entre secciones.
 /// </summary>
 public record ReportContext(
     DirectoryInfo Directory,

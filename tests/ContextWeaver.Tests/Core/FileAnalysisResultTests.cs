@@ -4,14 +4,14 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Core;
 
-/// <summary>Tests for <see cref="FileAnalysisResult"/>.</summary>
+/// <summary>Pruebas para <see cref="FileAnalysisResult"/>.</summary>
 public class FileAnalysisResultTests
 {
     // ─── ModuleName (computed property) ───
 
-    /// <summary>Verifies that files in subdirectories are assigned to the correct module.</summary>
-    /// <param name="path">The relative path of the file.</param>
-    /// <param name="expectedModule">The expected module name.</param>
+    /// <summary>Verifica que los archivos en subdirectorios se asignen al módulo correcto.</summary>
+    /// <param name="path">La ruta relativa del archivo.</param>
+    /// <param name="expectedModule">El nombre del módulo esperado.</param>
     [Theory]
     [InlineData("Core/ClassA.cs", "Core")]
     [InlineData("Services/SettingsProvider.cs", "Services")]
@@ -22,7 +22,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be(expectedModule);
     }
 
-    /// <summary>Verifies that files at the root return "Root" as the module name.</summary>
+    /// <summary>Verifica que los archivos en la raíz retornen "Root" como nombre del módulo.</summary>
     [Fact]
     public void ModuleName_FileAtRoot_ReturnsRoot()
     {
@@ -30,7 +30,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Root");
     }
 
-    /// <summary>Verifies that an empty path returns "Root".</summary>
+    /// <summary>Verifica que una ruta vacía retorne "Root".</summary>
     [Fact]
     public void ModuleName_EmptyPath_ReturnsRoot()
     {
@@ -38,7 +38,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Root");
     }
 
-    /// <summary>Verifies that Windows-style paths are handled correctly.</summary>
+    /// <summary>Verifica que las rutas estilo Windows se manejen correctamente.</summary>
     [Fact]
     public void ModuleName_WindowsStylePath_ReturnsFirstSegment()
     {
@@ -46,7 +46,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Core");
     }
 
-    /// <summary>Verifies that deeply nested files return the top-level folder as the module.</summary>
+    /// <summary>Verifica que los archivos profundamente anidados retornen la carpeta de nivel superior como módulo.</summary>
     [Fact]
     public void ModuleName_DeeplyNestedPath_ReturnsTopLevel()
     {
@@ -56,7 +56,7 @@ public class FileAnalysisResultTests
 
     // ─── Default Values ───
 
-    /// <summary>Verifies that a new instance has the expected default values.</summary>
+    /// <summary>Verifica que una nueva instancia tenga los valores predeterminados esperados.</summary>
     [Fact]
     public void DefaultValues_NewInstance_HasExpectedDefaults()
     {
@@ -76,7 +76,7 @@ public class FileAnalysisResultTests
 
     // ─── Metrics (typed) ───
 
-    /// <summary>Verifies that metrics are initialized to null/empty by default.</summary>
+    /// <summary>Verifica que las métricas se inicialicen como nulas/vacías por defecto.</summary>
     [Fact]
     public void Metrics_DefaultInstance_HasNullNumericMetrics()
     {
@@ -88,7 +88,7 @@ public class FileAnalysisResultTests
         result.Metrics.PublicApiSignatures.Should().BeEmpty();
     }
 
-    /// <summary>Verifies that typed metrics can be set and retrieved correctly.</summary>
+    /// <summary>Verifica que las métricas tipadas puedan establecerse y recuperarse correctamente.</summary>
     [Fact]
     public void Metrics_CanSetAndRetrieveTypedValues()
     {

@@ -17,7 +17,8 @@ public class CodeAnalyzerService
     private readonly SettingsProvider _settingsProvider;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="CodeAnalyzerService"/> class.
+    /// Initializes a new instance of the <see cref="CodeAnalyzerService"/> class.
+    ///     Inicializa una nueva instancia de la clase <see cref="CodeAnalyzerService"/>.
     /// </summary>
     /// <param name="settingsProvider">Proveedor de configuración.</param>
     /// <param name="analyzers">Colección de analizadores de archivos disponibles.</param>
