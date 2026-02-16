@@ -6,29 +6,20 @@ namespace ContextWeaver.Tests.Utilities;
 
 public class MarkdownHelperTests
 {
-    [Fact]
-    public void CreateAnchor_SimpleText_ReturnsLowercaseKebab()
+    // ─── Valid Inputs (consolidated into Theory) ───
+
+    [Theory]
+    [InlineData("Hello World", "hello-world")]
+    [InlineData("Core -- Module", "core-module")]
+    [InlineData("Step 1 - Analysis", "step-1-analysis")]
+    [InlineData("  Hello  ", "hello")]
+    [InlineData("C# File Analysis!", "c-file-analysis")]
+    public void CreateAnchor_ValidInput_ReturnsExpectedAnchor(string input, string expected)
     {
-        MarkdownHelper.CreateAnchor("Hello World").Should().Be("hello-world");
+        MarkdownHelper.CreateAnchor(input).Should().Be(expected);
     }
 
-    [Fact]
-    public void CreateAnchor_SpecialCharacters_RemovesNonAlphanumeric()
-    {
-        MarkdownHelper.CreateAnchor("C# File Analysis!").Should().Be("c-file-analysis");
-    }
-
-    [Fact]
-    public void CreateAnchor_MultipleDashes_CollapsesToSingle()
-    {
-        MarkdownHelper.CreateAnchor("Core -- Module").Should().Be("core-module");
-    }
-
-    [Fact]
-    public void CreateAnchor_LeadingTrailingSpaces_Trims()
-    {
-        MarkdownHelper.CreateAnchor("  Hello  ").Should().Be("hello");
-    }
+    // ─── Null / Whitespace ───
 
     [Theory]
     [InlineData(null)]
@@ -39,16 +30,12 @@ public class MarkdownHelperTests
         MarkdownHelper.CreateAnchor(input!).Should().BeEmpty();
     }
 
-    [Fact]
-    public void CreateAnchor_WithNumbers_PreservesNumbers()
-    {
-        MarkdownHelper.CreateAnchor("Step 1 - Analysis").Should().Be("step-1-analysis");
-    }
+    // ─── Edge Cases ───
 
     [Fact]
     public void CreateAnchor_Accents_RemovesAccentedChars()
     {
-        // Accented chars are removed by the regex [^a-z0-9\s-]
+        // Accented chars are stripped by regex [^a-z0-9\s-], leaving only ASCII
         MarkdownHelper.CreateAnchor("Módulo Análisis").Should().Be("mdulo-anlisis");
     }
 
@@ -61,6 +48,7 @@ public class MarkdownHelperTests
     [Fact]
     public void CreateAnchor_PathLikeInput_RemovesSlashes()
     {
+        // Slashes are non-alphanumeric, removed by regex
         MarkdownHelper.CreateAnchor("Core/FileAnalysis").Should().Be("corefileanalysis");
     }
 }

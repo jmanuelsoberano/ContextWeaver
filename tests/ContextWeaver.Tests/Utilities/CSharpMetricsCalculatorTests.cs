@@ -123,7 +123,7 @@ class C {
     }
 
     [Fact]
-    public void CyclomaticComplexity_LogicalAnd_Returns2()
+    public void CyclomaticComplexity_LogicalAnd_Returns3()
     {
         var code = @"
 class C {
@@ -136,7 +136,7 @@ class C {
     }
 
     [Fact]
-    public void CyclomaticComplexity_LogicalOr_Returns2()
+    public void CyclomaticComplexity_LogicalOr_Returns3()
     {
         var code = @"
 class C {

@@ -1,4 +1,5 @@
 using ContextWeaver.Analyzers;
+using ContextWeaver.Tests.Helpers;
 using FluentAssertions;
 using Xunit;
 
@@ -8,7 +9,7 @@ public class GenericFileAnalyzerTests
 {
     private readonly GenericFileAnalyzer _analyzer = new();
 
-    // ─── CanAnalyze ───
+    // ─── CanAnalyze: Supported Extensions ───
 
     [Theory]
     [InlineData(".ts")]
@@ -26,6 +27,8 @@ public class GenericFileAnalyzerTests
         _analyzer.CanAnalyze(file).Should().BeTrue();
     }
 
+    // ─── CanAnalyze: Case Insensitive ───
+
     [Theory]
     [InlineData(".TS")]
     [InlineData(".Js")]
@@ -36,8 +39,10 @@ public class GenericFileAnalyzerTests
         _analyzer.CanAnalyze(file).Should().BeTrue();
     }
 
+    // ─── CanAnalyze: Unsupported / Delegated ───
+
     [Theory]
-    [InlineData(".cs")]
+    [InlineData(".cs")]   // Handled by CSharpFileAnalyzer
     [InlineData(".py")]
     [InlineData(".java")]
     [InlineData(".exe")]
@@ -55,79 +60,62 @@ public class GenericFileAnalyzerTests
     public async Task InitializeAsync_CompletesImmediately()
     {
         var task = _analyzer.InitializeAsync(Enumerable.Empty<FileInfo>());
-        await task; // Should not throw
+        await task;
         task.IsCompletedSuccessfully.Should().BeTrue();
     }
 
-    // ─── AnalyzeAsync ───
+    // ─── AnalyzeAsync: Language Detection ───
 
-    [Fact]
-    public async Task AnalyzeAsync_JsonFile_ReturnsCorrectLanguageAndContent()
+    [Theory]
+    [InlineData(".json", "{ \"key\": \"value\" }", "json")]
+    [InlineData(".ts", "const x: number = 42;", "typescript")]
+    [InlineData(".html", "<h1>Hello</h1>", "html")]
+    [InlineData(".md", "# Title", "markdown")]
+    [InlineData(".csproj", "<Project></Project>", "xml")]
+    public async Task AnalyzeAsync_ByExtension_ReturnsCorrectLanguage(
+        string extension, string content, string expectedLanguage)
     {
-        // Create a temp file
-        var tempFile = Path.GetTempFileName();
-        var jsonFile = Path.ChangeExtension(tempFile, ".json");
-        File.Move(tempFile, jsonFile);
+        using var tmp = new TempFile(extension, content);
 
-        try
-        {
-            var content = "{ \"key\": \"value\" }";
-            await File.WriteAllTextAsync(jsonFile, content);
+        var result = await _analyzer.AnalyzeAsync(new FileInfo(tmp.Path));
 
-            var result = await _analyzer.AnalyzeAsync(new FileInfo(jsonFile));
-
-            result.Should().NotBeNull();
-            result.Language.Should().Be("json");
-            result.CodeContent.Should().Be(content);
-            result.LinesOfCode.Should().Be(1);
-        }
-        finally
-        {
-            File.Delete(jsonFile);
-        }
+        result.Should().NotBeNull();
+        result.Language.Should().Be(expectedLanguage);
+        result.CodeContent.Should().Be(content);
     }
+
+    // ─── AnalyzeAsync: Line Counting ───
 
     [Fact]
     public async Task AnalyzeAsync_MultilineFile_CountsLinesCorrectly()
     {
-        var tempFile = Path.GetTempFileName();
-        var mdFile = Path.ChangeExtension(tempFile, ".md");
-        File.Move(tempFile, mdFile);
+        // 5 lines of text + trailing newline = Split('\n') produces 6 parts
+        var content = "# Title\n\nParagraph 1\n\nParagraph 2\n";
+        using var tmp = new TempFile(".md", content);
 
-        try
-        {
-            var content = "# Title\n\nParagraph 1\n\nParagraph 2\n";
-            await File.WriteAllTextAsync(mdFile, content);
+        var result = await _analyzer.AnalyzeAsync(new FileInfo(tmp.Path));
 
-            var result = await _analyzer.AnalyzeAsync(new FileInfo(mdFile));
-
-            result.Language.Should().Be("markdown");
-            result.LinesOfCode.Should().Be(6); // 5 lines + trailing newline = 6 parts on split
-        }
-        finally
-        {
-            File.Delete(mdFile);
-        }
+        result.LinesOfCode.Should().Be(6);
     }
 
     [Fact]
-    public async Task AnalyzeAsync_TypeScriptFile_ReturnsTypescriptLanguage()
+    public async Task AnalyzeAsync_SingleLineFile_Returns1()
     {
-        var tempFile = Path.GetTempFileName();
-        var tsFile = Path.ChangeExtension(tempFile, ".ts");
-        File.Move(tempFile, tsFile);
+        using var tmp = new TempFile(".json", "{}");
 
-        try
-        {
-            await File.WriteAllTextAsync(tsFile, "const x: number = 42;");
+        var result = await _analyzer.AnalyzeAsync(new FileInfo(tmp.Path));
 
-            var result = await _analyzer.AnalyzeAsync(new FileInfo(tsFile));
+        result.LinesOfCode.Should().Be(1);
+    }
 
-            result.Language.Should().Be("typescript");
-        }
-        finally
-        {
-            File.Delete(tsFile);
-        }
+    [Fact]
+    public async Task AnalyzeAsync_EmptyFile_Returns1()
+    {
+        // Empty string split by '\n' produces 1 empty part
+        using var tmp = new TempFile(".json", "");
+
+        var result = await _analyzer.AnalyzeAsync(new FileInfo(tmp.Path));
+
+        result.LinesOfCode.Should().Be(1);
     }
 }

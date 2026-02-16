@@ -190,4 +190,78 @@ public class InstabilityCalculatorTests
         // I = 1/(0+1) = 1.0
         metrics["Services"].Instability.Should().Be(1.0);
     }
+
+    // ─── Negative / Edge Cases ───
+
+    [Fact]
+    public void Calculate_NullClassDependencies_DoesNotThrow()
+    {
+        var results = new List<FileAnalysisResult>
+        {
+            new()
+            {
+                RelativePath = "Core/ClassA.cs",
+                DefinedTypes = new List<string> { "ClassA" },
+                ClassDependencies = null!
+            }
+        };
+
+        // Should not throw; null dependencies are skipped
+        var act = () => _calculator.Calculate(results);
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void Calculate_NullDefinedTypes_DoesNotThrow()
+    {
+        var results = new List<FileAnalysisResult>
+        {
+            new()
+            {
+                RelativePath = "Core/ClassA.cs",
+                DefinedTypes = null!,
+                ClassDependencies = new List<string>()
+            }
+        };
+
+        var act = () => _calculator.Calculate(results);
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void Calculate_DependencyToUnknownType_IsIgnoredGracefully()
+    {
+        // ClassA depends on "Phantom" which is not defined in any file
+        var results = new List<FileAnalysisResult>
+        {
+            CreateResult("Core/ClassA.cs",
+                definedTypes: new List<string> { "ClassA" },
+                classDependencies: new List<string> { "ClassA --> Phantom" })
+        };
+
+        var metrics = _calculator.Calculate(results);
+
+        // "Phantom" doesn't belong to any module, so no efferent counted
+        metrics["Core"].Ce.Should().Be(0);
+        metrics["Core"].Ca.Should().Be(0);
+    }
+
+    [Fact]
+    public void Calculate_MalformedDependencyString_IsIgnoredGracefully()
+    {
+        // A dependency string that can't be parsed by DependencyRelation.Parse
+        var results = new List<FileAnalysisResult>
+        {
+            CreateResult("Core/ClassA.cs",
+                definedTypes: new List<string> { "ClassA" },
+                classDependencies: new List<string> { "not a valid dependency", "", "   " })
+        };
+
+        var metrics = _calculator.Calculate(results);
+
+        // Should still produce a result for the module, just with 0 dependencies
+        metrics.Should().ContainKey("Core");
+        metrics["Core"].Ce.Should().Be(0);
+    }
 }
+
