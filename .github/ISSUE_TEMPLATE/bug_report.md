@@ -32,3 +32,7 @@ Descripción clara y concisa del problema.
 ## Contexto adicional
 
 Logs, capturas de pantalla, o archivos de configuración relevantes.
+
+## Issues relacionados
+
+Si este bug está relacionado con otro issue abierto o cerrado, menciónalo aquí (ej. #123).

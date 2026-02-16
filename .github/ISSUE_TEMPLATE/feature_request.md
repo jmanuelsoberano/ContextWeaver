@@ -21,3 +21,7 @@ Describe cómo te gustaría que funcionara.
 ## Contexto adicional
 
 Mockups, ejemplos de otras herramientas, o cualquier referencia útil.
+
+## Issues relacionados
+
+Si esta feature está relacionada con otro issue (bug o feature), menciónalo aquí.
