@@ -99,14 +99,27 @@ Este proyecto aplica principios fundacionales de ingeniería de software:
 
 ## ¿Dónde va mi código?
 
+Esta guía te ayudará a ubicar tus cambios en el lugar correcto de la arquitectura.
+
 | Quiero... | Proyecto | Carpeta |
 |:---|:---|:---|
-| Agregar un nuevo analizador (ej. TypeScript) | `ContextWeaver.Engine` | `Analyzers/` |
+| Agregar un nuevo analizador de archivos (ej. TypeScript) | `ContextWeaver.Engine` | `Analyzers/` |
 | Agregar un nuevo formato de reporte (ej. XML) | `ContextWeaver.Engine` | `Reporters/` |
-| Agregar un nuevo modelo de datos | `ContextWeaver.Core` | `Models/` |
-| Agregar lógica de prueba unitaria | `ContextWeaver.Engine.Tests` o `Core.Tests` | Según corresponda |
-| Agregar fixtures de prueba | `ContextWeaver.Tests.Shared` | `Fixtures/` |
+| Agregar una nueva sección al reporte Markdown | `ContextWeaver.Engine` | `Reporters/Sections/` |
+| Agregar una nueva utilidad de cálculo (ej. métricas) | `ContextWeaver.Engine` | `Utilities/` |
+| Agregar un nuevo modelo de datos o DTO | `ContextWeaver.Core` | `Models/` |
+| Agregar una nueva abstracción o interfaz | `ContextWeaver.Core` | `Abstractions/` |
+| Modificar argumentos CLI o inyección de dependencias | `ContextWeaver.Cli` | `Program.cs` |
+| Agregar configuración (ej. opciones nuevas en JSON) | `ContextWeaver.Core` | `Config/` |
+| Agregar tests unitarios para Core | `ContextWeaver.Core.Tests` | `Models/` o `Abstractions/` |
+| Agregar tests unitarios para Engine | `ContextWeaver.Engine.Tests` | `Analyzers/` o `Reporters/` |
+| Agregar tests de sistema completo (E2E) | `ContextWeaver.E2E.Tests` | `UseCases/` |
+| Agregar fixtures o utilidades de prueba | `ContextWeaver.Tests.Shared` | `Fixtures/` o `Helpers/` |
 
-## Reportar bugs y Proponer Features
+## Reportar bugs
 
-Usa las plantillas de Issue en `.github/ISSUE_TEMPLATE/` para reportar problemas o sugerir mejoras.
+Si encuentras un error, por favor usa la plantilla de [Bug Report](.github/ISSUE_TEMPLATE/bug_report.md) para reportarlo. Incluye pasos para reproducirlo y el entorno donde ocurre.
+
+## Proponer features
+
+Si tienes una idea para mejorar ContextWeaver, usa la plantilla de [Feature Request](.github/ISSUE_TEMPLATE/feature_request.md) para proponerla. Descríbela con detalle y explica el valor que aporta.
