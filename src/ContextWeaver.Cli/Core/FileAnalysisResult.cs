@@ -1,39 +1,32 @@
 ﻿namespace ContextWeaver.Core;
 
 /// <summary>
-///     BUENA PRÁCTICA: Data Transfer Object (DTO).
-///     Esta clase es un POCO (Plain Old CLR Object) cuya única responsabilidad es transportar datos
-///     entre las capas de la aplicación (desde los analizadores hasta los generadores de reportes).
-///     PRINCIPIO DE DISEÑO: ALTA COHESIÓN.
-///     La clase solo contiene datos relacionados con el resultado de un análisis de archivo.
-///     No tiene lógica de negocio, lo que la hace cohesiva y fácil de entender.
+///     Data Transfer Object (DTO) que transporta los resultados de un análisis de archivo
+///     entre las capas de la aplicación (analizadores → generadores de reportes).
+///     Propiedades son <c>init</c>-only para prevenir mutación accidental post-construcción.
 /// </summary>
 public class FileAnalysisResult
 {
     public string RelativePath { get; set; } = string.Empty;
-    public int LinesOfCode { get; set; }
-    public string CodeContent { get; set; } = string.Empty;
-    public string Language { get; set; } = "plaintext";
-    public FileMetrics Metrics { get; set; } = new();
+    public int LinesOfCode { get; init; }
+    public string CodeContent { get; init; } = string.Empty;
+    public string Language { get; init; } = "plaintext";
+    public FileMetrics Metrics { get; init; } = new();
 
-    // Nueva propiedad para los Usings, para tipado fuerte y fácil acceso.
-    public List<string> Usings { get; set; } = new();
+    public List<string> Usings { get; init; } = new();
+    public List<string> ClassDependencies { get; init; } = new();
 
-    // ✅ NUEVA PROPIEDAD: Para almacenar las dependencias de clase.
-    // Guardaremos las relaciones en formato "ClaseOrigen -> ClaseDestino".
-    public List<string> ClassDependencies { get; set; } = new();
-
-    // ✅ NUEVA PROPIEDAD: Dependencias entrantes (Quién me usa).
-    // Se llena en el post-procesamiento.
+    /// <summary>
+    ///     Dependencias entrantes (quién me usa).
+    ///     Permanece como <c>set</c> porque se llena en post-procesamiento
+    ///     después de construir el objeto (en <c>CodeAnalyzerService</c>).
+    /// </summary>
     public List<string> IncomingDependencies { get; set; } = new();
 
-    // ✅ NUEVA PROPIEDAD: Tipos definidos en este archivo.
-    public List<string> DefinedTypes { get; set; } = new();
+    public List<string> DefinedTypes { get; init; } = new();
+    public Dictionary<string, string> DefinedTypeKinds { get; init; } = new();
 
-    // ✅ NUEVA PROPIEDAD: Tipo de dato (class, interface, struct, record, enum).
-    // Key: Nombre del tipo, Value: Kind.
-    public Dictionary<string, string> DefinedTypeKinds { get; set; } = new();
-    // ✅ NUEVA PROPIEDAD COMPUTADA: Centraliza la lógica de nombre de módulo.
+    /// <summary>Centraliza la lógica de nombre de módulo.</summary>
     public string ModuleName
     {
         get
@@ -44,9 +37,7 @@ public class FileAnalysisResult
         }
     }
 
-
-    // ✅ NUEVA PROPIEDAD: Semántica enriquecida para Taxonomía (Modificadores, Interfaces, Atributos).
-    public Dictionary<string, TypeSemantics> DefinedTypeSemantics { get; set; } = new();
+    public Dictionary<string, TypeSemantics> DefinedTypeSemantics { get; init; } = new();
 }
 
 public record TypeSemantics(
