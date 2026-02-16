@@ -23,8 +23,10 @@ public class MarkdownReportGenerator : IReportGenerator
         new FileContentSection()
     };
 
+    /// <inheritdoc />
     public string Format => "markdown";
 
+    /// <inheritdoc />
     public string Generate(DirectoryInfo directory, List<FileAnalysisResult> results,
         Dictionary<string, (int Ca, int Ce, double Instability)> instabilityMetrics)
     {

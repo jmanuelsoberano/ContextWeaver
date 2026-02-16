@@ -4,8 +4,10 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Core;
 
+/// <summary>Tests for <see cref="DefaultSettings"/>.</summary>
 public class DefaultSettingsTests
 {
+    /// <summary>Verifies that the default settings are not null.</summary>
     [Fact]
     public void Get_ReturnsNonNullSettings()
     {
@@ -13,6 +15,7 @@ public class DefaultSettingsTests
         settings.Should().NotBeNull();
     }
 
+    /// <summary>Verifies that .cs is included in the default extensions.</summary>
     [Fact]
     public void Get_IncludedExtensions_ContainsCSharp()
     {
@@ -20,6 +23,7 @@ public class DefaultSettingsTests
         settings.IncludedExtensions.Should().Contain(".cs");
     }
 
+    /// <summary>Verifies that all expected extensions are included.</summary>
     [Fact]
     public void Get_IncludedExtensions_ContainsAllExpected()
     {
@@ -30,6 +34,7 @@ public class DefaultSettingsTests
         });
     }
 
+    /// <summary>Verifies that bin and obj are excluded by default.</summary>
     [Fact]
     public void Get_ExcludePatterns_ContainsBinAndObj()
     {
@@ -38,6 +43,7 @@ public class DefaultSettingsTests
         settings.ExcludePatterns.Should().Contain("obj");
     }
 
+    /// <summary>Verifies that node_modules is excluded by default.</summary>
     [Fact]
     public void Get_ExcludePatterns_ContainsNodeModules()
     {
@@ -45,6 +51,7 @@ public class DefaultSettingsTests
         settings.ExcludePatterns.Should().Contain("node_modules");
     }
 
+    /// <summary>Verifies that a new instance is returned each time.</summary>
     [Fact]
     public void Get_ReturnsFreshInstance_EachCall()
     {

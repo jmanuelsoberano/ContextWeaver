@@ -18,16 +18,19 @@ public class GenericFileAnalyzer : IFileAnalyzer
         { ".md", "markdown" }, { ".csproj", "xml" }, { ".sln", "plaintext" }
     };
 
+    /// <inheritdoc />
     public bool CanAnalyze(FileInfo file)
     {
         return _languageMap.ContainsKey(file.Extension.ToLowerInvariant());
     }
 
+    /// <inheritdoc />
     public Task InitializeAsync(IEnumerable<FileInfo> files)
     {
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
         var content = await File.ReadAllTextAsync(file.FullName);

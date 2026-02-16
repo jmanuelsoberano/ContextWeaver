@@ -12,6 +12,9 @@ internal static class DiagramHelper
     ///     Returns the PlantUML keyword and stereotype for a type name,
     ///     using the Roslyn-derived <paramref name="typeKindMap"/> for accuracy.
     /// </summary>
+    /// <param name="typeName">Name of the type to check.</param>
+    /// <param name="typeKindMap">Dictionary mapping type names to their kinds (class, interface, etc.).</param>
+    /// <returns>A tuple containing the PlantUML keyword and stereotype.</returns>
     public static (string Keyword, string Stereotype) GetPlantUMLMeta(
         string typeName, Dictionary<string, string> typeKindMap)
     {
@@ -37,6 +40,8 @@ internal static class DiagramHelper
     /// <summary>
     ///     Returns true if the given word is a C# type keyword.
     /// </summary>
+    /// <param name="keyword">The word to check.</param>
+    /// <returns>True if the word is a type keyword; otherwise, false.</returns>
     public static bool IsTypeKeyword(string? keyword)
     {
         return keyword is "class" or "interface" or "struct" or "record" or "enum";

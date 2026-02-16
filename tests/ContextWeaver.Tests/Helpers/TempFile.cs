@@ -7,8 +7,15 @@ namespace ContextWeaver.Tests.Helpers;
 /// </summary>
 public sealed class TempFile : IDisposable
 {
+    /// <summary>Gets the full path to the temporary file.</summary>
     public string Path { get; }
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TempFile"/> class.
+    ///     Creates a temp file with the specified extension and content.
+    /// </summary>
+    /// <param name="extension">The file extension (e.g., ".txt").</param>
+    /// <param name="content">The initial content of the file.</param>
     public TempFile(string extension, string content = "")
     {
         var tempPath = System.IO.Path.GetTempFileName();
@@ -21,6 +28,7 @@ public sealed class TempFile : IDisposable
             File.WriteAllText(Path, content);
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         if (File.Exists(Path))

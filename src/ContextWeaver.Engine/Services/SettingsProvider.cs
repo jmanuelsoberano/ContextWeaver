@@ -5,16 +5,29 @@ using Microsoft.Extensions.Logging;
 
 namespace ContextWeaver.Services;
 
+/// <summary>
+///     Gestiona la carga y validación de la configuración de análisis.
+///     Busca el archivo .contextweaver.json o crea uno por defecto si no existe.
+/// </summary>
 public class SettingsProvider
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
     private readonly ILogger<SettingsProvider> _logger;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="SettingsProvider"/> class.
+    /// </summary>
+    /// <param name="logger">Logger para diagnósticos de configuración.</param>
     public SettingsProvider(ILogger<SettingsProvider> logger)
     {
         _logger = logger;
     }
 
+    /// <summary>
+    ///     Carga la configuración para un directorio específico.
+    /// </summary>
+    /// <param name="directory">Directorio raíz del análisis.</param>
+    /// <returns>La configuración cargada o los valores por defecto si falla la carga.</returns>
     public AnalysisSettings LoadSettingsFor(DirectoryInfo directory)
     {
         var localConfigPath = Path.Combine(directory.FullName, ".contextweaver.json");

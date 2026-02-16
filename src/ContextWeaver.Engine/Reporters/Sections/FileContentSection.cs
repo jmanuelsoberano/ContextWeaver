@@ -11,6 +11,7 @@ public class FileContentSection : IReportSection
 {
     private static readonly char[] Separators = { ' ', ':' };
 
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

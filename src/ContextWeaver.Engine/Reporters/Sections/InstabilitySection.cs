@@ -7,6 +7,7 @@ namespace ContextWeaver.Reporters.Sections;
 /// </summary>
 public class InstabilitySection : IReportSection
 {
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

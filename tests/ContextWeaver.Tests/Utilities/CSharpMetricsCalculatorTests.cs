@@ -5,6 +5,9 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Utilities;
 
+/// <summary>
+///     Tests for <see cref="CSharpMetricsCalculator"/>.
+/// </summary>
 public class CSharpMetricsCalculatorTests
 {
     private static Microsoft.CodeAnalysis.SyntaxNode ParseRoot(string code)
@@ -12,6 +15,7 @@ public class CSharpMetricsCalculatorTests
 
     // ─── Cyclomatic Complexity ───
 
+    /// <summary>Verifies that an empty method has a complexity of 1.</summary>
     [Fact]
     public void CyclomaticComplexity_EmptyMethod_Returns1()
     {
@@ -20,6 +24,7 @@ public class CSharpMetricsCalculatorTests
         result.Should().Be(1);
     }
 
+    /// <summary>Verifies that a null root returns the default complexity of 1.</summary>
     [Fact]
     public void CyclomaticComplexity_NullRoot_Returns1()
     {
@@ -27,6 +32,7 @@ public class CSharpMetricsCalculatorTests
         result.Should().Be(1);
     }
 
+    /// <summary>Verifies that a single if statement increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_SingleIf_Returns2()
     {
@@ -40,6 +46,7 @@ class C {
         result.Should().Be(2);
     }
 
+    /// <summary>Verifies that an if-else if structure increases complexity correctly.</summary>
     [Fact]
     public void CyclomaticComplexity_IfElseIf_Returns3()
     {
@@ -55,6 +62,7 @@ class C {
         result.Should().Be(3); // base(1) + if(1) + else-if(1)
     }
 
+    /// <summary>Verifies that a for loop increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_ForLoop_Returns2()
     {
@@ -68,6 +76,7 @@ class C {
         result.Should().Be(2);
     }
 
+    /// <summary>Verifies that a foreach loop increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_ForEach_Returns2()
     {
@@ -81,6 +90,7 @@ class C {
         result.Should().Be(2);
     }
 
+    /// <summary>Verifies that a while loop increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_While_Returns2()
     {
@@ -94,6 +104,7 @@ class C {
         result.Should().Be(2);
     }
 
+    /// <summary>Verifies that a switch statement with cases increases complexity.</summary>
     [Fact]
     public void CyclomaticComplexity_SwitchWithThreeCases_Returns4()
     {
@@ -111,6 +122,7 @@ class C {
         result.Should().Be(4); // base(1) + 3 cases
     }
 
+    /// <summary>Verifies that the ternary operator increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_TernaryOperator_Returns2()
     {
@@ -122,6 +134,7 @@ class C {
         result.Should().Be(2);
     }
 
+    /// <summary>Verifies that the logical AND operator increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_LogicalAnd_Returns3()
     {
@@ -135,6 +148,7 @@ class C {
         result.Should().Be(3); // base(1) + if(1) + &&(1)
     }
 
+    /// <summary>Verifies that the logical OR operator increases complexity by 1.</summary>
     [Fact]
     public void CyclomaticComplexity_LogicalOr_Returns3()
     {
@@ -148,6 +162,7 @@ class C {
         result.Should().Be(3); // base(1) + if(1) + ||(1)
     }
 
+    /// <summary>Verifies that a complex method sums up various complexity increments correctly.</summary>
     [Fact]
     public void CyclomaticComplexity_ComplexMethod_CountsAllBranches()
     {
@@ -169,6 +184,7 @@ class C {
 
     // ─── Max Nesting Depth ───
 
+    /// <summary>Verifies that a flat method has 0 depth.</summary>
     [Fact]
     public void MaxNestingDepth_FlatMethod_Returns0()
     {
@@ -182,6 +198,7 @@ class C {
         result.Should().Be(0);
     }
 
+    /// <summary>Verifies that a single if increases depth to 1.</summary>
     [Fact]
     public void MaxNestingDepth_SingleIf_Returns1()
     {
@@ -197,6 +214,7 @@ class C {
         result.Should().Be(1);
     }
 
+    /// <summary>Verifies that nested structures increase depth correctly.</summary>
     [Fact]
     public void MaxNestingDepth_NestedIfInFor_Returns2()
     {
@@ -214,6 +232,7 @@ class C {
         result.Should().Be(2);
     }
 
+    /// <summary>Verifies that deeply nested structures are calculated correctly.</summary>
     [Fact]
     public void MaxNestingDepth_DeeplyNested_Returns4()
     {

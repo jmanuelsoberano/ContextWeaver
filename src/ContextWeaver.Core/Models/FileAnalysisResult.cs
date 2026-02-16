@@ -7,26 +7,40 @@ namespace ContextWeaver.Core;
 /// </summary>
 public class FileAnalysisResult
 {
+    /// <summary>Gets or sets the relative path of the file from the root directory.</summary>
     public string RelativePath { get; set; } = string.Empty;
+
+    /// <summary>Gets the total number of lines in the file.</summary>
     public int LinesOfCode { get; init; }
+
+    /// <summary>Gets the full content of the file.</summary>
     public string CodeContent { get; init; } = string.Empty;
+
+    /// <summary>Gets the detected language identifier (e.g., "csharp", "json").</summary>
     public string Language { get; init; } = "plaintext";
+
+    /// <summary>Gets the specific metrics calculated for this file.</summary>
     public FileMetrics Metrics { get; init; } = new();
 
+    /// <summary>Gets the list of namespaces imported via 'using' directives.</summary>
     public List<string> Usings { get; init; } = new();
+
+    /// <summary>Gets the list of outgoing dependencies (e.g., "ThisClass --> OtherClass").</summary>
     public List<string> ClassDependencies { get; init; } = new();
 
     /// <summary>
-    ///     Dependencias entrantes (quién me usa).
-    ///     Permanece como <c>set</c> porque se llena en post-procesamiento
-    ///     después de construir el objeto (en <c>CodeAnalyzerService</c>).
+    ///     Gets or sets the list of incoming dependencies (files that depend on this one).
+    ///     Permanece como <c>set</c> porque se llena en post-procesamiento.
     /// </summary>
     public List<string> IncomingDependencies { get; set; } = new();
 
+    /// <summary>Gets the list of type names defined in this file.</summary>
     public List<string> DefinedTypes { get; init; } = new();
+
+    /// <summary>Gets a dictionary mapping type names to their kind (class, interface, etc.).</summary>
     public Dictionary<string, string> DefinedTypeKinds { get; init; } = new();
 
-    /// <summary>Centraliza la lógica de nombre de módulo.</summary>
+    /// <summary>Gets the module name derived from the file path.</summary>
     public string ModuleName
     {
         get
@@ -38,9 +52,16 @@ public class FileAnalysisResult
         }
     }
 
+    /// <summary>Gets a dictionary mapping type names to their semantic details (modifiers, interfaces).</summary>
     public Dictionary<string, TypeSemantics> DefinedTypeSemantics { get; init; } = new();
 }
 
+/// <summary>
+///     Encapsulates semantic details about a defined type.
+/// </summary>
+/// <param name="Modifiers">List of access modifiers (public, static, etc.).</param>
+/// <param name="Interfaces">List of implemented interfaces or base classes.</param>
+/// <param name="Attributes">List of applied attributes.</param>
 public record TypeSemantics(
     List<string> Modifiers,
     List<string> Interfaces,

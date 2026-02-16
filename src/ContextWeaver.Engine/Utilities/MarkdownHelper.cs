@@ -9,6 +9,12 @@ namespace ContextWeaver.Utilities;
 /// </summary>
 public static class MarkdownHelper
 {
+    /// <summary>
+    ///     Creates a URL-friendly anchor string from the given text.
+    ///     Converts to lowercase, removes special characters, and replaces spaces with hyphens.
+    /// </summary>
+    /// <param name="text">The text to convert.</param>
+    /// <returns>A clean anchor string suitable for Markdown links.</returns>
     public static string CreateAnchor(string text)
     {
         if (string.IsNullOrWhiteSpace(text))

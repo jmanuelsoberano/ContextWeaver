@@ -4,6 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ContextWeaver.Services;
 
+/// <summary>
+///     Coordina el proceso de análisis de código.
+///     Orquesta la carga de configuración, descubrimiento de archivos, ejecución de analizadores
+///     y generación de reportes.
+/// </summary>
 public class CodeAnalyzerService
 {
     private readonly IEnumerable<IFileAnalyzer> _analyzers;
@@ -11,6 +16,13 @@ public class CodeAnalyzerService
     private readonly ILogger<CodeAnalyzerService> _logger;
     private readonly SettingsProvider _settingsProvider;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="CodeAnalyzerService"/> class.
+    /// </summary>
+    /// <param name="settingsProvider">Proveedor de configuración.</param>
+    /// <param name="analyzers">Colección de analizadores de archivos disponibles.</param>
+    /// <param name="generators">Colección de generadores de reportes disponibles.</param>
+    /// <param name="logger">Logger para diagnósticos.</param>
     public CodeAnalyzerService(
         SettingsProvider settingsProvider,
         IEnumerable<IFileAnalyzer> analyzers,
@@ -23,6 +35,13 @@ public class CodeAnalyzerService
         _logger = logger;
     }
 
+    /// <summary>
+    ///     Ejecuta el pipeline completo de análisis y generación de reportes.
+    /// </summary>
+    /// <param name="directory">Directorio raíz a analizar.</param>
+    /// <param name="outputFile">Archivo donde se escribirá el reporte.</param>
+    /// <param name="format">Formato de salida deseado (ej. "markdown").</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task AnalyzeAndGenerateReport(DirectoryInfo directory, FileInfo outputFile, string format)
     {
         var generator = _generators.FirstOrDefault(g => g.Format.Equals(format, StringComparison.OrdinalIgnoreCase));

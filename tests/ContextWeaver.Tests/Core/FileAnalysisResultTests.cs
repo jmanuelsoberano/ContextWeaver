@@ -4,10 +4,14 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Core;
 
+/// <summary>Tests for <see cref="FileAnalysisResult"/>.</summary>
 public class FileAnalysisResultTests
 {
     // ─── ModuleName (computed property) ───
 
+    /// <summary>Verifies that files in subdirectories are assigned to the correct module.</summary>
+    /// <param name="path">The relative path of the file.</param>
+    /// <param name="expectedModule">The expected module name.</param>
     [Theory]
     [InlineData("Core/ClassA.cs", "Core")]
     [InlineData("Services/SettingsProvider.cs", "Services")]
@@ -18,6 +22,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be(expectedModule);
     }
 
+    /// <summary>Verifies that files at the root return "Root" as the module name.</summary>
     [Fact]
     public void ModuleName_FileAtRoot_ReturnsRoot()
     {
@@ -25,6 +30,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Root");
     }
 
+    /// <summary>Verifies that an empty path returns "Root".</summary>
     [Fact]
     public void ModuleName_EmptyPath_ReturnsRoot()
     {
@@ -32,6 +38,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Root");
     }
 
+    /// <summary>Verifies that Windows-style paths are handled correctly.</summary>
     [Fact]
     public void ModuleName_WindowsStylePath_ReturnsFirstSegment()
     {
@@ -39,6 +46,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Core");
     }
 
+    /// <summary>Verifies that deeply nested files return the top-level folder as the module.</summary>
     [Fact]
     public void ModuleName_DeeplyNestedPath_ReturnsTopLevel()
     {
@@ -48,6 +56,7 @@ public class FileAnalysisResultTests
 
     // ─── Default Values ───
 
+    /// <summary>Verifies that a new instance has the expected default values.</summary>
     [Fact]
     public void DefaultValues_NewInstance_HasExpectedDefaults()
     {
@@ -67,6 +76,7 @@ public class FileAnalysisResultTests
 
     // ─── Metrics (typed) ───
 
+    /// <summary>Verifies that metrics are initialized to null/empty by default.</summary>
     [Fact]
     public void Metrics_DefaultInstance_HasNullNumericMetrics()
     {
@@ -78,6 +88,7 @@ public class FileAnalysisResultTests
         result.Metrics.PublicApiSignatures.Should().BeEmpty();
     }
 
+    /// <summary>Verifies that typed metrics can be set and retrieved correctly.</summary>
     [Fact]
     public void Metrics_CanSetAndRetrieveTypedValues()
     {

@@ -5,6 +5,10 @@ namespace ContextWeaver.Core;
 /// </summary>
 public static class DefaultSettings
 {
+    /// <summary>
+    ///     Obtiene la configuración predeterminada recomendada.
+    /// </summary>
+    /// <returns>Una instancia de <see cref="AnalysisSettings"/> con valores por defecto.</returns>
     public static AnalysisSettings Get()
     {
         return new AnalysisSettings

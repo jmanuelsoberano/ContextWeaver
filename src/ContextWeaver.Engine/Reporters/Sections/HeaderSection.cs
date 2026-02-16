@@ -2,8 +2,13 @@ using System.Text;
 
 namespace ContextWeaver.Reporters.Sections;
 
+/// <summary>
+///     Renders the introductory header of the report.
+///     Provides context about the file format, purpose, and usage guidelines.
+/// </summary>
 public class HeaderSection : IReportSection
 {
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         return $"""

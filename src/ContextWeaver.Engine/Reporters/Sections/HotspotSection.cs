@@ -8,6 +8,7 @@ namespace ContextWeaver.Reporters.Sections;
 /// </summary>
 public class HotspotSection : IReportSection
 {
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

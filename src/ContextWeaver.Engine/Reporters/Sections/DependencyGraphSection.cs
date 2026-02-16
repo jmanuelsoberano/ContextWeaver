@@ -8,6 +8,7 @@ namespace ContextWeaver.Reporters.Sections;
 /// </summary>
 public class DependencyGraphSection : IReportSection
 {
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var allDependencies = new HashSet<string>();

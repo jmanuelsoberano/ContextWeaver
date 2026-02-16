@@ -14,6 +14,11 @@ namespace ContextWeaver.Extensions;
 /// </summary>
 public static class HostBuilderExtensions
 {
+    /// <summary>
+    ///     Creates and configures the host builder with all required services.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>The configured <see cref="IHostBuilder"/>.</returns>
     public static IHostBuilder CreateHostBuilder(string[] args)
     {
         return Host.CreateDefaultBuilder(args)

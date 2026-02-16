@@ -4,10 +4,12 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Core;
 
+/// <summary>Tests for <see cref="DependencyRelation"/>.</summary>
 public class DependencyRelationTests
 {
     // ─── Parse: Happy Path ───
 
+    /// <summary>Verifies that a usage dependency is parsed correctly.</summary>
     [Fact]
     public void Parse_UsageDependency_ReturnsDependencyWithUsageKind()
     {
@@ -19,6 +21,7 @@ public class DependencyRelationTests
         result.Kind.Should().Be(DependencyKind.Usage);
     }
 
+    /// <summary>Verifies that an inheritance dependency is parsed correctly.</summary>
     [Fact]
     public void Parse_InheritanceDependency_ReturnsDependencyWithInheritanceKind()
     {
@@ -30,6 +33,7 @@ public class DependencyRelationTests
         result.Kind.Should().Be(DependencyKind.Inheritance);
     }
 
+    /// <summary>Verifies that whitespace is trimmed from source and target.</summary>
     [Fact]
     public void Parse_TrimsWhitespace_FromSourceAndTarget()
     {
@@ -42,6 +46,8 @@ public class DependencyRelationTests
 
     // ─── Parse: Null / Invalid Input ───
 
+    /// <summary>Verifies that null or whitespace input returns null.</summary>
+    /// <param name="input">The input string to check.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -52,6 +58,8 @@ public class DependencyRelationTests
         result.Should().BeNull();
     }
 
+    /// <summary>Verifies that malformed input returns null.</summary>
+    /// <param name="input">The input string to check.</param>
     [Theory]
     [InlineData("ClassA")]
     [InlineData("ClassA -> ClassB")]      // Wrong arrow
@@ -66,6 +74,7 @@ public class DependencyRelationTests
 
     // ─── ToMermaid ───
 
+    /// <summary>Verifies that usage dependency is serialized to Mermaid arrow.</summary>
     [Fact]
     public void ToMermaid_UsageKind_ReturnsArrow()
     {
@@ -73,6 +82,7 @@ public class DependencyRelationTests
         dep.ToMermaid().Should().Be("A --> B");
     }
 
+    /// <summary>Verifies that inheritance dependency is serialized to Mermaid dotted arrow.</summary>
     [Fact]
     public void ToMermaid_InheritanceKind_ReturnsDottedArrow()
     {
@@ -82,6 +92,7 @@ public class DependencyRelationTests
 
     // ─── ToPlantUml ───
 
+    /// <summary>Verifies that usage dependency is serialized to PlantUML arrow.</summary>
     [Fact]
     public void ToPlantUml_UsageKind_ReturnsSolidArrow()
     {
@@ -89,6 +100,7 @@ public class DependencyRelationTests
         dep.ToPlantUml().Should().Be("A --> B");
     }
 
+    /// <summary>Verifies that inheritance dependency is serialized to PlantUML dotted arrow.</summary>
     [Fact]
     public void ToPlantUml_InheritanceKind_ReturnsDottedArrow()
     {
@@ -98,6 +110,7 @@ public class DependencyRelationTests
 
     // ─── Roundtrip ───
 
+    /// <summary>Verifies roundtrip parsing and serialization for usage dependencies.</summary>
     [Fact]
     public void Roundtrip_ParseThenToMermaid_PreservesUsageDependency()
     {
@@ -107,6 +120,7 @@ public class DependencyRelationTests
         parsed!.ToMermaid().Should().Be("ClassA --> ClassB");
     }
 
+    /// <summary>Verifies roundtrip parsing and serialization for inheritance dependencies.</summary>
     [Fact]
     public void Roundtrip_ParseThenToMermaid_PreservesInheritanceDependency()
     {
@@ -118,6 +132,7 @@ public class DependencyRelationTests
 
     // ─── Record Equality ───
 
+    /// <summary>Verifies that records with same values are equal.</summary>
     [Fact]
     public void RecordEquality_SameValues_AreEqual()
     {
@@ -126,6 +141,7 @@ public class DependencyRelationTests
         a.Should().Be(b);
     }
 
+    /// <summary>Verifies that records with different values are not equal.</summary>
     [Fact]
     public void RecordEquality_DifferentKind_AreNotEqual()
     {

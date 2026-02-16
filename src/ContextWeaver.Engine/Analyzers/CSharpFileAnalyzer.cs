@@ -22,16 +22,22 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     private CSharpCompilation? _globalCompilation;
     private Dictionary<string, SyntaxTree> _syntaxTrees = new();
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="CSharpFileAnalyzer"/> class.
+    /// </summary>
+    /// <param name="logger">Logger para diagnósticos de análisis.</param>
     public CSharpFileAnalyzer(ILogger<CSharpFileAnalyzer> logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public bool CanAnalyze(FileInfo file)
     {
         return file.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <inheritdoc />
     public async Task InitializeAsync(IEnumerable<FileInfo> files)
     {
         var csFiles = files.Where(CanAnalyze).ToList();
@@ -61,10 +67,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
         }
     }
 
-    // THREAD-SAFETY: _allProjectTypes se llena exclusivamente en InitializeAsync() (secuencial)
-    // y se lee en AnalyzeAsync() (paralelo). Esto es seguro porque CodeAnalyzerService.AnalyzeAndGenerateReport()
-    // garantiza que InitializeAsync() se completa ANTES de que Parallel.ForEachAsync invoque AnalyzeAsync().
-    // Si este orden cambia, convertir a ConcurrentDictionary<string, byte> o similar.
+    /// <inheritdoc />
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
         try

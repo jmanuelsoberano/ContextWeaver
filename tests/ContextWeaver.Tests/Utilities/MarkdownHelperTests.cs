@@ -4,10 +4,14 @@ using Xunit;
 
 namespace ContextWeaver.Tests.Utilities;
 
+/// <summary>Tests for <see cref="MarkdownHelper"/>.</summary>
 public class MarkdownHelperTests
 {
     // ─── Valid Inputs (consolidated into Theory) ───
 
+    /// <summary>Verifies that valid inputs produce the expected anchor slugs.</summary>
+    /// <param name="input">The input string to convert.</param>
+    /// <param name="expected">The expected anchor slug.</param>
     [Theory]
     [InlineData("Hello World", "hello-world")]
     [InlineData("Core -- Module", "core-module")]
@@ -21,6 +25,8 @@ public class MarkdownHelperTests
 
     // ─── Null / Whitespace ───
 
+    /// <summary>Verifies that null or whitespace inputs return an empty string.</summary>
+    /// <param name="input">The input string to check.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -32,6 +38,7 @@ public class MarkdownHelperTests
 
     // ─── Edge Cases ───
 
+    /// <summary>Verifies that accented characters are removed (normalized).</summary>
     [Fact]
     public void CreateAnchor_Accents_RemovesAccentedChars()
     {
@@ -39,12 +46,14 @@ public class MarkdownHelperTests
         MarkdownHelper.CreateAnchor("Módulo Análisis").Should().Be("mdulo-anlisis");
     }
 
+    /// <summary>Verifies that strings consisting only of special characters return an empty string.</summary>
     [Fact]
     public void CreateAnchor_AllSpecialChars_ReturnsEmpty()
     {
         MarkdownHelper.CreateAnchor("@#$%^&*()").Should().BeEmpty();
     }
 
+    /// <summary>Verifies that slashes in paths are removed, not preserved as separators.</summary>
     [Fact]
     public void CreateAnchor_PathLikeInput_RemovesSlashes()
     {

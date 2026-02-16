@@ -13,8 +13,10 @@ public class NestingWalker : CSharpSyntaxWalker
     private int _currentDepth;
     private int _maxDepth;
 
+    /// <summary>Gets the maximum nesting depth found during the walk.</summary>
     public int MaxDepth => _maxDepth;
 
+    /// <inheritdoc />
     public override void Visit(SyntaxNode? node)
     {
         if (node == null)

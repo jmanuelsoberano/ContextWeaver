@@ -18,6 +18,10 @@ public class FullPipelineTests : IDisposable
     private readonly DirectoryInfo _fixtureDir;
     private readonly string _outputPath;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="FullPipelineTests"/> class.
+    ///     Sets up the fixture directory and temporary output path.
+    /// </summary>
     public FullPipelineTests()
     {
         // Walk up from the assembly output (bin/Debug/net8.0) to the test project root,
@@ -28,6 +32,7 @@ public class FullPipelineTests : IDisposable
         _outputPath = Path.Combine(Path.GetTempPath(), $"contextweaver_e2e_{Guid.NewGuid()}.md");
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         if (File.Exists(_outputPath))
@@ -52,6 +57,10 @@ public class FullPipelineTests : IDisposable
             NullLogger<CodeAnalyzerService>.Instance);
     }
 
+    /// <summary>
+    ///     Verifies that the full pipeline produces a valid markdown report file.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ProducesValidMarkdown()
     {
@@ -74,6 +83,10 @@ public class FullPipelineTests : IDisposable
         content.Should().Contain("## File:", "file sections should exist");
     }
 
+    /// <summary>
+    ///     Verifies that C# specific analysis confirms presence of C# files and metrics.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsCSharpAnalysis()
     {
@@ -92,6 +105,10 @@ public class FullPipelineTests : IDisposable
         content.Should().Contain("csharp", "language should be detected as csharp");
     }
 
+    /// <summary>
+    ///     Verifies that non-C# files (like JSON) are analyzed via GenericFileAnalyzer.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsNonCSharpFiles()
     {
@@ -108,6 +125,10 @@ public class FullPipelineTests : IDisposable
         content.Should().Contain("json", "language should be detected as json");
     }
 
+    /// <summary>
+    ///     Verifies that dependency information is correctly extracted and reported.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsDependencyInfo()
     {

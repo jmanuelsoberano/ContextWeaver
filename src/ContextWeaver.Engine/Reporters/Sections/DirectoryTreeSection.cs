@@ -11,6 +11,7 @@ public class DirectoryTreeSection : IReportSection
 {
     private static readonly char[] PathSeparators = { '/', '\\' };
 
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();
