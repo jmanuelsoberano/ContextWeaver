@@ -7,29 +7,46 @@
 ### Prerrequisitos
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Git
+- [Git](https://git-scm.com/)
 
-### Setup
+### Setup Inicial
 
+1.  **Clonar el repositorio**:
+    ```bash
+    git clone https://github.com/jmanuelsoberano/ContextWeaver.git
+    cd ContextWeaver
+    ```
+
+2.  **Restaurar dependencias y herramientas**:
+    Este paso es crucial ya que instala **Husky.NET** (para hooks de git) y otras herramientas locales.
+    ```bash
+    dotnet tool restore
+    ```
+    *Nota: Si los hooks no se instalan automáticamente, ejecuta `dotnet husky install`.*
+
+## Flujo de Trabajo y Calidad
+
+### Estándares de Código (.editorconfig)
+Utilizamos `dotnet format` para asegurar consistencia.
+- **Root `.editorconfig`**: Reglas estrictas para código de producción.
+- **`tests/.editorconfig`**: Reglas adaptadas para pruebas (ej. `Metodo_Escenario_Resultado`).
+
+### Hooks Automáticos (Husky.NET)
+Hemos configurado **Husky** para proteger la calidad del código:
+- **Pre-commit**: Ejecuta automáticamente `dotnet format` en los archivos que vas a subir (staged files).
+    - Si el error es corregible (espacios, indentación), se arregla y se incluye en el commit.
+    - Si el error requiere intervención manual, el commit fallará para que lo revises.
+
+### Ejecutar Pruebas
+Para correr toda la suite de pruebas (Unitarias + E2E):
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/jmanuelsoberano/ContextWeaver.git
-cd ContextWeaver
-
-# 2. Restaurar dependencias
-dotnet restore
-
-# 3. Verificar que todo compila
-dotnet build
-
-# 4. Correr los tests
 dotnet test
 ```
 
 ## Arquitectura del proyecto
 
 ```
-Cli → Engine → Core    (Dependency Rule: nunca al revés)
+Cli → Engine → Core    (Regla de Dependencia: nunca al revés)
 ```
 
 | Proyecto | Qué contiene | Cuándo tocarlo |
@@ -55,10 +72,11 @@ Este proyecto aplica principios fundacionales de ingeniería de software:
 1. **Fork** el repositorio
 2. **Crea un branch** desde `main`: `git checkout -b feature/mi-feature`
 3. **Haz tus cambios** siguiendo la arquitectura descrita arriba
-4. **Asegúrate de que pasa todo:**
+4. **Verificación Local:**
+   Husky se encargará del formato al hacer commit, pero puedes correr manualmente:
    ```bash
-   dotnet format --verify-no-changes
-   dotnet build --no-incremental
+   dotnet format
+   dotnet build
    dotnet test
    ```
 5. **Commit** usando [Conventional Commits](https://www.conventionalcommits.org/):
@@ -70,31 +88,25 @@ Este proyecto aplica principios fundacionales de ingeniería de software:
 
 ## Convenciones de código
 
-- **Estilo:** configurado en `.editorconfig` + StyleCop. Ejecuta `dotnet format` antes de hacer commit.
+- **Estilo:** Gestionado por `.editorconfig` y `dotnet format`.
 - **Idioma y Localización:**
-  - **Documentación y Comentarios**: Español (excepto Propiedades y Constructores, que deben seguir reglas de StyleCop (English)).
+  - **Documentación y Comentarios**: Español.
+  - **Constructores y Propiedades**: Inglés (reglas StyleCop específicas).
   - **Términos Técnicos**: Mantener en Inglés (ej. "Helper", "Task", "Wrapper").
   - **Identificadores de Código**: Inglés (ej. `CSharpFileAnalyzer`).
-  - *Nota*: Para reglas detalladas de IA, consultar `.cursorrules`.
-- **Tests:** todo feature nuevo debe incluir tests unitarios o E2E.
-- **Namespaces:** deben coincidir con la ubicación del archivo dentro del proyecto.
+- **Tests:** Todo feature nuevo debe incluir tests unitarios o E2E.
+- **Namespaces:** Deben coincidir con la estructura de carpetas.
 
 ## ¿Dónde va mi código?
 
 | Quiero... | Proyecto | Carpeta |
 |:---|:---|:---|
-| Agregar un nuevo analizador (ej. TypeScript) | Engine | `Analyzers/` |
-| Agregar un nuevo formato de reporte (ej. XML) | Engine | `Reporters/` |
-| Agregar una nueva sección al reporte Markdown | Engine | `Reporters/Sections/` |
-| Agregar un nuevo modelo de datos | Core | `Models/` |
-| Agregar una nueva abstracción | Core | `Abstractions/` |
-| Modificar argumentos CLI | Cli | `Program.cs` |
-| Agregar una nueva utilidad de cálculo | Engine | `Utilities/` |
+| Agregar un nuevo analizador (ej. TypeScript) | `ContextWeaver.Engine` | `Analyzers/` |
+| Agregar un nuevo formato de reporte (ej. XML) | `ContextWeaver.Engine` | `Reporters/` |
+| Agregar un nuevo modelo de datos | `ContextWeaver.Core` | `Models/` |
+| Agregar lógica de prueba unitaria | `ContextWeaver.Engine.Tests` o `Core.Tests` | Según corresponda |
+| Agregar fixtures de prueba | `ContextWeaver.Tests.Shared` | `Fixtures/` |
 
-## Reportar bugs
+## Reportar bugs y Proponer Features
 
-Usa la plantilla de [Bug Report](.github/ISSUE_TEMPLATE/bug_report.md) para reportar problemas.
-
-## Proponer features
-
-Usa la plantilla de [Feature Request](.github/ISSUE_TEMPLATE/feature_request.md) para proponer nuevas funcionalidades.
+Usa las plantillas de Issue en `.github/ISSUE_TEMPLATE/` para reportar problemas o sugerir mejoras.
