@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
-namespace ContextWeaver.Tests.E2E;
+namespace ContextWeaver.E2E.Tests;
 
 /// <summary>
 ///     Pruebas de extremo a extremo que ejercitan el pipeline completo de análisis:
@@ -15,7 +15,8 @@ namespace ContextWeaver.Tests.E2E;
 /// </summary>
 public class FullPipelineTests : IDisposable
 {
-    private readonly DirectoryInfo _fixtureDir;
+    private readonly DirectoryInfo _fixtureSourceDir;
+    private readonly DirectoryInfo _tempWorkDir;
     private readonly string _outputPath;
 
     /// <summary>
@@ -24,12 +25,17 @@ public class FullPipelineTests : IDisposable
     /// </summary>
     public FullPipelineTests()
     {
-        // Subir desde la salida del ensamblado (bin/Debug/net8.0) a la raíz del proyecto de pruebas,
-        // luego a Fixtures/SampleProject. Esto evita el patrón de exclusión "bin".
+        // Ubicación original en bin (solo lectura para el test)
         var assemblyDir = Path.GetDirectoryName(typeof(FullPipelineTests).Assembly.Location)!;
-        var testProjectDir = Path.GetFullPath(Path.Combine(assemblyDir, "..", "..", ".."));
-        _fixtureDir = new DirectoryInfo(Path.Combine(testProjectDir, "Fixtures", "SampleProject"));
-        _outputPath = Path.Combine(Path.GetTempPath(), $"contextweaver_e2e_{Guid.NewGuid()}.md");
+        _fixtureSourceDir = new DirectoryInfo(Path.Combine(assemblyDir, "Fixtures", "SampleProject"));
+        
+        // Crear directorio temporal de trabajo fuera de "bin" para evitar exclusiones por defecto
+        var tempPath = Path.Combine(Path.GetTempPath(), $"cw_e2e_{Guid.NewGuid()}");
+        _tempWorkDir = Directory.CreateDirectory(tempPath);
+        
+        CopyDirectory(_fixtureSourceDir, _tempWorkDir);
+
+        _outputPath = Path.Combine(Path.GetTempPath(), $"contextweaver_e2e_report_{Guid.NewGuid()}.md");
     }
 
     /// <inheritdoc/>
@@ -37,6 +43,27 @@ public class FullPipelineTests : IDisposable
     {
         if (File.Exists(_outputPath))
             File.Delete(_outputPath);
+            
+        if (_tempWorkDir.Exists)
+            _tempWorkDir.Delete(true);
+            
+        GC.SuppressFinalize(this);
+    }
+
+    private static void CopyDirectory(DirectoryInfo source, DirectoryInfo destination)
+    {
+        if (!destination.Exists) destination.Create();
+
+        foreach (var file in source.GetFiles())
+        {
+            file.CopyTo(Path.Combine(destination.FullName, file.Name), true);
+        }
+
+        foreach (var subDir in source.GetDirectories())
+        {
+            var nextDest = destination.CreateSubdirectory(subDir.Name);
+            CopyDirectory(subDir, nextDest);
+        }
     }
 
     private CodeAnalyzerService BuildService()
@@ -69,7 +96,7 @@ public class FullPipelineTests : IDisposable
         var outputFile = new FileInfo(_outputPath);
 
         // Actuar
-        await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
+        await service.AnalyzeAndGenerateReport(_tempWorkDir, outputFile, "markdown");
 
         // Afirmar — el archivo fue producido
         File.Exists(_outputPath).Should().BeTrue("el archivo de reporte debe ser creado");
@@ -95,7 +122,7 @@ public class FullPipelineTests : IDisposable
         var outputFile = new FileInfo(_outputPath);
 
         // Actuar
-        await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
+        await service.AnalyzeAndGenerateReport(_tempWorkDir, outputFile, "markdown");
         var content = await File.ReadAllTextAsync(_outputPath);
 
         // Afirmar — contenido específico de C#
@@ -117,7 +144,7 @@ public class FullPipelineTests : IDisposable
         var outputFile = new FileInfo(_outputPath);
 
         // Actuar
-        await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
+        await service.AnalyzeAndGenerateReport(_tempWorkDir, outputFile, "markdown");
         var content = await File.ReadAllTextAsync(_outputPath);
 
         // Afirmar — archivo JSON incluido
@@ -137,7 +164,7 @@ public class FullPipelineTests : IDisposable
         var outputFile = new FileInfo(_outputPath);
 
         // Actuar
-        await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
+        await service.AnalyzeAndGenerateReport(_tempWorkDir, outputFile, "markdown");
         var content = await File.ReadAllTextAsync(_outputPath);
 
         // Afirmar — relaciones de dependencia detectadas

@@ -1,4 +1,4 @@
-namespace ContextWeaver.Tests.Helpers;
+namespace ContextWeaver.Tests.Common.Helpers;
 
 /// <summary>
 ///     Helper IDisposable que crea un archivo temporal con la extensión deseada
@@ -7,9 +7,6 @@ namespace ContextWeaver.Tests.Helpers;
 /// </summary>
 public sealed class TempFile : IDisposable
 {
-    /// <summary>Gets the full path to the temporary file.</summary>
-    public string Path { get; }
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="TempFile"/> class.
     ///     Creates a temporary file with the specified extension and content.
@@ -27,6 +24,9 @@ public sealed class TempFile : IDisposable
         if (!string.IsNullOrEmpty(content))
             File.WriteAllText(Path, content);
     }
+
+    /// <summary>Gets the full path to the temporary file.</summary>
+    public string Path { get; }
 
     /// <inheritdoc/>
     public void Dispose()

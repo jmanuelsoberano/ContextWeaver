@@ -1,9 +1,9 @@
 using ContextWeaver.Analyzers;
-using ContextWeaver.Tests.Helpers;
+using ContextWeaver.Tests.Common.Helpers;
 using FluentAssertions;
 using Xunit;
 
-namespace ContextWeaver.Tests.Analyzers;
+namespace ContextWeaver.Engine.Tests.Analyzers;
 
 /// <summary>Pruebas para <see cref="GenericFileAnalyzer"/>.</summary>
 public class GenericFileAnalyzerTests

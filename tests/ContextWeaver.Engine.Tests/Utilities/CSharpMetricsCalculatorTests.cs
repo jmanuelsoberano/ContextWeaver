@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
-namespace ContextWeaver.Tests.Utilities;
+namespace ContextWeaver.Engine.Tests.Utilities;
 
 /// <summary>
 ///     Pruebas para <see cref="CSharpMetricsCalculator"/>.

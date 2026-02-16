@@ -2,7 +2,7 @@ using ContextWeaver.Core;
 using FluentAssertions;
 using Xunit;
 
-namespace ContextWeaver.Tests.Core;
+namespace ContextWeaver.Core.Tests;
 
 /// <summary>Pruebas para <see cref="DefaultSettings"/>.</summary>
 public class DefaultSettingsTests

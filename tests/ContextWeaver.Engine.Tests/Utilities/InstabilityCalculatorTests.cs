@@ -3,7 +3,7 @@ using ContextWeaver.Utilities;
 using FluentAssertions;
 using Xunit;
 
-namespace ContextWeaver.Tests.Utilities;
+namespace ContextWeaver.Engine.Tests.Utilities;
 
 /// <summary>
 ///     Pruebas para <see cref="InstabilityCalculator"/>.
