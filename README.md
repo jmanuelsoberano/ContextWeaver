@@ -146,10 +146,18 @@ ContextWeaver.Cli → ContextWeaver.Engine → ContextWeaver.Core
 | **ContextWeaver.Engine** | Lógica de negocio puro: Analyzers, Reporters, Services, Utilities. |
 | **ContextWeaver.Cli** | Punto de entrada, configuración de DI y parseo de argumentos. |
 
-### Contribuir
+### 🤝 Contribuir
 
-Lee [CONTRIBUTING.md](CONTRIBUTING.md) para guía de setup, arquitectura, y convenciones.
+¡Las contribuciones son bienvenidas! Por favor lee las siguientes guías antes de empezar:
 
-### Licencia
+- [Guía de Contribución](CONTRIBUTING.md): Cómo configurar el entorno y enviar PRs.
+- [Código de Conducta](CODE_OF_CONDUCT.md): Nuestras normas de comunidad.
+- [Política de Seguridad](SECURITY.md): Cómo reportar vulnerabilidades.
 
-[MIT](LICENSE) © Jose Manuel Campos Soberano
+### 📜 Historial de Cambios
+
+Consulta el [CHANGELOG](CHANGELOG.md) para ver la historia de cambios notable.
+
+### 📄 Licencia
+
+Este proyecto está bajo la Licencia [MIT](LICENSE).
