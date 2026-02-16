@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContextWeaver.Engine.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContextWeaver.E2E.Tests", "tests\ContextWeaver.E2E.Tests\ContextWeaver.E2E.Tests.csproj", "{3EB89845-B715-45A8-914A-14811227BA28}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContextWeaver.Architecture.Tests", "tests\ContextWeaver.Architecture.Tests\ContextWeaver.Architecture.Tests.csproj", "{B63B38E5-A2C9-4C61-942D-290217C56401}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{3EB89845-B715-45A8-914A-14811227BA28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EB89845-B715-45A8-914A-14811227BA28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EB89845-B715-45A8-914A-14811227BA28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B63B38E5-A2C9-4C61-942D-290217C56401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B63B38E5-A2C9-4C61-942D-290217C56401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B63B38E5-A2C9-4C61-942D-290217C56401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B63B38E5-A2C9-4C61-942D-290217C56401}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{150E2018-D700-43BE-91A7-BC78D9709B78} = {A1B2C3D4-0001-0001-0001-000000000001}
@@ -63,5 +69,6 @@ Global
 		{E3047101-687C-47AC-84FF-F0DCC5D9F640} = {A1B2C3D4-0002-0002-0002-000000000002}
 		{5B4C807E-168A-4C5B-8EAE-036003DDB9FE} = {A1B2C3D4-0002-0002-0002-000000000002}
 		{3EB89845-B715-45A8-914A-14811227BA28} = {A1B2C3D4-0002-0002-0002-000000000002}
+		{B63B38E5-A2C9-4C61-942D-290217C56401} = {A1B2C3D4-0002-0002-0002-000000000002}
 	EndGlobalSection
 EndGlobal

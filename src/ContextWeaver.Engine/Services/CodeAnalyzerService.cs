@@ -9,7 +9,7 @@ namespace ContextWeaver.Services;
 ///     Orquesta la carga de configuración, descubrimiento de archivos, ejecución de analizadores
 ///     y generación de reportes.
 /// </summary>
-public class CodeAnalyzerService
+public sealed class CodeAnalyzerService
 {
     private readonly IEnumerable<IFileAnalyzer> _analyzers;
     private readonly IEnumerable<IReportGenerator> _generators;

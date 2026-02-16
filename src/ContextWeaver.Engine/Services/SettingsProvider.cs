@@ -6,10 +6,9 @@ using Microsoft.Extensions.Logging;
 namespace ContextWeaver.Services;
 
 /// <summary>
-///     Gestiona la carga y validación de la configuración de análisis.
-///     Busca el archivo .contextweaver.json o crea uno por defecto si no existe.
+///     Proveedor de configuración centralizado.
 /// </summary>
-public class SettingsProvider
+public sealed class SettingsProvider
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
     private readonly ILogger<SettingsProvider> _logger;
