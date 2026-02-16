@@ -20,7 +20,7 @@ public interface IFileAnalyzer
     ///     Útil para construir índices o mapas globales.
     /// </summary>
     /// <param name="files">Colección completa de archivos a analizar.</param>
-    /// <returns>Una tarea que representa la inicialización asíncrona.</returns>
+    /// <returns>Una task que representa la inicialización asíncrona.</returns>
     Task InitializeAsync(IEnumerable<FileInfo> files);
 
     /// <summary>

@@ -1,7 +1,7 @@
 namespace ContextWeaver.Reporters;
 
 /// <summary>
-///     Ayudante compartido para la generación de diagramas PlantUML/Mermaid.
+///     Helper compartido para la generación de diagramas PlantUML/Mermaid.
 ///     Utilizado por <see cref="Sections.DependencyGraphSection"/>,
 ///     <see cref="Sections.ModuleDiagramSection"/>, y
 ///     <see cref="Sections.FileContentSection"/>.

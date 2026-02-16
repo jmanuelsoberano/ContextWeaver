@@ -7,7 +7,7 @@ namespace ContextWeaver.Tests.Helpers;
 /// </summary>
 public sealed class TempFile : IDisposable
 {
-    /// <summary>Gets obtiene la ruta completa al archivo temporal.</summary>
+    /// <summary>Obtiene la ruta completa al archivo temporal.</summary>
     public string Path { get; }
 
     /// <summary>
