@@ -28,11 +28,11 @@ public class FullPipelineTests : IDisposable
         // Ubicación original en bin (solo lectura para el test)
         var assemblyDir = Path.GetDirectoryName(typeof(FullPipelineTests).Assembly.Location)!;
         _fixtureSourceDir = new DirectoryInfo(Path.Combine(assemblyDir, "Fixtures", "SampleProject"));
-        
+
         // Crear directorio temporal de trabajo fuera de "bin" para evitar exclusiones por defecto
         var tempPath = Path.Combine(Path.GetTempPath(), $"cw_e2e_{Guid.NewGuid()}");
         _tempWorkDir = Directory.CreateDirectory(tempPath);
-        
+
         CopyDirectory(_fixtureSourceDir, _tempWorkDir);
 
         _outputPath = Path.Combine(Path.GetTempPath(), $"contextweaver_e2e_report_{Guid.NewGuid()}.md");
@@ -43,16 +43,17 @@ public class FullPipelineTests : IDisposable
     {
         if (File.Exists(_outputPath))
             File.Delete(_outputPath);
-            
+
         if (_tempWorkDir.Exists)
             _tempWorkDir.Delete(true);
-            
+
         GC.SuppressFinalize(this);
     }
 
     private static void CopyDirectory(DirectoryInfo source, DirectoryInfo destination)
     {
-        if (!destination.Exists) destination.Create();
+        if (!destination.Exists)
+            destination.Create();
 
         foreach (var file in source.GetFiles())
         {
