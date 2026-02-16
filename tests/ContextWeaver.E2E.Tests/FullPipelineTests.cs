@@ -31,7 +31,7 @@ public class FullPipelineTests : IDisposable
 
         // Crear directorio temporal de trabajo fuera de "bin" para evitar exclusiones por defecto
         var tempPath = Path.Combine(Path.GetTempPath(), $"cw_e2e_{Guid.NewGuid()}");
-        _tempWorkDir = Directory.CreateDirectory(tempPath);
+        _tempWorkDir = Directory.CreateDirectory(tempPath); // Bad indentation for testing
 
         CopyDirectory(_fixtureSourceDir, _tempWorkDir);
 
