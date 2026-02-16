@@ -2,156 +2,97 @@
 
 ## 1. Visión General
 
-**ContextWeaver** es una herramienta de línea de comandos (CLI) diseñada para ingenieros de software y arquitectos. Su propósito principal es transformar un repositorio de código completo en un **único documento Markdown enriquecido**. Este documento consolidado está optimizado para ser consumido por Large Language Models (LLMs), facilitando tareas de análisis arquitectónico, refactorización, documentación y onboarding.
+**ContextWeaver** es una herramienta de línea de comandos (CLI) diseñada para ingenieros de software y arquitectos. Su propósito principal es transformar cualquier repositorio de código en un **único documento Markdown enriquecido**, optimizado para el consumo por Large Language Models (LLMs) y la colaboración técnica.
 
-La herramienta no solo concatena archivos, sino que realiza un "Context Engineering" activo: filtra ruido, calcula métricas de calidad, analiza dependencias arquitectónicas y genera mapas de navegación visuales.
+Más allá de la herramienta en sí, este proyecto sirve como un **Laboratorio de Ingeniería de Software**, demostrando cómo construir sistemas robustos basándose en **fundamentos, valores y principios**, más allá de seguir ciegamente patrones o reglas rígidas.
 
 ## 2. Objetivos del Diseño
 
-1.  **Optimización para LLMs**: Proveer el máximo contexto con la mínima cantidad de tokens irrelevantes (filtrando binarios, `node_modules`, etc.).
-2.  **Navegabilidad Humana**: Permitir que los desarrolladores naveguen fácilmente por la estructura del proyecto dentro de un solo archivo.
-3.  **Insight Arquitectónico**: Ofrecer métricas de alto nivel (Inestabilidad, Acoplamiento) que no son evidentes al ver archivos individuales.
-4.  **Extensibilidad**: Arquitectura modular que permite añadir nuevos lenguajes y formatos de reporte fácilmente.
-5.  **Cero Configuración (Zero-Config)**: Funcionar "out-of-the-box" con valores sensatos, pero permitir personalización total mediante configuración.
+1.  **Optimización para Contexto**: Maximizar la señal y reducir el ruido para el procesamiento por IA.
+2.  **Excelencia Técnica**: Aplicar rigurosamente los fundamentos de la ingeniería (cohesión, acoplamiento, abstracción).
+3.  **Cero Fricción**: Automatizar la consistencia y el estilo para liberar la carga cognitiva del desarrollador.
+4.  **Extensibilidad**: Facilitar la evolución del sistema a través de una arquitectura abierta.
+5.  **Transparencia**: El sistema explica su estructura a través de su propio diseño.
 
 ## 3. Arquitectura del Sistema
 
-El sistema sigue una arquitectura modular basada en **Inyección de Dependencias** (`Microsoft.Extensions.DependencyInjection`) y patrones de diseño sólidos (Strategy, SOLID).
+El sistema se basa en una **Arquitectura Centrada en el Dominio** (Domain-Centric Architecture).
 
-### 3.1 Componentes Principales
+Independientemente de si la llamas "Clean", "Hexagonal" o "Puertos y Adaptadores", la idea central es la misma: **Proteger el núcleo de la aplicación de los detalles externos**.
 
-*   **Entry Point (`ContextWeaver.Cli`)**:
-    *   `Program.cs`: Maneja la interfaz de línea de comandos (CLI) usando `System.CommandLine`.
-    *   Configura el contenedor de servicios (DI) y lanza el proceso.
-*   **Orquestador (`ContextWeaver.Engine.Services`)**:
-    *   `CodeAnalyzerService`: Coordina el flujo principal: carga configuración -> descubre archivos -> delega análisis -> calcula métricas globales -> genera reporte.
-*   **Configuración (`ContextWeaver.Engine.Services`)**:
-    *   `SettingsProvider`: Gestiona la carga de `.contextweaver.json` y provee valores por defecto (`DefaultSettings`).
-*   **Modelos y Abstracciones (`ContextWeaver.Core`)**:
-    *   `IFileAnalyzer`, `IReportGenerator`: Interfaces clave.
-    *   `FileAnalysisResult`, `AnalysisSettings`: Modelos de datos compartidos.
-*   **Analizadores (`ContextWeaver.Engine.Analyzers`)**: Implementan `IFileAnalyzer`.
-    *   `CSharpFileAnalyzer`: Análisis profundo de sintaxis C# (Roslyn).
-    *   `GenericFileAnalyzer`: Análisis básico de archivos de texto/código.
-*   **Calculadores de Métricas (`ContextWeaver.Engine.Utilities`)**:
-    *   `InstabilityCalculator`: Calcula la inestabilidad de módulos.
-    *   `CSharpMetricsCalculator`: Calcula complejidad ciclomática.
-*   **Generadores de Reportes (`ContextWeaver.Engine.Reporters`)**: Implementan `IReportGenerator`.
-    *   `MarkdownReportGenerator`: Renderiza el resultado final en Markdown.
+### 3.1 La Regla de Oro (Dependency Rule)
+El principio fundamental que gobierna este diseño es la dirección de las dependencias:
+**Las dependencias siempre apuntan hacia adentro, hacia las políticas de alto nivel.**
 
-### 3.2 Diagrama de Flujo de Datos
+`Cli (Detalle) → Engine (Mecanismo) → Core (Dominio)`
 
-```mermaid
-graph LR
-    FS[Sistema de Archivos] --> |Archivos Crudos| Filter[Filtro de Configuración]
-    Filter --> |Archivos Relevantes| Analyzer[Motor de Análisis]
-    Analyzer --> |CSharpFileAnalyzer| CSA[AST Roslyn & Métricas]
-    Analyzer --> |GenericFileAnalyzer| GA[Conteo de Líneas]
-    CSA --> Results[Resultados de Análisis]
-    GA --> Results
-    Results --> Instability[Calculadora de Inestabilidad]
-    Results --> ReportGen[Generador de Reporte]
-    Instability --> ReportGen
-    ReportGen --> |Markdown| FileOut[Archivo de Salida]
-```
+*   **ContextWeaver.Core (El Corazón)**:
+    *   Aquí residen los conceptos fundamentales y las reglas del negocio (`Modelos`, `Abstracciones`).
+    *   No sabe nada del mundo exterior (ni bases de datos, ni CLI, ni sistema de archivos).
+    *   Es la parte más estable y reutilizable del sistema.
+*   **ContextWeaver.Engine (La Lógica)**:
+    *   Implementa los casos de uso y coordina las operaciones.
+    *   Usa las abstracciones definidas en el Core para realizar el trabajo "sucio" (analizar archivos, generar reportes).
+    *   Es el adaptador principal entre la intención del usuario y los recursos del sistema.
+*   **ContextWeaver.Cli (La Entrega)**:
+    *   Es solo un mecanismo de entrega. Podría ser una API Web, una GUI o una CLI.
+    *   Su única responsabilidad es recibir la entrada del usuario, configurar el sistema (Inyección de Dependencias) y presentar la salida.
 
-## 4. Especificaciones Funcionales
+### 3.2 Por qué este enfoque?
+Al desacoplar el "qué hace" (Core) del "cómo se usa" (Cli) y "cómo funciona" (Engine), logramos:
+*   **Testabilidad**: Podemos probar el núcleo sin necesidad de un sistema de archivos real o interacción de usuario.
+*   **Mantenibilidad**: Cambios en la CLI no rompen las reglas de negocio.
+*   **Evolución**: Si mañana queremos una interfaz web, el Core y Engine no cambian.
 
-### 4.1 Interfaz de Línea de Comandos (CLI)
+### 3.3 Estrategia de Pruebas
 
-La herramienta se ejecuta desde la terminal con los siguientes argumentos:
+Siguiendo la misma filosofía de separación:
 
-| Comando / Opción | Alias | Descripción | Valor por Defecto |
-| :--- | :--- | :--- | :--- |
-| `--directorio` | `-d` | Directorio raíz del proyecto a analizar. | Directorio actual (`.`) |
-| `--output` | `-o` | Nombre/Ruta del archivo de reporte generado. | `analysis_report.md` |
-| `--format` | `-f` | Formato del reporte de salida. | `markdown` |
+| Nivel | Propósito | Enfoque |
+| :--- | :--- | :--- |
+| **Pruebas de Unidad (Core/Engine)** | Verificar la corrección lógica de componentes aislados. | Rápidas, deterministas, sin efectos secundarios. Usan "dobles de prueba" (test doubles) cuando es necesario. |
+| **Pruebas de Integración (E2E)** | Verificar que el sistema ensamblado funciona como un todo. | Realistas, usan el sistema de archivos (en entornos controlados/temporales) para asegurar que la "pegamin" entre componentes es fuerte. |
 
-**Comportamiento**:
-1.  Si no se proveen argumentos, analiza el directorio actual.
-2.  Muestra logs de progreso en la consola (archivos encontrados, configuración usada, éxito/error).
+## 4. Estándares de Ingeniería y Calidad (QA)
 
-### 4.2 Sistema de Configuración
+La calidad no es un acto, es un hábito automatizado.
 
-La herramienta busca un archivo `.contextweaver.json` en el directorio raíz del análisis.
+### 4.1 Automatización con Husky.NET y Git Hooks
+Para garantizar que "lo correcto" sea también "lo fácil", utilizamos **Husky**:
 
-*   **Si existe**: Carga la configuración y la mezcla con los valores por defecto (si faltan secciones).
-*   **Si NO existe**: Crea automáticamente un archivo `.contextweaver.json` con la configuración por defecto para facilitar la personalización futura.
+*   **Antes de confirmar (Pre-commit)**: El sistema se auto-corrige. Formateadores automáticos (`dotnet format`) arreglan inconsistencias de estilo (espacios, llaves) en los archivos modificados. Esto evita discusiones triviales en las revisiones de código.
 
-**Estructura de `.contextweaver.json`**:
-```json
-{
-  "AnalysisSettings": {
-    "IncludedExtensions": [".cs", ".ts", ".html", ...],
-    "ExcludePatterns": ["bin", "obj", "node_modules", ...]
-  }
-}
-```
+### 4.2 Configuración de Editor Contextual
+Reconocemos que el código de producción y el código de prueba tienen necesidades diferentes:
 
-**Valores por Defecto**:
-*   **Extensiones**: `.cs`, `.csproj`, `.sln`, `.json`, `.ts`, `.html`, `.scss`, `.css`, `.md`
-*   **Exclusiones**: `bin`, `obj`, `node_modules`, `.angular`, `.vs`, `dist`, `wwwroot`, `Publish`, `packages`, `Scripts`, `Content`
+*   **Producción (.editorconfig raíz)**: Prioriza la uniformidad y la documentación pública.
+*   **Pruebas (tests/.editorconfig)**: Prioriza la expresividad. Permitimos nombres de métodos con guiones bajos (`Debe_HacerX_Cuando_Y`) porque en los tests, el nombre del método es la documentación del escenario.
 
-### 4.3 Motor de Análisis de Archivos
+### 4.3 Disciplina de "Cero Advertencias"
+Tratamos las advertencias del compilador como errores (`TreatWarningsAsErrors`). Una advertencia ignorada hoy es un bug mañana. Esto mantiene la ventana rota cerrada desde el primer día.
 
-#### 4.3.1 Análisis de C# (`CSharpFileAnalyzer`)
-Utiliza Roslyn (Microsoft.CodeAnalysis) para un análisis sintáctico y semántico profundo.
-*   **Métricas**: Líneas de Código (LOC), Complejidad Ciclomática (flujo de control), Profundidad de Anidamiento (`MaxNestingDepth`).
-*   **Repo Map (Firmas API)**: Extrae firmas públicas de clases, métodos, propiedades y constructores.
-*   **Dependencias**:
-    *   Extrae sentencias `using`.
-    *   Detecta relaciones de **Herencia** (`-.->`) y **Uso** (`-->`) entre clases del proyecto para gráficos Mermaid.
-*   **Compliance**: El analizador mismo cumple con reglas estrictas de análisis de código (StyleCop/Roslyn Analyzers) para garantizar mantenibilidad.
+## 5. Especificaciones Funcionales (Resumen)
 
-#### 4.3.2 Análisis Genérico (`GenericFileAnalyzer`)
-Para lenguajes soportados pero sin analizador específico (TS, JS, HTML, etc.).
-*   **Métricas**: Líneas de Código (LOC).
-*   **Lenguaje**: Mapeo automático de extensión a identificador de bloque de código Markdown (ej. `.ts` -> `typescript`).
+### 5.1 CLI
+*   **Argumentos**: `-d` (directorio), `-o` (salida), `-f` (formato).
+*   **Smart Defaults**: Si no se especifica nada, asume que quieres analizar "aquí y ahora".
 
-### 4.4 Análisis Arquitectónico (Inestabilidad)
+### 5.2 Análisis Semántico (C#)
+*   No leemos el código como texto plano; lo entendemos como estructura (AST).
+*   Extraemos la **intención** (firmas, atributos, herencia) y métricas objetivas (complejidad, anidamiento) para dar una radiografía real del código.
 
-Calcula la métrica de Inestabilidad de Robert C. Martin para cada carpeta de primer nivel (módulo).
+### 5.3 Análisis Arquitectónico
+*   Calculamos métricas fundamentales como la **Inestabilidad** ($I = Ce / (Ca + Ce)$).
+*   Esto nos permite visualizar objetivamente qué partes del sistema son el "núcleo estable" y cuáles son las "zonas de cambio", ayudando a tomar decisiones de refactorización basadas en datos.
 
-**Fórmula**: $I = \frac{Ce}{Ca + Ce}$
-*   **$Ce$ (Coupling Efferent)**: Número de módulos externos de los que depende este módulo (salientes).
-*   **$Ca$ (Coupling Afferent)**: Número de módulos externos que dependen de este módulo (entrantes).
+## 6. Documentación y Comunidad
 
-**Interpretación**:
-*   $0 \le I \le 0.3$: **Estable** (Core/Abstracciones).
-*   $0.7 \le I \le 1.0$: **Inestable** (Implementaciones/UI).
+Este repositorio aspira a ser un ciudadano modelo del ecosistema Open Source, proporcionando:
 
-### 4.5 Generación de Reportes (`MarkdownReportGenerator`)
+*   **CONTRIBUTING.md**: Mapa de ruta para colaboradores.
+*   **CODE_OF_CONDUCT.md**: Nuestros valores comunitarios.
+*   **SECURITY.md**: Política de responsabilidad.
+*   **CHANGELOG.md**: Respeto por la historia del proyecto.
 
-El reporte `analysis_report.md` contiene las siguientes secciones ordenadas:
-
-1.  **Header**: Resumen del propósito, fecha y advertencias de seguridad.
-2.  **Análisis de Hotspots**:
-    *   Top 5 archivos por tamaño (LOC).
-    *   Top 5 archivos por acoplamiento (número de `imports`).
-3.  **Análisis de Inestabilidad**: Tabla con métricas $Ca$, $Ce$, $I$ y clasificación por módulo.
-4.  **Gráfico de Dependencias**:
-    *   **Mermaid**: Diagrama `graph TD` visualizando la arquitectura.
-    *   **PlantUML**: Bloque alternativo con estereotipos ricos (`<<record>>`, `<<struct>>`).
-5.  **Diagramas de Módulo**: Secciones dedicadas con diagramas de dependencias detallados por cada carpeta de primer nivel.
-6.  **Estructura de Directorios**: Árbol de navegación con enlaces (anclas) a cada sección de archivo.
-7.  **Contenido de Archivos**:
-    *   Ruta del archivo.
-    *   **Diagrama de Contexto**: Mini-gráfico (Mermaid y PlantUML) mostrando dependencias directas del archivo.
-    *   **Referencias Entrantes**: Lista "Used By" con los archivos que dependen de este.
-    *   **Repo Map**: Resumen de API pública e imports, enriquecido con semántica (modificadores, interfaces, atributos).
-    *   **Métricas**: LOC, Complejidad Ciclomática, Profundidad Máxima de Anidamiento.
-    *   **Código Fuente**: Bloque de código completo con resaltado de sintaxis.
-
-## 5. Requisitos No Funcionales
-
-1.  **Performance**: Debe manejar repositorios de tamaño mediano (miles de archivos) en segundos. El uso de `StringBuilder` y operaciones asíncronas (`async/await`) es crítico.
-2.  **Seguridad**: El reporte de salida contiene código fuente completo. Debe advertirse al usuario sobre no compartir información sensible contenida en el reporte.
-3.  **Portabilidad**: Al ser una .NET Global Tool, debe funcionar indistintamente en Windows, Linux y macOS.
-4.  **Mantenibilidad**: El código debe seguir principios SOLID. Nuevos analizadores deben poder agregarse implementando `IFileAnalyzer` sin modificar el orquestador.
-
-## 6. Futuras Mejoras (Roadmap)
-
-*   [ ] Soporte para análisis profundo de TypeScript/JavaScript (AST).
-*   [ ] Cálculo de métricas de acoplamiento a nivel de método.
-*   [ ] Generación de reportes en formato JSON/XML para integración CI/CD.
-*   [ ] Detección automática de secretos/credenciales antes de generar el reporte.
+---
+*Este documento evoluciona junto con nuestro entendimiento del problema y la solución.*
