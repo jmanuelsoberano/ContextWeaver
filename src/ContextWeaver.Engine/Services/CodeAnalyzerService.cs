@@ -42,7 +42,7 @@ public class CodeAnalyzerService
     /// <param name="directory">Directorio raíz a analizar.</param>
     /// <param name="outputFile">Archivo donde se escribirá el reporte.</param>
     /// <param name="format">Formato de salida deseado (ej. "markdown").</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <returns>Una task que representa la operación asíncrona.</returns>
     public async Task AnalyzeAndGenerateReport(DirectoryInfo directory, FileInfo outputFile, string format)
     {
         var generator = _generators.FirstOrDefault(g => g.Format.Equals(format, StringComparison.OrdinalIgnoreCase));

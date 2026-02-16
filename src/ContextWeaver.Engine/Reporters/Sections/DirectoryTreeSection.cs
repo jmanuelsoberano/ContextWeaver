@@ -15,7 +15,7 @@ public class DirectoryTreeSection : IReportSection
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("# Directory Structure");
+        sb.AppendLine("# Estructura de Directorios");
         sb.AppendLine();
 
         var root = BuildTree(context.SortedResults);
@@ -65,7 +65,7 @@ public class DirectoryTreeSection : IReportSection
 
         foreach (var file in files)
         {
-            var headerText = $"File: {file.Path}";
+            var headerText = $"Archivo: {file.Path}";
             var anchor = MarkdownHelper.CreateAnchor(headerText);
             sb.AppendLine($"{indent}- [{file.Name}](#{anchor})");
         }

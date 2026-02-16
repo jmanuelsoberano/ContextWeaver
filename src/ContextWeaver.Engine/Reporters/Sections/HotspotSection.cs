@@ -20,7 +20,7 @@ public class HotspotSection : IReportSection
         var topByLoc = context.SortedResults.OrderByDescending(r => r.LinesOfCode).Take(5);
         foreach (var result in topByLoc)
         {
-            var headerText = $"File: {result.RelativePath}";
+            var headerText = $"Archivo: {result.RelativePath}";
             var anchor = MarkdownHelper.CreateAnchor(headerText);
             sb.AppendLine($"* **({result.LinesOfCode} LOC)** - [`{result.RelativePath}`](#{anchor})");
         }
@@ -37,9 +37,9 @@ public class HotspotSection : IReportSection
 
         foreach (var item in topByImports)
         {
-            var headerText = $"File: {item.Result.RelativePath}";
+            var headerText = $"Archivo: {item.Result.RelativePath}";
             var anchor = MarkdownHelper.CreateAnchor(headerText);
-            sb.AppendLine($"* **({item.ImportCount} Imports)** - [`{item.Result.RelativePath}`](#{anchor})");
+            sb.AppendLine($"* **({item.ImportCount} Importaciones)** - [`{item.Result.RelativePath}`](#{anchor})");
         }
 
         sb.AppendLine();

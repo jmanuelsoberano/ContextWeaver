@@ -94,7 +94,7 @@ public class InstabilityCalculator
             {
                 var (ca, ce) = kvp.Value;
                 // I = Ce / (Ca + Ce)
-                // Range: [0, 1]. 0 = Muy Estable (Abstracto), 1 = Muy Inestable (Concreto)
+                // Rango: [0, 1]. 0 = Muy Estable (Abstracto), 1 = Muy Inestable (Concreto)
                 var instability = ca + ce == 0 ? 0.0 : (double)ce / (ca + ce);
                 return (ca, ce, instability);
             });

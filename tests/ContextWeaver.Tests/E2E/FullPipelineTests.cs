@@ -73,15 +73,15 @@ public class FullPipelineTests : IDisposable
         await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
 
         // Afirmar — el archivo fue producido
-        File.Exists(_outputPath).Should().BeTrue("the report file should be created");
+        File.Exists(_outputPath).Should().BeTrue("el archivo de reporte debe ser creado");
         var content = await File.ReadAllTextAsync(_outputPath);
         content.Should().NotBeNullOrWhiteSpace();
 
         // Afirmar — las secciones clave están presentes
-        content.Should().Contain("Análisis de Hotspots", "hotspot section should exist");
-        content.Should().Contain("Análisis de Inestabilidad", "instability section should exist");
-        content.Should().Contain("Directory Structure", "directory tree should exist");
-        content.Should().Contain("## File:", "file sections should exist");
+        content.Should().Contain("Análisis de Hotspots", "la sección de hotspot debe existir");
+        content.Should().Contain("Análisis de Inestabilidad", "la sección de inestabilidad debe existir");
+        content.Should().Contain("Estructura de Directorios", "el árbol de directorios debe existir");
+        content.Should().Contain("## Archivo:", "las secciones de archivo deben existir");
     }
 
     /// <summary>
@@ -100,10 +100,10 @@ public class FullPipelineTests : IDisposable
         var content = await File.ReadAllTextAsync(_outputPath);
 
         // Afirmar — contenido específico de C#
-        content.Should().Contain("Calculator.cs", "Calculator file should be analyzed");
-        content.Should().Contain("MathService.cs", "MathService file should be analyzed");
-        content.Should().Contain("CyclomaticComplexity", "C# metrics should be rendered");
-        content.Should().Contain("csharp", "language should be detected as csharp");
+        content.Should().Contain("Calculator.cs", "el archivo Calculator debe ser analizado");
+        content.Should().Contain("MathService.cs", "el archivo MathService debe ser analizado");
+        content.Should().Contain("CyclomaticComplexity", "las métricas de C# deben ser renderizadas");
+        content.Should().Contain("csharp", "el lenguaje debe ser detectado como csharp");
     }
 
     /// <summary>
@@ -122,8 +122,8 @@ public class FullPipelineTests : IDisposable
         var content = await File.ReadAllTextAsync(_outputPath);
 
         // Afirmar — archivo JSON incluido
-        content.Should().Contain("config.json", "JSON file should be analyzed");
-        content.Should().Contain("json", "language should be detected as json");
+        content.Should().Contain("config.json", "el archivo JSON debe ser analizado");
+        content.Should().Contain("json", "el lenguaje debe ser detectado como json");
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class FullPipelineTests : IDisposable
         var content = await File.ReadAllTextAsync(_outputPath);
 
         // Afirmar — relaciones de dependencia detectadas
-        content.Should().Contain("Calculator", "Calculator should appear in report");
-        content.Should().Contain("MathService", "MathService should appear in report");
+        content.Should().Contain("Calculator", "Calculator debe aparecer en el reporte");
+        content.Should().Contain("MathService", "MathService debe aparecer en el reporte");
     }
 }

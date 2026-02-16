@@ -20,13 +20,13 @@ public class FileContentSection : IReportSection
 
         foreach (var result in context.SortedResults)
         {
-            sb.AppendLine($"## File: {result.RelativePath}");
+            sb.AppendLine($"## Archivo: {result.RelativePath}");
             sb.AppendLine();
 
             // Diagrama de Contexto
             sb.Append(RenderFileContextDiagram(result, context.TypeKindMap));
 
-            // Referencias Entrantes ("Used By")
+            // Referencias Entrantes ("Usado por")
             if (result.IncomingDependencies != null && result.IncomingDependencies.Count > 0)
             {
                 var usedByFiles = result.IncomingDependencies
@@ -39,7 +39,7 @@ public class FileContentSection : IReportSection
 
                 if (usedByFiles.Count > 0)
                 {
-                    sb.AppendLine($"**Used By:** {string.Join(", ", usedByFiles)}");
+                    sb.AppendLine($"**Usado por:** {string.Join(", ", usedByFiles)}");
                     sb.AppendLine();
                 }
             }
@@ -68,13 +68,13 @@ public class FileContentSection : IReportSection
                             {
                                 if (semantics.Modifiers.Count > 0)
                                     sb.AppendLine(
-                                        $"    - Modifiers: {string.Join(", ", semantics.Modifiers)}");
+                                        $"    - Modificadores: {string.Join(", ", semantics.Modifiers)}");
                                 if (semantics.Attributes.Count > 0)
                                     sb.AppendLine(
-                                        $"    - Attributes: {string.Join(", ", semantics.Attributes)}");
+                                        $"    - Atributos: {string.Join(", ", semantics.Attributes)}");
                                 if (semantics.Interfaces.Count > 0)
                                     sb.AppendLine(
-                                        $"    - Implements: {string.Join(", ", semantics.Interfaces)}");
+                                        $"    - Implementa: {string.Join(", ", semantics.Interfaces)}");
                             }
                         }
                     }
@@ -94,7 +94,7 @@ public class FileContentSection : IReportSection
 
             // Métricas
             sb.AppendLine("#### Métricas");
-            sb.AppendLine($"* **Lineas de Código (LOC):** {result.LinesOfCode}");
+            sb.AppendLine($"* **Líneas de Código (LOC):** {result.LinesOfCode}");
             if (result.Metrics.CyclomaticComplexity.HasValue)
                 sb.AppendLine($"* **CyclomaticComplexity:** {result.Metrics.CyclomaticComplexity.Value}");
             if (result.Metrics.MaxNestingDepth.HasValue)
@@ -102,7 +102,7 @@ public class FileContentSection : IReportSection
             sb.AppendLine();
 
             // Código Fuente
-            sb.AppendLine("#### Source Code");
+            sb.AppendLine("#### Código Fuente");
             sb.AppendLine("```" + result.Language);
             sb.AppendLine(result.CodeContent.Trim());
             sb.AppendLine("```");

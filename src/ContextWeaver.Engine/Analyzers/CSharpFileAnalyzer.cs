@@ -23,8 +23,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     private Dictionary<string, SyntaxTree> _syntaxTrees = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CSharpFileAnalyzer"/> class.
-    ///     Inicializa una nueva instancia de la clase <see cref="CSharpFileAnalyzer"/>.
+    ///     Inicializa una nueva instancia de la clase <see cref="CodeAnalyzerService"/>.
     /// </summary>
     /// <param name="logger">Logger para diagnósticos de análisis.</param>
     public CSharpFileAnalyzer(ILogger<CSharpFileAnalyzer> logger)
@@ -196,6 +195,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     /// <summary>
     ///     Extrae las firmas de los miembros públicos (clases, métodos, propiedades) del árbol de sintaxis.
     /// </summary>
+    /// <returns>Una lista de cadenas que representan las firmas de la API pública.</returns>
     private static List<string> ExtractPublicApiSignatures(SyntaxNode root)
     {
         var signatures = new List<string>();
@@ -249,6 +249,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     /// <summary>
     ///     Extrae las sentencias 'using' del árbol de sintaxis.
     /// </summary>
+    /// <returns>Una lista de cadenas que representan las sentencias 'using'.</returns>
     private static List<string> ExtractUsingStatements(SyntaxNode root)
     {
         return root.DescendantNodes().OfType<UsingDirectiveSyntax>()
@@ -263,6 +264,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     ///     2. Filtra dependencias a tipos del sistema de .NET (ej. List, Exception).
     ///     3. Evita la creación de enlaces vacíos.
     /// </summary>
+    /// <returns>Una lista de cadenas que representan las dependencias de clase.</returns>
     private List<string> ExtractClassDependencies(SyntaxNode root, SemanticModel semanticModel)
     {
         var dependencies = new HashSet<string>();
