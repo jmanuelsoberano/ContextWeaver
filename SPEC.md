@@ -20,16 +20,23 @@ El sistema sigue una arquitectura modular basada en **Inyección de Dependencias
 
 ### 3.1 Componentes Principales
 
-*   **Entry Point (`Program.cs`)**: Maneja la interfaz de línea de comandos (CLI) usando `System.CommandLine`. Configura el contenedor de servicios y lanza el proceso.
-*   **Orquestador (`CodeAnalyzerService`)**: Coordina el flujo principal: carga configuración -> descubre archivos -> delega análisis -> calcula métricas globales -> genera reporte.
-*   **Configuración (`SettingsProvider`)**: Gestiona la carga de `.contextweaver.json` y provee valores por defecto (`DefaultSettings`).
-*   **Analizadores (`Analyzers/`)**: Implementan `IFileAnalyzer`. Extraen información específica de cada archivo.
+*   **Entry Point (`ContextWeaver.Cli`)**:
+    *   `Program.cs`: Maneja la interfaz de línea de comandos (CLI) usando `System.CommandLine`.
+    *   Configura el contenedor de servicios (DI) y lanza el proceso.
+*   **Orquestador (`ContextWeaver.Engine.Services`)**:
+    *   `CodeAnalyzerService`: Coordina el flujo principal: carga configuración -> descubre archivos -> delega análisis -> calcula métricas globales -> genera reporte.
+*   **Configuración (`ContextWeaver.Engine.Services`)**:
+    *   `SettingsProvider`: Gestiona la carga de `.contextweaver.json` y provee valores por defecto (`DefaultSettings`).
+*   **Modelos y Abstracciones (`ContextWeaver.Core`)**:
+    *   `IFileAnalyzer`, `IReportGenerator`: Interfaces clave.
+    *   `FileAnalysisResult`, `AnalysisSettings`: Modelos de datos compartidos.
+*   **Analizadores (`ContextWeaver.Engine.Analyzers`)**: Implementan `IFileAnalyzer`.
     *   `CSharpFileAnalyzer`: Análisis profundo de sintaxis C# (Roslyn).
     *   `GenericFileAnalyzer`: Análisis básico de archivos de texto/código.
-*   **Calculadores de Métricas (`Utilities/`)**:
+*   **Calculadores de Métricas (`ContextWeaver.Engine.Utilities`)**:
     *   `InstabilityCalculator`: Calcula la inestabilidad de módulos.
     *   `CSharpMetricsCalculator`: Calcula complejidad ciclomática.
-*   **Generadores de Reportes (`Reporters/`)**: Implementan `IReportGenerator`.
+*   **Generadores de Reportes (`ContextWeaver.Engine.Reporters`)**: Implementan `IReportGenerator`.
     *   `MarkdownReportGenerator`: Renderiza el resultado final en Markdown.
 
 ### 3.2 Diagrama de Flujo de Datos
@@ -89,11 +96,12 @@ La herramienta busca un archivo `.contextweaver.json` en el directorio raíz del
 
 #### 4.3.1 Análisis de C# (`CSharpFileAnalyzer`)
 Utiliza Roslyn (Microsoft.CodeAnalysis) para un análisis sintáctico y semántico profundo.
-*   **Métricas**: Líneas de Código (LOC), Complejidad Ciclomática (flujo de control).
+*   **Métricas**: Líneas de Código (LOC), Complejidad Ciclomática (flujo de control), Profundidad de Anidamiento (`MaxNestingDepth`).
 *   **Repo Map (Firmas API)**: Extrae firmas públicas de clases, métodos, propiedades y constructores.
 *   **Dependencias**:
     *   Extrae sentencias `using`.
     *   Detecta relaciones de **Herencia** (`-.->`) y **Uso** (`-->`) entre clases del proyecto para gráficos Mermaid.
+*   **Compliance**: El analizador mismo cumple con reglas estrictas de análisis de código (StyleCop/Roslyn Analyzers) para garantizar mantenibilidad.
 
 #### 4.3.2 Análisis Genérico (`GenericFileAnalyzer`)
 Para lenguajes soportados pero sin analizador específico (TS, JS, HTML, etc.).

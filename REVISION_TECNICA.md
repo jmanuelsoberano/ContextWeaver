@@ -9,7 +9,7 @@
 
 ContextWeaver es una herramienta de consola (CLI) diseñada para analizar repositorios de código y generar un reporte consolidado en Markdown. Su objetivo principal es empaquetar el contexto de un proyecto para ser consumido por Modelos de Lenguaje (LLMs).
 
-La arquitectura general es sólida, moderna y sigue buenas prácticas de ingeniería de software en .NET. **Tras la última iteración, se han resuelto los problemas críticos de análisis de dependencias y rendimiento.** Ahora la herramienta ofrece capacidades avanzadas de diagramación (Mermaid y PlantUML) y un análisis de contexto detallado a nivel de módulo y archivo.
+La arquitectura general es sólida, moderna y sigue buenas prácticas de ingeniería de software en .NET. **Tras la Fase 3, el proyecto se ha dividido en 3 capas estrictas: `Core` (Abstracciones), `Engine` (Lógica) y `Cli` (Entrada), siguiendo la Dependency Rule.** Ahora la herramienta ofrece capacidades avanzadas de diagramación (Mermaid y PlantUML) y un análisis de contexto detallado a nivel de módulo y archivo.
 
 ---
 
@@ -62,34 +62,32 @@ ContextWeaver escanea recursivamente un directorio, analiza código (C# vía Ros
 
 ### 3.2. Arquitectura de Componentes
 
-#### Diagrama de Clases (Conceptual)
+El proyecto se divide en 3 ensamblados (Projectos):
+
+1.  **ContextWeaver.Core**: Abstracciones puras (`IFileAnalyzer`, `IReportGenerator`) y Modelos (`FileAnalysisResult`).
+2.  **ContextWeaver.Engine**: Implementación de la lógica (`CodeAnalyzerService`, `CSharpFileAnalyzer`, `MarkdownReportGenerator`).
+3.  **ContextWeaver.Cli**: Configuración del Host (`Program.cs`) e Inyección de Dependencias.
+
+#### Diagrama de Clases (Simplificado por Capas)
 
 ```mermaid
 classDiagram
-    class Program {
-        +Main()
+    namespace Core {
+        class IFileAnalyzer { <<interface>> }
+        class FileAnalysisResult { <<record>> }
     }
-    class CodeAnalyzerService {
-        +AnalyzeAndGenerateReport()
+    namespace Engine {
+        class CodeAnalyzerService
+        class CSharpFileAnalyzer
     }
-    class IFileAnalyzer {
-        <<interface>>
-        +CanAnalyze(FileInfo) bool
-        +AnalyzeAsync(FileInfo) FileAnalysisResult
-    }
-    class CSharpFileAnalyzer {
-        +AnalyzeAsync()
-    }
-    class MarkdownReportGenerator {
-        +Generate()
-        +GenerateModuleDiagrams()
-        +GenerateFileContextDiagram()
+    namespace Cli {
+        class Program
     }
 
-    Program --> CodeAnalyzerService : USA
-    CodeAnalyzerService --> IFileAnalyzer : INYECTA (Colección)
-    CodeAnalyzerService --> MarkdownReportGenerator : USA
-    IFileAnalyzer <|.. CSharpFileAnalyzer
+    Program ..> CodeAnalyzerService : DI Resolution
+    CodeAnalyzerService --> IFileAnalyzer : Injects
+    CSharpFileAnalyzer ..|> IFileAnalyzer : Implements
+    CodeAnalyzerService ..> FileAnalysisResult : Uses
 ```
 
 ### 3.3. Nuevas Capacidades de Diagramación

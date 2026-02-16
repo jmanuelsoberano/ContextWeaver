@@ -42,6 +42,14 @@ desafío al:
    analizado para usar configuraciones específicas del proyecto. Si no lo encuentra, utiliza la configuración global por
    defecto, permitiendo una gran adaptabilidad.
 
+### Calidad de Código y Arquitectura
+
+El proyecto se adhiere a estándares estrictos de ingeniería de software:
+*   **Clean Architecture**: Separación estricta de responsabilidades (Core, Engine, Cli).
+*   **Zero Warnings**: El código compila sin advertencias ni errores (tratados como errores).
+*   **100% Test Pass Rate**: Todos los componentes críticos están cubiertos por pruebas unitarias y de integración.
+*   **Static Analysis**: Uso intensivo de Roslyn Analyzers y StyleCop para garantizar consistencia.
+
 ### Casos de Uso:
 
 - **Context Engineering para IA**: Genera un contexto rico y estructurado para tareas complejas como refactorización
@@ -56,12 +64,28 @@ desafío al:
 
 `ContextWeaver` se distribuye como una .NET Global Tool a través de NuGet.
 
-```
-Bash
-
-# Instalación
+```bash
+# Instalación desde NuGet (próximamente)
 dotnet tool install --global ContextWeaver
 ```
+
+#### Desarrollo Local
+
+Si deseas probar la herramienta sin instalarla globalmente o contribuir al desarrollo:
+
+1.  **Clonar el repositorio**:
+    ```bash
+    git clone https://github.com/jmanuelsoberano/ContextWeaver.git
+    cd ContextWeaver
+    ```
+2.  **Compilar y Ejecutar**:
+    ```bash
+    # Ejecutar directamente desde el código fuente
+    dotnet run --project src/ContextWeaver.Cli/ContextWeaver.Cli.csproj -- --help
+    
+    # O para analizar el propio proyecto
+    dotnet run --project src/ContextWeaver.Cli/ContextWeaver.Cli.csproj -- -d . -o reporte.md
+    ```
 
 #### Uso Básico (Recomendado)
 
@@ -118,9 +142,9 @@ ContextWeaver.Cli → ContextWeaver.Engine → ContextWeaver.Core
 
 | Proyecto | Responsabilidad |
 |:---|:---|
-| **Core** | Modelos + Abstracciones (cero dependencias) |
-| **Engine** | Analyzers, Reporters, Services, Utilities |
-| **Cli** | Entrada CLI + Inyección de Dependencias |
+| **ContextWeaver.Core** | Modelos + Abstracciones (cero dependencias externas). |
+| **ContextWeaver.Engine** | Lógica de negocio puro: Analyzers, Reporters, Services, Utilities. |
+| **ContextWeaver.Cli** | Punto de entrada, configuración de DI y parseo de argumentos. |
 
 ### Contribuir
 
