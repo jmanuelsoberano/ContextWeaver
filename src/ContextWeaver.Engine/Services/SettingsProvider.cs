@@ -7,6 +7,7 @@ namespace ContextWeaver.Services;
 
 public class SettingsProvider
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
     private readonly ILogger<SettingsProvider> _logger;
 
     public SettingsProvider(ILogger<SettingsProvider> logger)
@@ -34,8 +35,8 @@ public class SettingsProvider
                 }
 
                 var localSettings = section.Get<AnalysisSettings>();
-                if (localSettings != null && (localSettings.IncludedExtensions?.Any() == true ||
-                                              localSettings.ExcludePatterns?.Any() == true))
+                if (localSettings != null && ((localSettings.IncludedExtensions?.Length ?? 0) > 0 ||
+                                              (localSettings.ExcludePatterns?.Length ?? 0) > 0))
                 {
                     _logger.LogInformation("Configuración local aplicada exitosamente.");
                     return localSettings;
@@ -66,8 +67,7 @@ public class SettingsProvider
                 return defaultSettings;
             }
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var jsonString = JsonSerializer.Serialize(new { AnalysisSettings = defaultSettings }, options);
+            var jsonString = JsonSerializer.Serialize(new { AnalysisSettings = defaultSettings }, _jsonOptions);
             File.WriteAllText(resolvedPath, jsonString);
             _logger.LogInformation("Archivo de configuración creado en: {ConfigPath}", resolvedPath);
         }

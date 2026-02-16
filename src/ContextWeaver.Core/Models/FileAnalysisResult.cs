@@ -33,7 +33,7 @@ public class FileAnalysisResult
         {
             if (string.IsNullOrWhiteSpace(RelativePath))
                 return "Root";
-            var parts = RelativePath.Replace('\\', '/').Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = RelativePath.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
             return parts.Length > 1 ? parts[0] : "Root";
         }
     }

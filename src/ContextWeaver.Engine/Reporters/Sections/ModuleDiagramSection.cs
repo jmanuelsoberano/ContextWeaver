@@ -45,7 +45,7 @@ public class ModuleDiagramSection : IReportSection
                 }
             }
 
-            if (moduleDependencies.Any())
+            if (moduleDependencies.Count > 0)
             {
                 sb.AppendLine($"## Módulo: {moduleName}");
                 sb.AppendLine();

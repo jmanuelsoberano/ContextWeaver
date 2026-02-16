@@ -15,7 +15,7 @@ public static class MarkdownHelper
             return string.Empty;
 
         var anchor = text.Trim().ToLowerInvariant();
-        anchor = Regex.Replace(anchor, @"[^a-z0-9\s-]", "");
+        anchor = Regex.Replace(anchor, @"[^a-z0-9\s-]", string.Empty);
         anchor = Regex.Replace(anchor, @"[\s-]+", "-");
         return anchor.Trim('-');
     }

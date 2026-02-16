@@ -38,7 +38,6 @@ public class FullPipelineTests : IDisposable
     {
         var settingsProvider = new SettingsProvider(
             NullLogger<SettingsProvider>.Instance);
-        var instabilityCalculator = new InstabilityCalculator();
         var analyzers = new IFileAnalyzer[]
         {
             new CSharpFileAnalyzer(NullLogger<CSharpFileAnalyzer>.Instance),
@@ -48,7 +47,6 @@ public class FullPipelineTests : IDisposable
 
         return new CodeAnalyzerService(
             settingsProvider,
-            instabilityCalculator,
             analyzers,
             generators,
             NullLogger<CodeAnalyzerService>.Instance);

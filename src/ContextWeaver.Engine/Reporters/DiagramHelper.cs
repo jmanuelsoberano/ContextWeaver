@@ -19,19 +19,19 @@ internal static class DiagramHelper
         {
             return kind switch
             {
-                "interface" => ("interface", ""),
-                "enum" => ("enum", ""),
+                "interface" => ("interface", string.Empty),
+                "enum" => ("enum", string.Empty),
                 "record" => ("class", "<<record>>"),
                 "struct" => ("class", "<<struct>>"),
-                _ => ("class", "")
+                _ => ("class", string.Empty)
             };
         }
 
         // Fallback: heuristic detection
-        if (typeName.StartsWith("I") && typeName.Length > 1 && char.IsUpper(typeName[1]))
-            return ("interface", "");
+        if (typeName.Length > 1 && typeName.StartsWith('I') && char.IsUpper(typeName[1]))
+            return ("interface", string.Empty);
 
-        return ("class", "");
+        return ("class", string.Empty);
     }
 
     /// <summary>

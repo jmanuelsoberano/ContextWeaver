@@ -1,8 +1,11 @@
 using System.CommandLine;
+using System.Resources;
+using ContextWeaver.Cli;
 using ContextWeaver.Extensions;
 using ContextWeaver.Services;
 using Microsoft.Extensions.DependencyInjection;
 
+[assembly: NeutralResourcesLanguage("en")]
 
 // ARQUITECTURA: Top-Level Statements.
 // Este archivo ahora actúa como el punto de entrada directo de la aplicación.
@@ -14,20 +17,19 @@ using Microsoft.Extensions.DependencyInjection;
 var rootCommand = new RootCommand("Herramienta de análisis y extracción de código para LLMs.");
 
 var directoryOption = new Option<DirectoryInfo>(
-    new[] { "-d", "--directorio" },
+    CliConstants.DirectoryAliases,
     // La función getDefaultValue se ejecuta si el usuario no provee este parámetro.
     // "." es una forma universal de referirse al directorio actual.
     () => new DirectoryInfo("."),
     "El directorio raíz del proyecto a analizar. Por defecto, es el directorio actual.");
-// Ya no se necesita la propiedad { IsRequired = true }, porque ahora tiene un valor por defecto.
 
 var outputOption = new Option<FileInfo>(
-    new[] { "-o", "--output" },
+    CliConstants.OutputAliases,
     () => new FileInfo("analysis_report.md"),
     "El archivo de salida para el reporte consolidado.");
 
 var formatOption = new Option<string>(
-    new[] { "-f", "--format" },
+    CliConstants.FormatAliases,
     () => "markdown",
     "El formato del reporte de salida.");
 

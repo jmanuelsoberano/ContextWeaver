@@ -18,8 +18,6 @@ public class GenericFileAnalyzer : IFileAnalyzer
         { ".md", "markdown" }, { ".csproj", "xml" }, { ".sln", "plaintext" }
     };
 
-
-
     public bool CanAnalyze(FileInfo file)
     {
         return _languageMap.ContainsKey(file.Extension.ToLowerInvariant());
@@ -37,7 +35,7 @@ public class GenericFileAnalyzer : IFileAnalyzer
         {
             LinesOfCode = content.Split('\n').Length,
             CodeContent = content,
-            Language = _languageMap.GetValueOrDefault(file.Extension.ToLower(), "plaintext")
+            Language = _languageMap.GetValueOrDefault(file.Extension.ToLowerInvariant(), "plaintext")
         };
     }
 }

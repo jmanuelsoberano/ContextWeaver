@@ -37,7 +37,7 @@ public class NestingWalker : CSharpSyntaxWalker
         }
     }
 
-    private bool IsNestingNode(SyntaxNode node)
+    private static bool IsNestingNode(SyntaxNode node)
     {
         return node is IfStatementSyntax
                or ForStatementSyntax

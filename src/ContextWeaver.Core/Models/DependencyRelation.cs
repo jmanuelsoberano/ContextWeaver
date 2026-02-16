@@ -18,7 +18,7 @@ public record DependencyRelation(string Source, string Target, DependencyKind Ki
 
         var kind = raw.Contains("-.->") ? DependencyKind.Inheritance : DependencyKind.Usage;
         var separator = kind == DependencyKind.Inheritance ? "-.->" : "-->";
-        var parts = raw.Split(new[] { separator },
+        var parts = raw.Split(separator,
             StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) || string.IsNullOrWhiteSpace(parts[1]))

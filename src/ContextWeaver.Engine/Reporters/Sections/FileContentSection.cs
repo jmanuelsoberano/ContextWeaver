@@ -9,6 +9,8 @@ namespace ContextWeaver.Reporters.Sections;
 /// </summary>
 public class FileContentSection : IReportSection
 {
+    private static readonly char[] Separators = { ' ', ':' };
+
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();
@@ -24,7 +26,7 @@ public class FileContentSection : IReportSection
             sb.Append(RenderFileContextDiagram(result, context.TypeKindMap));
 
             // Referencias Entrantes ("Used By")
-            if (result.IncomingDependencies != null && result.IncomingDependencies.Any())
+            if (result.IncomingDependencies != null && result.IncomingDependencies.Count > 0)
             {
                 var usedByFiles = result.IncomingDependencies
                     .Select(d => DependencyRelation.Parse(d))
@@ -34,7 +36,7 @@ public class FileContentSection : IReportSection
                     .OrderBy(x => x)
                     .ToList();
 
-                if (usedByFiles.Any())
+                if (usedByFiles.Count > 0)
                 {
                     sb.AppendLine($"**Used By:** {string.Join(", ", usedByFiles)}");
                     sb.AppendLine();
@@ -42,7 +44,7 @@ public class FileContentSection : IReportSection
             }
 
             // Repo Map: Public API
-            if (result.Metrics.PublicApiSignatures.Any())
+            if (result.Metrics.PublicApiSignatures.Count > 0)
             {
                 var publicApi = result.Metrics.PublicApiSignatures;
                 sb.AppendLine("### Repo Map: Extraer solo firmas públicas y imports de cada archivo");
@@ -55,7 +57,7 @@ public class FileContentSection : IReportSection
                     var firstWord = lineTrimmed.Split(' ').FirstOrDefault();
                     if (DiagramHelper.IsTypeKeyword(firstWord))
                     {
-                        var parts = lineTrimmed.Split(new[] { ' ', ':' },
+                        var parts = lineTrimmed.Split(Separators,
                             StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length >= 2)
                         {
@@ -63,13 +65,13 @@ public class FileContentSection : IReportSection
                             if (result.DefinedTypeSemantics != null &&
                                 result.DefinedTypeSemantics.TryGetValue(typeName, out var semantics))
                             {
-                                if (semantics.Modifiers.Any())
+                                if (semantics.Modifiers.Count > 0)
                                     sb.AppendLine(
                                         $"    - Modifiers: {string.Join(", ", semantics.Modifiers)}");
-                                if (semantics.Attributes.Any())
+                                if (semantics.Attributes.Count > 0)
                                     sb.AppendLine(
                                         $"    - Attributes: {string.Join(", ", semantics.Attributes)}");
-                                if (semantics.Interfaces.Any())
+                                if (semantics.Interfaces.Count > 0)
                                     sb.AppendLine(
                                         $"    - Implements: {string.Join(", ", semantics.Interfaces)}");
                             }
@@ -81,7 +83,7 @@ public class FileContentSection : IReportSection
             }
 
             // Imports
-            if (result.Usings.Any())
+            if (result.Usings.Count > 0)
             {
                 sb.AppendLine("#### Imports:");
                 foreach (var singleUsing in result.Usings)

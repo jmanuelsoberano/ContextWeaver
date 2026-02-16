@@ -50,7 +50,7 @@ public class DependencyGraphSection : IReportSection
         sb.AppendLine();
 
         foreach (var module in modules.OrderBy(m => m.Key))
-            if (module.Value.Any())
+            if (module.Value.Count > 0)
             {
                 sb.AppendLine($"  subgraph {module.Key}");
                 foreach (var className in module.Value.OrderBy(n => n))
@@ -63,7 +63,7 @@ public class DependencyGraphSection : IReportSection
             sb.AppendLine($"  {dependency}");
         sb.AppendLine();
 
-        if (interfaces.Any())
+        if (interfaces.Count > 0)
         {
             sb.AppendLine("  %% Estilos");
             sb.AppendLine("  classDef interface fill:#ccf,stroke:#333,stroke-width:2px");
@@ -81,7 +81,7 @@ public class DependencyGraphSection : IReportSection
         sb.AppendLine();
 
         foreach (var module in modules.OrderBy(m => m.Key))
-            if (module.Value.Any())
+            if (module.Value.Count > 0)
             {
                 sb.AppendLine($"package \"{module.Key}\" {{");
                 foreach (var className in module.Value.OrderBy(n => n))

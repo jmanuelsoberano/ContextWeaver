@@ -8,19 +8,16 @@ public class CodeAnalyzerService
 {
     private readonly IEnumerable<IFileAnalyzer> _analyzers;
     private readonly IEnumerable<IReportGenerator> _generators;
-    private readonly InstabilityCalculator _instabilityCalculator;
     private readonly ILogger<CodeAnalyzerService> _logger;
     private readonly SettingsProvider _settingsProvider;
 
     public CodeAnalyzerService(
         SettingsProvider settingsProvider,
-        InstabilityCalculator instabilityCalculator,
         IEnumerable<IFileAnalyzer> analyzers,
         IEnumerable<IReportGenerator> generators,
         ILogger<CodeAnalyzerService> logger)
     {
         _settingsProvider = settingsProvider;
-        _instabilityCalculator = instabilityCalculator;
         _analyzers = analyzers;
         _generators = generators;
         _logger = logger;
@@ -60,7 +57,7 @@ public class CodeAnalyzerService
             if (analyzer != null)
             {
                 var result = await analyzer.AnalyzeAsync(file);
-                result.RelativePath = file.FullName.Replace(directory.FullName, "")
+                result.RelativePath = file.FullName.Replace(directory.FullName, string.Empty)
                     .Replace(Path.DirectorySeparatorChar, '/').TrimStart('/');
                 analysisResults.Add(result);
             }
@@ -108,7 +105,7 @@ public class CodeAnalyzerService
         }
 
         // 5. Calcular inestabilidad (responsabilidad delegada)
-        var instabilityMetrics = _instabilityCalculator.Calculate(resultsList);
+        var instabilityMetrics = InstabilityCalculator.Calculate(resultsList);
 
         // 6. Generar y escribir el reporte
         var reportContent = generator.Generate(directory, resultsList, instabilityMetrics);

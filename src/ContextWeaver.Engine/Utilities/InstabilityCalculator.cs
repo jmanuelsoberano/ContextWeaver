@@ -4,7 +4,7 @@ namespace ContextWeaver.Utilities;
 
 public class InstabilityCalculator
 {
-    public Dictionary<string, (int Ca, int Ce, double Instability)> Calculate(List<FileAnalysisResult> results)
+    public static Dictionary<string, (int Ca, int Ce, double Instability)> Calculate(List<FileAnalysisResult> results)
     {
         var typeToModuleMap = new Dictionary<string, string>();
         var moduleNames = new HashSet<string>();
@@ -71,9 +71,8 @@ public class InstabilityCalculator
             // Ca = Número de módulos que dependen de mí
             foreach (var dependentModule in dependencies)
             {
-                if (moduleMetrics.ContainsKey(dependentModule))
+                if (moduleMetrics.TryGetValue(dependentModule, out var depMetrics))
                 {
-                    var depMetrics = moduleMetrics[dependentModule];
                     moduleMetrics[dependentModule] = (depMetrics.Ca + 1, depMetrics.Ce);
                 }
             }

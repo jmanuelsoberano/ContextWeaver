@@ -22,7 +22,14 @@ public static class CSharpMetricsCalculator
         return walker.Complexity;
     }
 
-    private class ComplexityWalker : CSharpSyntaxWalker
+    public static int CalculateMaxNestingDepth(SyntaxNode root)
+    {
+        var walker = new NestingWalker();
+        walker.Visit(root);
+        return walker.MaxDepth;
+    }
+
+    private sealed class ComplexityWalker : CSharpSyntaxWalker
     {
         public int Complexity { get; private set; } = 1;
 
@@ -68,13 +75,5 @@ public static class CSharpMetricsCalculator
                 Complexity++;
             base.VisitBinaryExpression(node);
         }
-    }
-
-
-    public static int CalculateMaxNestingDepth(SyntaxNode root)
-    {
-        var walker = new NestingWalker();
-        walker.Visit(root);
-        return walker.MaxDepth;
     }
 }

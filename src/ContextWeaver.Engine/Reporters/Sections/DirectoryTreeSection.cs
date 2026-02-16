@@ -9,6 +9,8 @@ namespace ContextWeaver.Reporters.Sections;
 /// </summary>
 public class DirectoryTreeSection : IReportSection
 {
+    private static readonly char[] PathSeparators = { '/', '\\' };
+
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();
@@ -26,11 +28,11 @@ public class DirectoryTreeSection : IReportSection
 
     private static TreeNode BuildTree(List<FileAnalysisResult> results)
     {
-        var root = new TreeNode { Name = "" };
+        var root = new TreeNode { Name = string.Empty };
         foreach (var result in results)
         {
             var currentNode = root;
-            var pathParts = result.RelativePath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            var pathParts = result.RelativePath.Split(PathSeparators, StringSplitOptions.RemoveEmptyEntries);
 
             for (var i = 0; i < pathParts.Length; i++)
             {
@@ -68,7 +70,7 @@ public class DirectoryTreeSection : IReportSection
         }
     }
 
-    private class TreeNode
+    private sealed class TreeNode
     {
         public string Name { get; set; } = string.Empty;
         public string? Path { get; set; }

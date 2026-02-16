@@ -20,7 +20,6 @@ public static class HostBuilderExtensions
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddSingleton<SettingsProvider>();
-                services.AddSingleton<InstabilityCalculator>();
                 services.AddSingleton<CodeAnalyzerService>();
 
                 services.AddSingleton<IFileAnalyzer, CSharpFileAnalyzer>();

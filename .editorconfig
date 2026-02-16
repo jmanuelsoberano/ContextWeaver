@@ -47,6 +47,39 @@ dotnet_diagnostic.CS8602.severity = suggestion
 dotnet_diagnostic.CS8604.severity = suggestion
 dotnet_diagnostic.CS8618.severity = suggestion
 
+# StyleCop — suppress rules that conflict with modern C# style
+dotnet_diagnostic.SA0001.severity = none      # XML comment analysis disabled
+dotnet_diagnostic.SA1101.severity = none      # Prefix local calls with this
+dotnet_diagnostic.SA1200.severity = none      # Using directives must be inside namespace
+dotnet_diagnostic.SA1309.severity = none      # Field names must not begin with underscore
+dotnet_diagnostic.SA1503.severity = none      # Braces should not be omitted (handled by csharp_preserve_single_line_statements)
+dotnet_diagnostic.SA1633.severity = none      # File must have header (not needed for open-source)
+dotnet_diagnostic.SA1116.severity = none      # Parameters should begin on line after declaration
+dotnet_diagnostic.SA1000.severity = none      # Keyword spacing (conflicts with new() target-typed)
+dotnet_diagnostic.SA1009.severity = none      # Closing parenthesis spacing
+dotnet_diagnostic.SA1413.severity = none      # Trailing comma in multi-line initializers
+dotnet_diagnostic.SA1516.severity = none      # Elements should be separated by blank line (too verbose for DTOs)
+dotnet_diagnostic.SA1010.severity = none      # Opening square brackets spacing (conflicts with collection expressions)
+dotnet_diagnostic.SA1515.severity = none      # Single-line comment should be preceded by blank line
+dotnet_diagnostic.SA1313.severity = none      # Parameter names must begin with lower-case annotation (Conflicts with Records)
+dotnet_diagnostic.SA1117.severity = none      # Parameters must be on same line or separate lines
+dotnet_diagnostic.CA1848.severity = none      # Use LoggerMessage delegates (too strict for now)
+dotnet_diagnostic.CA1305.severity = none      # Specify IFormatProvider (too verbose)
+dotnet_diagnostic.SA1519.severity = none
+
+[**/*.Tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.SA1512.severity = none
+dotnet_diagnostic.SA1122.severity = none
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.SA1518.severity = none
+dotnet_diagnostic.SA1202.severity = none
+dotnet_diagnostic.SA1025.severity = none
+dotnet_diagnostic.SA1201.severity = none
+dotnet_diagnostic.CA1816.severity = none
+dotnet_diagnostic.CA1861.severity = none
+
+
 # XML files
 [*.{xml,csproj,props,targets,resx}]
 indent_size = 2

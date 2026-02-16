@@ -18,8 +18,14 @@ namespace ContextWeaver.Analyzers;
 public class CSharpFileAnalyzer : IFileAnalyzer
 {
     private readonly ILogger<CSharpFileAnalyzer> _logger;
+    private readonly HashSet<string> _allProjectTypes = new();
     private CSharpCompilation? _globalCompilation;
     private Dictionary<string, SyntaxTree> _syntaxTrees = new();
+
+    public CSharpFileAnalyzer(ILogger<CSharpFileAnalyzer> logger)
+    {
+        _logger = logger;
+    }
 
     public bool CanAnalyze(FileInfo file)
     {
@@ -59,13 +65,6 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     // y se lee en AnalyzeAsync() (paralelo). Esto es seguro porque CodeAnalyzerService.AnalyzeAndGenerateReport()
     // garantiza que InitializeAsync() se completa ANTES de que Parallel.ForEachAsync invoque AnalyzeAsync().
     // Si este orden cambia, convertir a ConcurrentDictionary<string, byte> o similar.
-    private readonly HashSet<string> _allProjectTypes = new();
-
-    public CSharpFileAnalyzer(ILogger<CSharpFileAnalyzer> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task<FileAnalysisResult> AnalyzeAsync(FileInfo file)
     {
         try
@@ -155,6 +154,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                         attributes.Add($"[{attr.Name}]");
                     }
                 }
+
                 definedTypeSemantics[name] = new TypeSemantics(modifiers, new List<string>(), attributes);
             }
 
@@ -192,7 +192,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     /// <summary>
     ///     Extrae las firmas de los miembros públicos (clases, métodos, propiedades) del árbol de sintaxis.
     /// </summary>
-    private List<string> ExtractPublicApiSignatures(SyntaxNode root)
+    private static List<string> ExtractPublicApiSignatures(SyntaxNode root)
     {
         var signatures = new List<string>();
 
@@ -226,7 +226,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                             memberSignature.Append($"{property.Type} {property.Identifier.Text}");
                             if (property.AccessorList != null)
                                 memberSignature.Append(
-                                    $" {property.AccessorList.ToString().Replace("\n", "").Replace("\r", "").Replace(" ", "")}"); // Simplificar accesores
+                                    $" {property.AccessorList.ToString().Replace("\n", string.Empty).Replace("\r", string.Empty).Replace(" ", string.Empty)}"); // Simplificar accesores
                             signatures.Add($"  - {memberSignature.ToString().Trim()}");
                         }
                         else if (member is ConstructorDeclarationSyntax constructor)
@@ -234,6 +234,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                             memberSignature.Append($"{constructor.Identifier.Text}{constructor.ParameterList}");
                             signatures.Add($"  - {memberSignature.ToString().Trim()}");
                         }
+
                         // Puedes añadir más tipos de miembros si es necesario (ej. eventos, campos)
                     }
             }
@@ -244,14 +245,13 @@ public class CSharpFileAnalyzer : IFileAnalyzer
     /// <summary>
     ///     Extrae las sentencias 'using' del árbol de sintaxis.
     /// </summary>
-    private List<string> ExtractUsingStatements(SyntaxNode root)
+    private static List<string> ExtractUsingStatements(SyntaxNode root)
     {
         return root.DescendantNodes().OfType<UsingDirectiveSyntax>()
             .Select(u => u.Name.ToString())
             .OrderBy(u => u)
             .ToList();
     }
-
 
     /// <summary>
     ///     ✅ VERSIÓN CORREGIDA: Extrae dependencias limpias y con sintaxis correcta para 'graph TD'.
@@ -268,7 +268,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             .Where(symbol => symbol != null)
             .ToList();
 
-        if (!declaredTypeSymbols.Any())
+        if (declaredTypeSymbols.Count == 0)
             return new List<string>();
 
         // Crear una lista de los nombres de nuestros propios tipos para poder filtrar.
@@ -287,8 +287,8 @@ public class CSharpFileAnalyzer : IFileAnalyzer
 
                 var targetTypeName = baseTypeSymbol.Name;
                 // ✅ FIX: Solo añadir si el destino es relevante (no es del sistema y no está vacío).
-                var targetNs = baseTypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
-                if (!string.IsNullOrWhiteSpace(targetTypeName) && !targetNs.StartsWith("System"))
+                var targetNs = baseTypeSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(targetTypeName) && !targetNs.StartsWith("System", StringComparison.Ordinal))
                     // ✅ FIX: Usar sintaxis de línea punteada para herencia en 'graph TD'
                     dependencies.Add($"{sourceTypeName} -.-> {targetTypeName}");
             }
@@ -305,7 +305,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                     continue;
 
                 var targetTypeName = targetTypeSymbol.Name;
-                var targetNs = targetTypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
+                var targetNs = targetTypeSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
 
                 // ✅ FIX: El filtro principal. Solo nos interesan las dependencias a otros tipos del proyecto.
                 // También se excluyen tipos del sistema y se asegura que el nombre no esté vacío.

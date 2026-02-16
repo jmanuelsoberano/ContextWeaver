@@ -1,6 +1,10 @@
 # ContextWeaver
 
-## La Herramienta CLI  para el Context Engineering y Análisis Arquitectónico
+[![CI](https://github.com/jmanuelsoberano/ContextWeaver/actions/workflows/ci.yml/badge.svg)](https://github.com/jmanuelsoberano/ContextWeaver/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+## La Herramienta CLI para el Context Engineering y Análisis Arquitectónico
 
 `ContextWeaver` es una potente herramienta de línea de comandos (.NET Global Tool) diseñada para ingenieros de software,
 arquitectos y desarrolladores. Transforma cualquier codebase en un **documento Markdown único, coherente y enriquecido
@@ -103,3 +107,25 @@ Para anular la configuración global, crea un archivo `.contextweaver.json` en l
   }
 }
 ```
+
+### Arquitectura
+
+El proyecto sigue **Ports & Adapters** con **Dependency Rule** unidireccional:
+
+```
+ContextWeaver.Cli → ContextWeaver.Engine → ContextWeaver.Core
+```
+
+| Proyecto | Responsabilidad |
+|:---|:---|
+| **Core** | Modelos + Abstracciones (cero dependencias) |
+| **Engine** | Analyzers, Reporters, Services, Utilities |
+| **Cli** | Entrada CLI + Inyección de Dependencias |
+
+### Contribuir
+
+Lee [CONTRIBUTING.md](CONTRIBUTING.md) para guía de setup, arquitectura, y convenciones.
+
+### Licencia
+
+[MIT](LICENSE) © Jose Manuel Campos Soberano
