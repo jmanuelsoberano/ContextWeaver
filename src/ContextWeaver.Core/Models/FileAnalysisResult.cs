@@ -7,40 +7,40 @@ namespace ContextWeaver.Core;
 /// </summary>
 public class FileAnalysisResult
 {
-    /// <summary>Gets or sets obtiene o establece la ruta relativa del archivo desde el directorio raíz.</summary>
+    /// <summary>Obtiene o establece la ruta relativa del archivo desde el directorio raíz.</summary>
     public string RelativePath { get; set; } = string.Empty;
 
-    /// <summary>Gets obtiene el número total de líneas en el archivo.</summary>
+    /// <summary>Obtiene el número total de líneas en el archivo.</summary>
     public int LinesOfCode { get; init; }
 
-    /// <summary>Gets obtiene el contenido completo del archivo.</summary>
+    /// <summary>Obtiene el contenido completo del archivo.</summary>
     public string CodeContent { get; init; } = string.Empty;
 
-    /// <summary>Gets obtiene el identificador de lenguaje detectado (ej. "csharp", "json").</summary>
+    /// <summary>Obtiene el identificador de lenguaje detectado (ej. "csharp", "json").</summary>
     public string Language { get; init; } = "plaintext";
 
-    /// <summary>Gets obtiene las métricas específicas calculadas para este archivo.</summary>
+    /// <summary>Obtiene las métricas específicas calculadas para este archivo.</summary>
     public FileMetrics Metrics { get; init; } = new();
 
-    /// <summary>Gets obtiene la lista de namespaces importados mediante directivas 'using'.</summary>
+    /// <summary>Obtiene la lista de namespaces importados mediante directivas 'using'.</summary>
     public List<string> Usings { get; init; } = new();
 
-    /// <summary>Gets obtiene la lista de dependencias salientes (ej. "EstaClase --> OtraClase").</summary>
+    /// <summary>Obtiene la lista de dependencias salientes (ej. "EstaClase --> OtraClase").</summary>
     public List<string> ClassDependencies { get; init; } = new();
 
     /// <summary>
-    ///     Gets or sets obtiene o establece la lista de dependencias entrantes (archivos que dependen de este).
+    ///     Obtiene o establece la lista de dependencias entrantes (archivos que dependen de este).
     ///     Permanece como <c>set</c> porque se llena en post-procesamiento.
     /// </summary>
     public List<string> IncomingDependencies { get; set; } = new();
 
-    /// <summary>Gets obtiene la lista de nombres de tipos definidos en este archivo.</summary>
+    /// <summary>Obtiene la lista de nombres de tipos definidos en este archivo.</summary>
     public List<string> DefinedTypes { get; init; } = new();
 
-    /// <summary>Gets obtiene un diccionario mapeando nombres de tipos a su clase (class, interface, etc.).</summary>
+    /// <summary>Obtiene un diccionario mapeando nombres de tipos a su clase (class, interface, etc.).</summary>
     public Dictionary<string, string> DefinedTypeKinds { get; init; } = new();
 
-    /// <summary>Gets obtiene el nombre del módulo derivado de la ruta del archivo.</summary>
+    /// <summary>Obtiene el nombre del módulo derivado de la ruta del archivo.</summary>
     public string ModuleName
     {
         get
@@ -52,7 +52,7 @@ public class FileAnalysisResult
         }
     }
 
-    /// <summary>Gets obtiene un diccionario mapeando nombres de tipos a sus detalles semánticos (modificadores, interfaces).</summary>
+    /// <summary>Obtiene un diccionario mapeando nombres de tipos a sus detalles semánticos (modificadores, interfaces).</summary>
     public Dictionary<string, TypeSemantics> DefinedTypeSemantics { get; init; } = new();
 }
 

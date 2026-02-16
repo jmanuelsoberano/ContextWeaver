@@ -74,7 +74,7 @@ public class DependencyGraphSection : IReportSection
         sb.AppendLine("```");
         sb.AppendLine();
 
-        // PlantUML Version
+        // Versión PlantUML
         sb.AppendLine("### Alternativa: PlantUML");
         sb.AppendLine("```plantuml");
         sb.AppendLine("@startuml");
