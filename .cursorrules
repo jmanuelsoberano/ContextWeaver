@@ -1,0 +1,26 @@
+# AI Behavior Rules
+
+## 1. Language & Localization
+- **Primary Language**: Spanish (Español).
+- **Scope**: All XML documentation (<summary>, <param>, <returns>), inline comments (`//`), and region headers (`#region`).
+- **Strict Exceptions (Keep in English)**:
+  - **Technical Terms/Patterns**: "Helper", "Wrapper", "Handler", "Service", "Pipeline", "Middleware", "Snapshot", "Fixture".
+  - **Type Names**: "Task" (when referring to `System.Threading.Tasks.Task`), "List", "Dictionary".
+  - **Code Identifiers**: Variable names, method names, class names.
+  
+  *Incorrect*: "Ayudante", "Tarea" (para el tipo), "Envoltorio".
+  *Correct*: "Helper", "Task", "Wrapper".
+
+## 2. XML Documentation Style
+- **No Generated Prefixes**: Do NOT use English prefixes like:
+  - "Gets or sets..."
+  - "Initializes a new instance of..."
+  - "d" (generic parameter descriptions)
+- **Direct & Concise**: Start directly with the description in Spanish.
+  - *Bad*: "Gets or sets the user name." -> "Obtiene o establece el nombre de usuario."
+  - *Good*: "Obtiene o establece el nombre de usuario." (Direct translate is okay if no prefix residue remains).
+  - *Better*: "El nombre del usuario." (If context allows).
+
+## 3. Formatting
+- Use 4 spaces for indentation.
+- Follow standard C# coding conventions (PascalCase for methods/classes, camelCase for locals).

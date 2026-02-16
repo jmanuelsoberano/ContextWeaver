@@ -71,7 +71,11 @@ Este proyecto aplica principios fundacionales de ingeniería de software:
 ## Convenciones de código
 
 - **Estilo:** configurado en `.editorconfig` + StyleCop. Ejecuta `dotnet format` antes de hacer commit.
-- **Idioma del código:** inglés para identificadores, español es aceptable en comentarios y documentación.
+- **Idioma y Localización:**
+  - **Documentación y Comentarios**: Español.
+  - **Términos Técnicos**: Mantener en Inglés (ej. "Helper", "Task", "Wrapper").
+  - **Identificadores de Código**: Inglés (ej. `CSharpFileAnalyzer`).
+  - *Nota*: Para reglas detalladas de IA, consultar `.cursorrules`.
 - **Tests:** todo feature nuevo debe incluir tests unitarios o E2E.
 - **Namespaces:** deben coincidir con la ubicación del archivo dentro del proyecto.
 
