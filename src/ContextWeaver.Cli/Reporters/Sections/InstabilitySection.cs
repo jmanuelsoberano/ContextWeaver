@@ -49,8 +49,10 @@ public class InstabilitySection : IReportSection
 
     private static string GetInstabilityDescription(double instability)
     {
-        if (instability <= 0.2) return "Muy estable / Core";
-        if (instability >= 0.8) return "Muy inestable / Concreto";
+        if (instability <= 0.2)
+            return "Muy estable / Core";
+        if (instability >= 0.8)
+            return "Muy inestable / Concreto";
         return "Estabilidad intermedia";
     }
 }

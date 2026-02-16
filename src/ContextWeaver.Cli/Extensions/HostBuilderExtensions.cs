@@ -1,4 +1,4 @@
-﻿using ContextWeaver.Analyzers;
+using ContextWeaver.Analyzers;
 using ContextWeaver.Interfaces;
 using ContextWeaver.Reporters;
 using ContextWeaver.Services;

@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+using System.CommandLine;
 using ContextWeaver.Extensions;
 using ContextWeaver.Services;
 using Microsoft.Extensions.DependencyInjection;

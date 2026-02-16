@@ -35,7 +35,8 @@ public class ModuleDiagramSection : IReportSection
                     foreach (var dep in file.ClassDependencies)
                     {
                         var relation = DependencyRelation.Parse(dep);
-                        if (relation == null) continue;
+                        if (relation == null)
+                            continue;
 
                         moduleDependencies.Add(dep);
                         relatedClasses.Add(relation.Source);

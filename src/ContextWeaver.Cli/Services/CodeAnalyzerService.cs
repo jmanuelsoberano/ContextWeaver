@@ -1,4 +1,4 @@
-﻿using ContextWeaver.Core;
+using ContextWeaver.Core;
 using ContextWeaver.Interfaces;
 using ContextWeaver.Utilities;
 using Microsoft.Extensions.Logging;
@@ -54,7 +54,7 @@ public class CodeAnalyzerService
 
         // 4. Analizar archivos (Paralelizado)
         var analysisResults = new System.Collections.Concurrent.ConcurrentBag<FileAnalysisResult>();
-        
+
         await Parallel.ForEachAsync(allFiles, async (file, ct) =>
         {
             var analyzer = _analyzers.FirstOrDefault(a => a.CanAnalyze(file));
@@ -94,7 +94,8 @@ public class CodeAnalyzerService
                 foreach (var dep in result.ClassDependencies)
                 {
                     var relation = DependencyRelation.Parse(dep);
-                    if (relation == null) continue;
+                    if (relation == null)
+                        continue;
 
                     if (typeToFileMap.TryGetValue(relation.Target, out var targetFile))
                     {

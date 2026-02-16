@@ -1,4 +1,4 @@
-﻿namespace ContextWeaver.Core;
+namespace ContextWeaver.Core;
 
 /// <summary>
 ///     Proporciona los valores de configuración por defecto para la aplicación.

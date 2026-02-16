@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using ContextWeaver.Core;
 using ContextWeaver.Interfaces;
 using ContextWeaver.Utilities;
@@ -55,7 +55,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             }
         }
     }
-    
+
     // THREAD-SAFETY: _allProjectTypes se llena exclusivamente en InitializeAsync() (secuencial)
     // y se lee en AnalyzeAsync() (paralelo). Esto es seguro porque CodeAnalyzerService.AnalyzeAndGenerateReport()
     // garantiza que InitializeAsync() se completa ANTES de que Parallel.ForEachAsync invoque AnalyzeAsync().
@@ -80,102 +80,102 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             var root = tree.GetRoot();
             var contentText = root.ToFullString();
 
-        // Usar SemanticModel global si está disponible, sino crear uno local.
-        SemanticModel semanticModel;
-        if (_globalCompilation != null)
-        {
-            semanticModel = _globalCompilation.GetSemanticModel(tree);
-        }
-        else
-        {
-            var compilation = CSharpCompilation.Create("ContextWeaverAnalysis")
-                .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
-                .AddSyntaxTrees(tree);
-            semanticModel = compilation.GetSemanticModel(tree);
-        }
-            
-        var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(root);
-        var maxNestingDepth = CSharpMetricsCalculator.CalculateMaxNestingDepth(root);
-        var publicApiSignatures = ExtractPublicApiSignatures(root);
-        var usings = ExtractUsingStatements(root); 
-        // Extraer las dependencias de clase usando el modelo semántico (global o local)
-        var classDependencies = ExtractClassDependencies(root, semanticModel);
-
-        // Extraer tipos definidos con su semántica enriquecida
-        var definedTypes = new List<string>();
-        var definedTypeKinds = new Dictionary<string, string>();
-        var definedTypeSemantics = new Dictionary<string, TypeSemantics>();
-
-        foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
-        {
-            var name = typeDecl.Identifier.Text;
-            definedTypes.Add(name);
-            definedTypeKinds[name] = typeDecl.Keyword.Text;
-            
-            // Semántica: Modificadores
-            var modifiers = typeDecl.Modifiers.Select(m => m.Text).ToList();
-            
-            // Semántica: Interfaces
-            var interfaces = new List<string>();
-            if (typeDecl.BaseList != null)
+            // Usar SemanticModel global si está disponible, sino crear uno local.
+            SemanticModel semanticModel;
+            if (_globalCompilation != null)
             {
-                foreach (var unused in typeDecl.BaseList.Types)
+                semanticModel = _globalCompilation.GetSemanticModel(tree);
+            }
+            else
+            {
+                var compilation = CSharpCompilation.Create("ContextWeaverAnalysis")
+                    .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                    .AddSyntaxTrees(tree);
+                semanticModel = compilation.GetSemanticModel(tree);
+            }
+
+            var complexity = CSharpMetricsCalculator.CalculateCyclomaticComplexity(root);
+            var maxNestingDepth = CSharpMetricsCalculator.CalculateMaxNestingDepth(root);
+            var publicApiSignatures = ExtractPublicApiSignatures(root);
+            var usings = ExtractUsingStatements(root);
+            // Extraer las dependencias de clase usando el modelo semántico (global o local)
+            var classDependencies = ExtractClassDependencies(root, semanticModel);
+
+            // Extraer tipos definidos con su semántica enriquecida
+            var definedTypes = new List<string>();
+            var definedTypeKinds = new Dictionary<string, string>();
+            var definedTypeSemantics = new Dictionary<string, TypeSemantics>();
+
+            foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+            {
+                var name = typeDecl.Identifier.Text;
+                definedTypes.Add(name);
+                definedTypeKinds[name] = typeDecl.Keyword.Text;
+
+                // Semántica: Modificadores
+                var modifiers = typeDecl.Modifiers.Select(m => m.Text).ToList();
+
+                // Semántica: Interfaces
+                var interfaces = new List<string>();
+                if (typeDecl.BaseList != null)
                 {
-                    // Nota: Aquí solo tomamos el texto crudo. Para mayor precisión se podría usar SemanticModel.
-                    // Pero para "Repo Map" visual es suficiente y más rápido así.
-                    interfaces.Add(unused.ToString());
+                    foreach (var unused in typeDecl.BaseList.Types)
+                    {
+                        // Nota: Aquí solo tomamos el texto crudo. Para mayor precisión se podría usar SemanticModel.
+                        // Pero para "Repo Map" visual es suficiente y más rápido así.
+                        interfaces.Add(unused.ToString());
+                    }
                 }
-            }
 
-            // Semántica: Atributos
-            var attributes = new List<string>();
-            foreach (var attrList in typeDecl.AttributeLists)
-            {
-                foreach (var attr in attrList.Attributes)
+                // Semántica: Atributos
+                var attributes = new List<string>();
+                foreach (var attrList in typeDecl.AttributeLists)
                 {
-                    attributes.Add($"[{attr.Name}]");
+                    foreach (var attr in attrList.Attributes)
+                    {
+                        attributes.Add($"[{attr.Name}]");
+                    }
                 }
+
+                definedTypeSemantics[name] = new TypeSemantics(modifiers, interfaces, attributes);
             }
 
-            definedTypeSemantics[name] = new TypeSemantics(modifiers, interfaces, attributes);
-        }
-
-        // También incluir Enums (con semántica vacía o básica)
-        foreach (var enumDecl in root.DescendantNodes().OfType<EnumDeclarationSyntax>())
-        {
-            var name = enumDecl.Identifier.Text;
-            definedTypes.Add(name);
-            definedTypeKinds[name] = "enum";
-            // Enums solo suelen tener modificadores (public, internal) y atributos.
-            var modifiers = enumDecl.Modifiers.Select(m => m.Text).ToList();
-             var attributes = new List<string>();
-            foreach (var attrList in enumDecl.AttributeLists)
+            // También incluir Enums (con semántica vacía o básica)
+            foreach (var enumDecl in root.DescendantNodes().OfType<EnumDeclarationSyntax>())
             {
-                foreach (var attr in attrList.Attributes)
+                var name = enumDecl.Identifier.Text;
+                definedTypes.Add(name);
+                definedTypeKinds[name] = "enum";
+                // Enums solo suelen tener modificadores (public, internal) y atributos.
+                var modifiers = enumDecl.Modifiers.Select(m => m.Text).ToList();
+                var attributes = new List<string>();
+                foreach (var attrList in enumDecl.AttributeLists)
                 {
-                    attributes.Add($"[{attr.Name}]");
+                    foreach (var attr in attrList.Attributes)
+                    {
+                        attributes.Add($"[{attr.Name}]");
+                    }
                 }
+                definedTypeSemantics[name] = new TypeSemantics(modifiers, new List<string>(), attributes);
             }
-            definedTypeSemantics[name] = new TypeSemantics(modifiers, new List<string>(), attributes);
-        }
 
-        return new FileAnalysisResult
-        {
-            LinesOfCode = contentText.Split('\n').Length,
-            CodeContent = contentText,
-            Language = "csharp",
-            Usings = usings,
-            ClassDependencies = classDependencies,
-            DefinedTypes = definedTypes,
-            DefinedTypeKinds = definedTypeKinds,
-            DefinedTypeSemantics = definedTypeSemantics,
-            Metrics = new FileMetrics
+            return new FileAnalysisResult
             {
-                CyclomaticComplexity = complexity,
-                MaxNestingDepth = maxNestingDepth,
-                PublicApiSignatures = publicApiSignatures
-            }
-        };
+                LinesOfCode = contentText.Split('\n').Length,
+                CodeContent = contentText,
+                Language = "csharp",
+                Usings = usings,
+                ClassDependencies = classDependencies,
+                DefinedTypes = definedTypes,
+                DefinedTypeKinds = definedTypeKinds,
+                DefinedTypeSemantics = definedTypeSemantics,
+                Metrics = new FileMetrics
+                {
+                    CyclomaticComplexity = complexity,
+                    MaxNestingDepth = maxNestingDepth,
+                    PublicApiSignatures = publicApiSignatures
+                }
+            };
         }
         catch (Exception ex)
         {
@@ -203,7 +203,8 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             {
                 var typeSignature = new StringBuilder();
                 typeSignature.Append($"{typeDeclaration.Keyword.Text} {typeDeclaration.Identifier.Text}");
-                if (typeDeclaration.TypeParameterList != null) typeSignature.Append(typeDeclaration.TypeParameterList);
+                if (typeDeclaration.TypeParameterList != null)
+                    typeSignature.Append(typeDeclaration.TypeParameterList);
                 if (typeDeclaration.BaseList != null)
                     typeSignature.Append(
                         $" : {string.Join(", ", typeDeclaration.BaseList.Types.Select(t => t.ToString()))}");
@@ -268,7 +269,8 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             .Where(symbol => symbol != null)
             .ToList();
 
-        if (!declaredTypeSymbols.Any()) return new List<string>();
+        if (!declaredTypeSymbols.Any())
+            return new List<string>();
 
         // Crear una lista de los nombres de nuestros propios tipos para poder filtrar.
         var projectTypeNames = new HashSet<string>(declaredTypeSymbols.Select(s => s.Name));
@@ -281,7 +283,8 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             var baseTypes = sourceTypeSymbol.Interfaces.Concat(new[] { sourceTypeSymbol.BaseType });
             foreach (var baseTypeSymbol in baseTypes)
             {
-                if (baseTypeSymbol == null || baseTypeSymbol.SpecialType == SpecialType.System_Object) continue;
+                if (baseTypeSymbol == null || baseTypeSymbol.SpecialType == SpecialType.System_Object)
+                    continue;
 
                 var targetTypeName = baseTypeSymbol.Name;
                 // ✅ FIX: Solo añadir si el destino es relevante (no es del sistema y no está vacío).
@@ -292,13 +295,15 @@ public class CSharpFileAnalyzer : IFileAnalyzer
             }
 
             var typeDeclarationSyntax = sourceTypeSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
-            if (typeDeclarationSyntax == null) continue;
+            if (typeDeclarationSyntax == null)
+                continue;
 
             // --- Análisis de USO / COMPOSICIÓN ---
             foreach (var typeNode in typeDeclarationSyntax.DescendantNodes().OfType<TypeSyntax>())
             {
                 var symbolInfo = semanticModel.GetSymbolInfo(typeNode);
-                if (symbolInfo.Symbol is not ITypeSymbol targetTypeSymbol) continue;
+                if (symbolInfo.Symbol is not ITypeSymbol targetTypeSymbol)
+                    continue;
 
                 var targetTypeName = targetTypeSymbol.Name;
                 var targetNs = targetTypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";

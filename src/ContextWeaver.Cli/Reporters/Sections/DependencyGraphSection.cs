@@ -17,13 +17,15 @@ public class DependencyGraphSection : IReportSection
         foreach (var result in context.SortedResults)
         {
             var moduleName = result.ModuleName;
-            if (!modules.ContainsKey(moduleName)) modules[moduleName] = new HashSet<string>();
+            if (!modules.ContainsKey(moduleName))
+                modules[moduleName] = new HashSet<string>();
 
             if (result.ClassDependencies != null)
                 foreach (var dependency in result.ClassDependencies)
                 {
                     var relation = DependencyRelation.Parse(dependency);
-                    if (relation == null) continue;
+                    if (relation == null)
+                        continue;
 
                     allDependencies.Add(dependency);
                     modules[moduleName].Add(relation.Source);
@@ -34,7 +36,8 @@ public class DependencyGraphSection : IReportSection
                 }
         }
 
-        if (allDependencies.Count == 0) return string.Empty;
+        if (allDependencies.Count == 0)
+            return string.Empty;
 
         var sb = new StringBuilder();
         sb.AppendLine("# 📈 Gráfico de Dependencias de Clases");

@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace ContextWeaver.Utilities;
 
@@ -11,7 +11,8 @@ public static class MarkdownHelper
 {
     public static string CreateAnchor(string text)
     {
-        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
 
         var anchor = text.Trim().ToLowerInvariant();
         anchor = Regex.Replace(anchor, @"[^a-z0-9\s-]", "");

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using ContextWeaver.Core;
 using ContextWeaver.Interfaces;
 using ContextWeaver.Reporters.Sections;

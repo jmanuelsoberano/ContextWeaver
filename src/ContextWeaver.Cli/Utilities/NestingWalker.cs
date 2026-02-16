@@ -17,14 +17,16 @@ public class NestingWalker : CSharpSyntaxWalker
 
     public override void Visit(SyntaxNode? node)
     {
-        if (node == null) return;
+        if (node == null)
+            return;
 
         var isNestingNode = IsNestingNode(node);
 
         if (isNestingNode)
         {
             _currentDepth++;
-            if (_currentDepth > _maxDepth) _maxDepth = _currentDepth;
+            if (_currentDepth > _maxDepth)
+                _maxDepth = _currentDepth;
         }
 
         base.Visit(node);

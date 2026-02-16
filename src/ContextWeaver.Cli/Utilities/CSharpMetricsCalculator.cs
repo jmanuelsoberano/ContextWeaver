@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,7 +13,8 @@ public static class CSharpMetricsCalculator
 {
     public static int CalculateCyclomaticComplexity(SyntaxNode root)
     {
-        if (root == null) return 1;
+        if (root == null)
+            return 1;
 
         var walker = new ComplexityWalker();
         walker.Visit(root);

@@ -1,4 +1,4 @@
-﻿using ContextWeaver.Core;
+using ContextWeaver.Core;
 
 namespace ContextWeaver.Utilities;
 
@@ -27,7 +27,7 @@ public class InstabilityCalculator
         }
 
         var moduleEfferentDependencies = new Dictionary<string, HashSet<string>>();
-        
+
         // Inicializar
         foreach (var module in moduleNames)
         {
@@ -44,7 +44,8 @@ public class InstabilityCalculator
                 foreach (var dep in result.ClassDependencies)
                 {
                     var relation = DependencyRelation.Parse(dep);
-                    if (relation == null) continue;
+                    if (relation == null)
+                        continue;
 
                     if (typeToModuleMap.TryGetValue(relation.Target, out var targetModule))
                     {

@@ -1,4 +1,4 @@
-﻿using ContextWeaver.Core;
+using ContextWeaver.Core;
 using ContextWeaver.Interfaces;
 
 namespace ContextWeaver.Analyzers;

@@ -1,4 +1,4 @@
-﻿namespace ContextWeaver.Core;
+namespace ContextWeaver.Core;
 
 /// <summary>
 ///     Data Transfer Object (DTO) que transporta los resultados de un análisis de archivo
@@ -31,7 +31,8 @@ public class FileAnalysisResult
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(RelativePath)) return "Root";
+            if (string.IsNullOrWhiteSpace(RelativePath))
+                return "Root";
             var parts = RelativePath.Replace('\\', '/').Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             return parts.Length > 1 ? parts[0] : "Root";
         }

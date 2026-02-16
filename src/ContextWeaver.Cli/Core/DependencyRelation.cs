@@ -13,7 +13,8 @@ public record DependencyRelation(string Source, string Target, DependencyKind Ki
     /// </summary>
     public static DependencyRelation? Parse(string raw)
     {
-        if (string.IsNullOrWhiteSpace(raw)) return null;
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
 
         var kind = raw.Contains("-.->") ? DependencyKind.Inheritance : DependencyKind.Usage;
         var separator = kind == DependencyKind.Inheritance ? "-.->" : "-->";

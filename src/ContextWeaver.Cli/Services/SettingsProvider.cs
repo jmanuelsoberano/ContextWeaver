@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using ContextWeaver.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

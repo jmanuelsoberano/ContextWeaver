@@ -38,7 +38,8 @@ public class DirectoryTreeSection : IReportSection
                 if (!currentNode.Children.ContainsKey(part))
                     currentNode.Children[part] = new TreeNode { Name = part };
                 currentNode = currentNode.Children[part];
-                if (i == pathParts.Length - 1) currentNode.Path = result.RelativePath;
+                if (i == pathParts.Length - 1)
+                    currentNode.Path = result.RelativePath;
             }
         }
 

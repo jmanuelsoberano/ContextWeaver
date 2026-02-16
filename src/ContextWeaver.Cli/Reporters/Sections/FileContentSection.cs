@@ -84,7 +84,8 @@ public class FileContentSection : IReportSection
             if (result.Usings.Any())
             {
                 sb.AppendLine("#### Imports:");
-                foreach (var singleUsing in result.Usings) sb.AppendLine($"- {singleUsing}");
+                foreach (var singleUsing in result.Usings)
+                    sb.AppendLine($"- {singleUsing}");
                 sb.AppendLine();
             }
 
@@ -127,7 +128,8 @@ public class FileContentSection : IReportSection
                 connections.Add($"{incoming} --> {myMainType}");
             }
 
-        if (connections.Count == 0) return string.Empty;
+        if (connections.Count == 0)
+            return string.Empty;
 
         var sb = new StringBuilder();
         sb.AppendLine("#### Contexto");
@@ -155,7 +157,8 @@ public class FileContentSection : IReportSection
         foreach (var conn in connections)
         {
             var relation = DependencyRelation.Parse(conn);
-            if (relation == null) continue;
+            if (relation == null)
+                continue;
             participants.Add(relation.Source);
             participants.Add(relation.Target);
         }
