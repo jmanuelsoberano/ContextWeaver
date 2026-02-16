@@ -1,6 +1,5 @@
 using ContextWeaver.Analyzers;
 using ContextWeaver.Core;
-using ContextWeaver.Interfaces;
 using ContextWeaver.Reporters;
 using ContextWeaver.Services;
 using ContextWeaver.Utilities;

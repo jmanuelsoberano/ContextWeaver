@@ -1,5 +1,4 @@
 using ContextWeaver.Core;
-using ContextWeaver.Interfaces;
 using ContextWeaver.Utilities;
 using Microsoft.Extensions.Logging;
 

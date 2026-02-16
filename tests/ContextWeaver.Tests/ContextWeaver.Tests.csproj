@@ -19,6 +19,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\ContextWeaver.Core\ContextWeaver.Core.csproj" />
+        <ProjectReference Include="..\..\src\ContextWeaver.Engine\ContextWeaver.Engine.csproj" />
         <ProjectReference Include="..\..\src\ContextWeaver.Cli\ContextWeaver.Cli.csproj" />
     </ItemGroup>
 
