@@ -3,22 +3,26 @@ using SampleApp;
 namespace SampleApp;
 
 /// <summary>
-///     A sample service that uses <see cref="Calculator"/> to perform operations.
+///     Una clase de servicio que usa la calculadora.
 /// </summary>
 public class MathService
 {
     private readonly Calculator _calculator;
 
-    /// <summary>Initializes a new instance of the <see cref="MathService"/> class.</summary>
-    /// <param name="calculator">The calculator instance.</param>
+    /// <summary>
+    ///     Inicializa una nueva instancia de la clase <see cref="MathService"/>.
+    /// </summary>
+    /// <param name="calculator">La instancia de la calculadora.</param>
     public MathService(Calculator calculator)
     {
         _calculator = calculator;
     }
 
-    /// <summary>Sums two integers using the calculator.</summary>
-    /// <param name="a">First integer.</param>
-    /// <param name="b">Second integer.</param>
-    /// <returns>The sum.</returns>
-    public int Sum(int a, int b) => _calculator.Add(a, b);
+    /// <summary>
+    ///     Calcula la suma de dos números a través de la calculadora.
+    /// </summary>
+    /// <param name="a">Primer entero.</param>
+    /// <param name="b">Segundo entero.</param>
+    /// <returns>El resultado.</returns>
+    public int ComputeSum(int a, int b) => _calculator.Add(a, b);
 }

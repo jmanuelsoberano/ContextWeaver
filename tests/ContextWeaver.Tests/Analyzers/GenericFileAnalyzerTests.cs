@@ -10,7 +10,7 @@ public class GenericFileAnalyzerTests
 {
     private readonly GenericFileAnalyzer _analyzer = new();
 
-    // ─── CanAnalyze: Supported Extensions ───
+    // ─── CanAnalyze: Extensiones Soportadas ───
 
     /// <summary>Verifica que las extensiones soportadas retornan true.</summary>
     /// <param name="extension">La extensión de archivo a probar.</param>
@@ -30,7 +30,7 @@ public class GenericFileAnalyzerTests
         _analyzer.CanAnalyze(file).Should().BeTrue();
     }
 
-    // ─── CanAnalyze: Case Insensitive ───
+    // ─── CanAnalyze: Insensible a Mayúsculas/Minúsculas ───
 
     /// <summary>Verifica que la coincidencia de extensiones no distinga entre mayúsculas y minúsculas.</summary>
     /// <param name="extension">La extensión de archivo a probar.</param>
@@ -44,12 +44,12 @@ public class GenericFileAnalyzerTests
         _analyzer.CanAnalyze(file).Should().BeTrue();
     }
 
-    // ─── CanAnalyze: Unsupported / Delegated ───
+    // ─── CanAnalyze: No Soportado / Delegado ───
 
     /// <summary>Verifica que las extensiones no soportadas o delegadas retornan false.</summary>
     /// <param name="extension">La extensión de archivo a probar.</param>
     [Theory]
-    [InlineData(".cs")]   // Handled by CSharpFileAnalyzer
+    [InlineData(".cs")]   // Manejado por CSharpFileAnalyzer
     [InlineData(".py")]
     [InlineData(".java")]
     [InlineData(".exe")]
@@ -75,7 +75,7 @@ public class GenericFileAnalyzerTests
         task.IsCompletedSuccessfully.Should().BeTrue();
     }
 
-    // ─── AnalyzeAsync: Language Detection ───
+    // ─── AnalyzeAsync: Detección de Lenguaje ───
 
     /// <summary>Verifica que se retorne el identificador de lenguaje correcto basado en la extensión.</summary>
     /// <param name="extension">La extensión del archivo.</param>
@@ -100,14 +100,14 @@ public class GenericFileAnalyzerTests
         result.CodeContent.Should().Be(content);
     }
 
-    // ─── AnalyzeAsync: Line Counting ───
+    // ─── AnalyzeAsync: Conteo de Líneas ───
 
     /// <summary>Verifica que las líneas se cuenten correctamente para archivos multilínea.</summary>
     /// <returns>Una <see cref="Task"/> que representa la operación asíncrona.</returns>
     [Fact]
     public async Task AnalyzeAsync_MultilineFile_CountsLinesCorrectly()
     {
-        // 5 lines of text + trailing newline = Split('\n') produces 6 parts
+        // 5 líneas de texto + nueva línea final = Split('\n') produce 6 partes
         var content = "# Title\n\nParagraph 1\n\nParagraph 2\n";
         using var tmp = new TempFile(".md", content);
 
@@ -133,7 +133,7 @@ public class GenericFileAnalyzerTests
     [Fact]
     public async Task AnalyzeAsync_EmptyFile_Returns1()
     {
-        // Empty string split by '\n' produces 1 empty part
+        // Cadena vacía dividida por '\n' produce 1 parte vacía
         using var tmp = new TempFile(".json", "");
 
         var result = await _analyzer.AnalyzeAsync(new FileInfo(tmp.Path));

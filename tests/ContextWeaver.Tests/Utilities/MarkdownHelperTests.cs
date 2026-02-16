@@ -7,7 +7,7 @@ namespace ContextWeaver.Tests.Utilities;
 /// <summary>Pruebas para <see cref="MarkdownHelper"/>.</summary>
 public class MarkdownHelperTests
 {
-    // ─── Valid Inputs (consolidated into Theory) ───
+    // ─── Entradas Válidas (consolidado en Theory) ───
 
     /// <summary>Verifica que las entradas válidas produzcan los slugs de anclaje esperados.</summary>
     /// <param name="input">La cadena de entrada a convertir.</param>
@@ -23,7 +23,7 @@ public class MarkdownHelperTests
         MarkdownHelper.CreateAnchor(input).Should().Be(expected);
     }
 
-    // ─── Null / Whitespace ───
+    // ─── Nulo / Espacios en blanco ───
 
     /// <summary>Verifica que las entradas nulas o con espacios en blanco retornen una cadena vacía.</summary>
     /// <param name="input">La cadena de entrada a verificar.</param>
@@ -36,13 +36,13 @@ public class MarkdownHelperTests
         MarkdownHelper.CreateAnchor(input!).Should().BeEmpty();
     }
 
-    // ─── Edge Cases ───
+    // ─── Casos Borde ───
 
     /// <summary>Verifica que los caracteres acentuados se eliminen (normalización).</summary>
     [Fact]
     public void CreateAnchor_Accents_RemovesAccentedChars()
     {
-        // Accented chars are stripped by regex [^a-z0-9\s-], leaving only ASCII
+        // Los caracteres acentuados son eliminados por regex [^a-z0-9\s-], dejando solo ASCII
         MarkdownHelper.CreateAnchor("Módulo Análisis").Should().Be("mdulo-anlisis");
     }
 
@@ -57,7 +57,7 @@ public class MarkdownHelperTests
     [Fact]
     public void CreateAnchor_PathLikeInput_RemovesSlashes()
     {
-        // Slashes are non-alphanumeric, removed by regex
+        // Las barras no son alfanuméricas, eliminadas por regex
         MarkdownHelper.CreateAnchor("Core/FileAnalysis").Should().Be("corefileanalysis");
     }
 }

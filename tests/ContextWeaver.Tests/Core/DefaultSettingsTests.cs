@@ -57,6 +57,6 @@ public class DefaultSettingsTests
     {
         var a = DefaultSettings.Get();
         var b = DefaultSettings.Get();
-        a.Should().NotBeSameAs(b, "each call should return a new instance to avoid shared state");
+        a.Should().NotBeSameAs(b, "cada llamada debe retornar una nueva instancia para evitar estado compartido");
     }
 }

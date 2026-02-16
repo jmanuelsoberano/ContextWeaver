@@ -25,8 +25,8 @@ public class FullPipelineTests : IDisposable
     /// </summary>
     public FullPipelineTests()
     {
-        // Walk up from the assembly output (bin/Debug/net8.0) to the test project root,
-        // then into Fixtures/SampleProject. This avoids the "bin" exclude pattern.
+        // Subir desde la salida del ensamblado (bin/Debug/net8.0) a la raíz del proyecto de pruebas,
+        // luego a Fixtures/SampleProject. Esto evita el patrón de exclusión "bin".
         var assemblyDir = Path.GetDirectoryName(typeof(FullPipelineTests).Assembly.Location)!;
         var testProjectDir = Path.GetFullPath(Path.Combine(assemblyDir, "..", "..", ".."));
         _fixtureDir = new DirectoryInfo(Path.Combine(testProjectDir, "Fixtures", "SampleProject"));
@@ -65,19 +65,19 @@ public class FullPipelineTests : IDisposable
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ProducesValidMarkdown()
     {
-        // Arrange
+        // Organizar
         var service = BuildService();
         var outputFile = new FileInfo(_outputPath);
 
-        // Act
+        // Actuar
         await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
 
-        // Assert — file was produced
+        // Afirmar — el archivo fue producido
         File.Exists(_outputPath).Should().BeTrue("the report file should be created");
         var content = await File.ReadAllTextAsync(_outputPath);
         content.Should().NotBeNullOrWhiteSpace();
 
-        // Assert — key sections are present
+        // Afirmar — las secciones clave están presentes
         content.Should().Contain("Análisis de Hotspots", "hotspot section should exist");
         content.Should().Contain("Análisis de Inestabilidad", "instability section should exist");
         content.Should().Contain("Directory Structure", "directory tree should exist");
@@ -91,15 +91,15 @@ public class FullPipelineTests : IDisposable
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsCSharpAnalysis()
     {
-        // Arrange
+        // Organizar
         var service = BuildService();
         var outputFile = new FileInfo(_outputPath);
 
-        // Act
+        // Actuar
         await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
         var content = await File.ReadAllTextAsync(_outputPath);
 
-        // Assert — C# specific content
+        // Afirmar — contenido específico de C#
         content.Should().Contain("Calculator.cs", "Calculator file should be analyzed");
         content.Should().Contain("MathService.cs", "MathService file should be analyzed");
         content.Should().Contain("CyclomaticComplexity", "C# metrics should be rendered");
@@ -113,15 +113,15 @@ public class FullPipelineTests : IDisposable
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsNonCSharpFiles()
     {
-        // Arrange
+        // Organizar
         var service = BuildService();
         var outputFile = new FileInfo(_outputPath);
 
-        // Act
+        // Actuar
         await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
         var content = await File.ReadAllTextAsync(_outputPath);
 
-        // Assert — JSON file included
+        // Afirmar — archivo JSON incluido
         content.Should().Contain("config.json", "JSON file should be analyzed");
         content.Should().Contain("json", "language should be detected as json");
     }
@@ -133,15 +133,15 @@ public class FullPipelineTests : IDisposable
     [Fact]
     public async Task AnalyzeAndGenerateReport_SampleProject_ContainsDependencyInfo()
     {
-        // Arrange
+        // Organizar
         var service = BuildService();
         var outputFile = new FileInfo(_outputPath);
 
-        // Act
+        // Actuar
         await service.AnalyzeAndGenerateReport(_fixtureDir, outputFile, "markdown");
         var content = await File.ReadAllTextAsync(_outputPath);
 
-        // Assert — dependency relationships detected
+        // Afirmar — relaciones de dependencia detectadas
         content.Should().Contain("Calculator", "Calculator should appear in report");
         content.Should().Contain("MathService", "MathService should appear in report");
     }

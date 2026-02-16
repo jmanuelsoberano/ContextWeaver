@@ -7,7 +7,7 @@ namespace ContextWeaver.Tests.Core;
 /// <summary>Pruebas para <see cref="FileAnalysisResult"/>.</summary>
 public class FileAnalysisResultTests
 {
-    // ─── ModuleName (computed property) ───
+    // ─── Nombre del Módulo (propiedad calculada) ───
 
     /// <summary>Verifica que los archivos en subdirectorios se asignen al módulo correcto.</summary>
     /// <param name="path">La ruta relativa del archivo.</param>
@@ -54,7 +54,7 @@ public class FileAnalysisResultTests
         result.ModuleName.Should().Be("Core");
     }
 
-    // ─── Default Values ───
+    // ─── Valores Por Defecto ───
 
     /// <summary>Verifica que una nueva instancia tenga los valores predeterminados esperados.</summary>
     [Fact]
@@ -74,7 +74,7 @@ public class FileAnalysisResultTests
         result.DefinedTypeSemantics.Should().BeEmpty();
     }
 
-    // ─── Metrics (typed) ───
+    // ─── Métricas (tipadas) ───
 
     /// <summary>Verifica que las métricas se inicialicen como nulas/vacías por defecto.</summary>
     [Fact]

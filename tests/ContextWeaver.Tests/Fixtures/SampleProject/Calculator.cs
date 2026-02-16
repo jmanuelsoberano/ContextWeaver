@@ -1,19 +1,19 @@
 namespace SampleApp;
 
 /// <summary>
-///     A sample calculator class for testing purposes.
+///     Una clase calculadora de ejemplo para propósitos de prueba.
 /// </summary>
 public class Calculator
 {
-    /// <summary>Adds two integers.</summary>
-    /// <param name="a">First integer.</param>
-    /// <param name="b">Second integer.</param>
-    /// <returns>The sum.</returns>
+    /// <summary>Suma dos enteros.</summary>
+    /// <param name="a">Primer entero.</param>
+    /// <param name="b">Segundo entero.</param>
+    /// <returns>La suma.</returns>
     public int Add(int a, int b) => a + b;
 
-    /// <summary>Subtracts two integers.</summary>
-    /// <param name="a">First integer.</param>
-    /// <param name="b">Second integer.</param>
-    /// <returns>The difference.</returns>
+    /// <summary>Resta dos enteros.</summary>
+    /// <param name="a">Primer entero.</param>
+    /// <param name="b">Segundo entero.</param>
+    /// <returns>La diferencia.</returns>
     public int Subtract(int a, int b) => a - b;
 }

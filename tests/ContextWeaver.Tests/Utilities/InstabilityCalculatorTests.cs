@@ -23,7 +23,7 @@ public class InstabilityCalculatorTests
         };
     }
 
-    // ─── Basic Scenarios ───
+    // ─── Escenarios Básicos ───
 
     /// <summary>Verifica que los resultados vacíos retornen un diccionario vacío.</summary>
     [Fact]
@@ -66,10 +66,10 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // Services depends on Utilities → Ce=1 for Services
+        // Services depende de Utilities → Ce=1 para Services
         metrics["Services"].Ce.Should().Be(1);
         metrics["Services"].Ca.Should().Be(0);
-        // Utilities is depended upon by Services → Ca=1 for Utilities
+        // Utilities es dependido por Services → Ca=1 para Utilities
         metrics["Utilities"].Ca.Should().Be(1);
         metrics["Utilities"].Ce.Should().Be(0);
     }
@@ -78,7 +78,7 @@ public class InstabilityCalculatorTests
     [Fact]
     public void Calculate_FullyUnstableModule_ReturnsInstability1()
     {
-        // A module that only depends on others but nobody depends on it
+        // Un módulo que solo depende de otros pero nadie depende de él
         var results = new List<FileAnalysisResult>
         {
             CreateResult("UI/View.cs",
@@ -90,7 +90,7 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // UI has Ce=1, Ca=0 → I = 1/(0+1) = 1.0
+        // UI tiene Ce=1, Ca=0 → I = 1/(0+1) = 1.0
         metrics["UI"].Instability.Should().Be(1.0);
     }
 
@@ -98,7 +98,7 @@ public class InstabilityCalculatorTests
     [Fact]
     public void Calculate_FullyStableModule_ReturnsInstability0()
     {
-        // A module that is depended upon but depends on nothing
+        // Un módulo del cual se depende pero no depende de nada
         var results = new List<FileAnalysisResult>
         {
             CreateResult("UI/View.cs",
@@ -110,11 +110,11 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // Core has Ce=0, Ca=1 → I = 0/(1+0) = 0.0
+        // Core tiene Ce=0, Ca=1 → I = 0/(1+0) = 0.0
         metrics["Core"].Instability.Should().Be(0.0);
     }
 
-    // ─── Intra-module Dependencies ───
+    // ─── Dependencias Intra-módulo ───
 
     /// <summary>Verifica que las dependencias dentro del mismo módulo no cuenten para Ce.</summary>
     [Fact]
@@ -131,12 +131,12 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // Both in "Core" → no efferent dependency
+        // Ambos en "Core" → sin dependencia eferente
         metrics["Core"].Ce.Should().Be(0);
         metrics["Core"].Ca.Should().Be(0);
     }
 
-    // ─── Inheritance Dependencies ───
+    // ─── Dependencias de Herencia ───
 
     /// <summary>Verifica que las dependencias de herencia cuenten como dependencias eferentes.</summary>
     [Fact]
@@ -157,7 +157,7 @@ public class InstabilityCalculatorTests
         metrics["Interfaces"].Ca.Should().Be(1);
     }
 
-    // ─── Root Module ───
+    // ─── Módulo Raíz ───
 
     /// <summary>Verifica que los archivos en el nivel raíz se asignen a un módulo "Root".</summary>
     [Fact]
@@ -172,7 +172,7 @@ public class InstabilityCalculatorTests
         metrics.Should().ContainKey("Root");
     }
 
-    // ─── Multiple Dependencies ───
+    // ─── Dependencias Múltiples ───
 
     /// <summary>Verifica el cálculo de inestabilidad para un módulo con múltiples dependencias.</summary>
     [Fact]
@@ -195,13 +195,13 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // Services depends on Utilities (1 unique target module) → Ce=1
+        // Services depende de Utilities (1 módulo destino único) → Ce=1
         metrics["Services"].Ce.Should().Be(1);
         // I = 1/(0+1) = 1.0
         metrics["Services"].Instability.Should().Be(1.0);
     }
 
-    // ─── Negative / Edge Cases ───
+    // ─── Negativos / Casos Borde ───
 
     /// <summary>Verifica que una lista de dependencias de clase nula no cause una excepción.</summary>
     [Fact]
@@ -217,7 +217,7 @@ public class InstabilityCalculatorTests
             }
         };
 
-        // Should not throw; null dependencies are skipped
+        // No debería lanzar excepción; las dependencias nulas se omiten
         var act = () => InstabilityCalculator.Calculate(results);
         act.Should().NotThrow();
     }
@@ -244,7 +244,7 @@ public class InstabilityCalculatorTests
     [Fact]
     public void Calculate_DependencyToUnknownType_IsIgnoredGracefully()
     {
-        // ClassA depends on "Phantom" which is not defined in any file
+        // ClassA depende de "Phantom" que no está definido en ningún archivo
         var results = new List<FileAnalysisResult>
         {
             CreateResult("Core/ClassA.cs",
@@ -254,7 +254,7 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // "Phantom" doesn't belong to any module, so no efferent counted
+        // "Phantom" no pertenece a ningún módulo, así que no se cuenta eferente
         metrics["Core"].Ce.Should().Be(0);
         metrics["Core"].Ca.Should().Be(0);
     }
@@ -263,7 +263,7 @@ public class InstabilityCalculatorTests
     [Fact]
     public void Calculate_MalformedDependencyString_IsIgnoredGracefully()
     {
-        // A dependency string that can't be parsed by DependencyRelation.Parse
+        // Una cadena de dependencia que no puede ser parseada por DependencyRelation.Parse
         var results = new List<FileAnalysisResult>
         {
             CreateResult("Core/ClassA.cs",
@@ -273,7 +273,7 @@ public class InstabilityCalculatorTests
 
         var metrics = InstabilityCalculator.Calculate(results);
 
-        // Should still produce a result for the module, just with 0 dependencies
+        // Todavía debería producir un resultado para el módulo, solo que con 0 dependencias
         metrics.Should().ContainKey("Core");
         metrics["Core"].Ce.Should().Be(0);
     }

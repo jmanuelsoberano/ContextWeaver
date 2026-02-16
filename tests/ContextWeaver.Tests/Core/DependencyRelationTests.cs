@@ -44,7 +44,7 @@ public class DependencyRelationTests
         result.Target.Should().Be("ClassB");
     }
 
-    // ─── Parse: Null / Invalid Input ───
+    // ─── Parsear: Entrada Nula / Inválida ───
 
     /// <summary>Verifica que una entrada nula o con espacios en blanco retorne null.</summary>
     /// <param name="input">La cadena de entrada a verificar.</param>
@@ -72,7 +72,7 @@ public class DependencyRelationTests
         result.Should().BeNull();
     }
 
-    // ─── ToMermaid ───
+    // ─── A Mermaid ───
 
     /// <summary>Verifica que una dependencia de uso se serialice a una flecha de Mermaid.</summary>
     [Fact]
@@ -90,7 +90,7 @@ public class DependencyRelationTests
         dep.ToMermaid().Should().Be("A -.-> B");
     }
 
-    // ─── ToPlantUml ───
+    // ─── A PlantUml ───
 
     /// <summary>Verifica que una dependencia de uso se serialice a una flecha de PlantUML.</summary>
     [Fact]
@@ -108,7 +108,7 @@ public class DependencyRelationTests
         dep.ToPlantUml().Should().Be("A ..> B");
     }
 
-    // ─── Roundtrip ───
+    // ─── Ida y Vuelta ───
 
     /// <summary>Verifica el parseo y serialización de ida y vuelta para dependencias de uso.</summary>
     [Fact]
@@ -130,7 +130,7 @@ public class DependencyRelationTests
         parsed!.ToMermaid().Should().Be("ClassA -.-> IService");
     }
 
-    // ─── Record Equality ───
+    // ─── Igualdad de Registros ───
 
     /// <summary>Verifica que los registros con los mismos valores sean iguales.</summary>
     [Fact]

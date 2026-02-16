@@ -13,7 +13,7 @@ public class CSharpMetricsCalculatorTests
     private static Microsoft.CodeAnalysis.SyntaxNode ParseRoot(string code)
         => CSharpSyntaxTree.ParseText(code).GetRoot();
 
-    // ─── Cyclomatic Complexity ───
+    // ─── Complejidad Ciclomática ───
 
     /// <summary>Verifica que un método vacío tenga una complejidad de 1.</summary>
     [Fact]
@@ -119,7 +119,7 @@ class C {
     }
 }";
         var result = CSharpMetricsCalculator.CalculateCyclomaticComplexity(ParseRoot(code));
-        result.Should().Be(4); // base(1) + 3 cases
+        result.Should().Be(4); // base(1) + 3 casos
     }
 
     /// <summary>Verifica que el operador ternario incremente la complejidad en 1.</summary>
@@ -182,7 +182,7 @@ class C {
         result.Should().Be(6);
     }
 
-    // ─── Max Nesting Depth ───
+    // ─── Profundidad Máxima de Anidamiento ───
 
     /// <summary>Verifica que un método plano tenga una profundidad de 0.</summary>
     [Fact]
