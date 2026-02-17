@@ -81,7 +81,10 @@ public sealed class SettingsProvider
 
             var jsonString = JsonSerializer.Serialize(new { AnalysisSettings = defaultSettings }, _jsonOptions);
             File.WriteAllText(resolvedPath, jsonString);
-            _logger.LogInformation("Archivo de configuración creado en: {ConfigPath}", resolvedPath);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Archivo de configuración creado en: {ConfigPath}", resolvedPath);
+            }
         }
         catch (UnauthorizedAccessException ex)
         {

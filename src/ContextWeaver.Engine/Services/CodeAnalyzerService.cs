@@ -130,6 +130,9 @@ public sealed class CodeAnalyzerService
         var reportContent = generator.Generate(directory, resultsList, instabilityMetrics);
         await File.WriteAllTextAsync(outputFile.FullName, reportContent);
 
-        _logger.LogInformation("Reporte en formato '{Format}' generado exitosamente en: {OutputPath}", format, outputFile.FullName);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Reporte en formato '{Format}' generado exitosamente en: {OutputPath}", format, outputFile.FullName);
+        }
     }
 }
