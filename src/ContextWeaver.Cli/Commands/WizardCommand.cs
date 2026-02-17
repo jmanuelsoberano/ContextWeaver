@@ -13,6 +13,13 @@ public class WizardCommand : AsyncCommand<WizardSettings>
 {
     private static readonly string[] _supportedFormats = { "markdown", "json", "xml" };
 
+    private static readonly string[] BulkSelectionOptions =
+    {
+        "Usar selección por defecto / guardada",
+        "Seleccionar TODAS las secciones opcionales",
+        "Seleccionar NINGUNA sección opcional (empezar limpio)"
+    };
+
     private static readonly IReportSection[] _availableSections =
     {
         new HeaderSection(),
@@ -192,13 +199,33 @@ public class WizardCommand : AsyncCommand<WizardSettings>
                     "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]")
                 .Required(); // Validar que se seleccione al menos una
 
+            // 3a. Selección inicial (Bulk Selection)
+            var selectionMode = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("¿Cómo desea comenzar la selección de secciones?")
+                    .AddChoices(BulkSelectionOptions));
+
             foreach (var section in optionalSections)
             {
                 var label = $"{section.Name} — {section.Description}";
                 sectionPrompt.AddChoice(label);
 
-                // Pre-seleccionar: si hay preferencias guardadas, usar esas; si no, seleccionar todas
-                if (savedSections == null || savedSections.Contains(section.Name))
+                bool shouldSelect = false;
+                if (selectionMode.StartsWith(BulkSelectionOptions[0], StringComparison.Ordinal))
+                {
+                    // Pre-seleccionar: si hay preferencias guardadas, usar esas; si no, seleccionar todas
+                    shouldSelect = savedSections == null || savedSections.Contains(section.Name);
+                }
+                else if (selectionMode.StartsWith(BulkSelectionOptions[1], StringComparison.Ordinal))
+                {
+                    shouldSelect = true;
+                }
+                else
+                {
+                    shouldSelect = false;
+                }
+
+                if (shouldSelect)
                     sectionPrompt.Select(label);
             }
 
