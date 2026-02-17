@@ -1,0 +1,10 @@
+[*.cs]
+# Allow underscores in test method names
+dotnet_diagnostic.CA1707.severity = none
+
+# Disable "ConfigureAwait" warning for tests
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.SA1028.severity = none
+
+# Disable Documentation warning for tests
+dotnet_diagnostic.SA1600.severity = none

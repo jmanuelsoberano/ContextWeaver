@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <ApplicationIcon>ContextWeaver.ico</ApplicationIcon>
+        <AssemblyName>ContextWeaver</AssemblyName>
+        <RootNamespace>ContextWeaver</RootNamespace>
+
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>contextweaver</ToolCommandName>
+
+        <PackageId>ContextWeaver</PackageId>
+        <Version>1.0.7</Version>
+        <Authors>Manuel Soberano</Authors>
+        <Description>Una herramienta CLI para analizar repositorios de código .NET y generar un contexto consolidado, optimizado para LLMs.</Description>
+        <PackageTags>cli;dotnet;tool;llm;codegen;ai;context;prompt</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <PackageProjectUrl>https://github.com/t-mansoberano/ContextWeaver</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/t-mansoberano/ContextWeaver.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <!-- Best Practices: SourceLink & Symbols -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>ContextWeaver.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\ContextWeaver.Engine\ContextWeaver.Engine.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="ContextWeaver.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="ContextWeaver.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="ContextWeaver.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>

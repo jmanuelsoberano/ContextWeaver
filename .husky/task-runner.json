@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "name": "build-check",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "--no-restore",
+        "--warnaserror"
+      ],
+      "include": [
+        "**/*.cs"
+      ]
+    },
+    {
+      "name": "format",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": [
+        "format",
+        "--include",
+        "${staged}"
+      ],
+      "include": [
+        "**/*.cs",
+        "**/*.json"
+      ]
+    },
+    {
+      "name": "stage-fix",
+      "group": "pre-commit",
+      "command": "git",
+      "args": [
+        "add",
+        "${staged}"
+      ],
+      "include": [
+        "**/*.cs",
+        "**/*.json"
+      ]
+    }
+  ]
+}

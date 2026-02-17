@@ -1,0 +1,83 @@
+# EditorConfig - https://editorconfig.org
+# Configuración estándar para ContextWeaver
+
+root = true
+
+# Defaults para todos los archivos
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C# files
+[*.cs]
+indent_size = 4
+
+# Reglas de estilo C#
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = true
+
+# Preferencias de uso de var
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Preferencias de expresiones
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+
+# Nullable reference types
+dotnet_diagnostic.CS8602.severity = suggestion
+dotnet_diagnostic.CS8604.severity = suggestion
+dotnet_diagnostic.CS8618.severity = suggestion
+
+# StyleCop — suppress rules that conflict with modern C# style
+dotnet_diagnostic.SA0001.severity = none      # XML comment analysis disabled
+dotnet_diagnostic.SA1101.severity = none      # Prefix local calls with this
+dotnet_diagnostic.SA1200.severity = none      # Using directives must be inside namespace
+dotnet_diagnostic.SA1309.severity = none      # Field names must not begin with underscore
+dotnet_diagnostic.SA1503.severity = none      # Braces should not be omitted (handled by csharp_preserve_single_line_statements)
+dotnet_diagnostic.SA1633.severity = none      # File must have header (not needed for open-source)
+dotnet_diagnostic.SA1116.severity = none      # Parameters should begin on line after declaration
+dotnet_diagnostic.SA1000.severity = none      # Keyword spacing (conflicts with new() target-typed)
+dotnet_diagnostic.SA1009.severity = none      # Closing parenthesis spacing
+dotnet_diagnostic.SA1413.severity = none      # Trailing comma in multi-line initializers
+dotnet_diagnostic.SA1516.severity = none      # Elements should be separated by blank line (too verbose for DTOs)
+dotnet_diagnostic.SA1010.severity = none      # Opening square brackets spacing (conflicts with collection expressions)
+dotnet_diagnostic.SA1515.severity = none      # Single-line comment should be preceded by blank line
+dotnet_diagnostic.SA1313.severity = none      # Parameter names must begin with lower-case annotation (Conflicts with Records)
+dotnet_diagnostic.SA1117.severity = none      # Parameters must be on same line or separate lines
+dotnet_diagnostic.CA1848.severity = none      # Use LoggerMessage delegates (too strict for now)
+dotnet_diagnostic.CA1305.severity = none      # Specify IFormatProvider (too verbose)
+dotnet_diagnostic.SA1519.severity = none
+
+
+
+
+# XML files
+[*.{xml,csproj,props,targets,resx}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false

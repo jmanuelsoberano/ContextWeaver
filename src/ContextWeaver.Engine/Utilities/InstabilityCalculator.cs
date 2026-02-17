@@ -1,0 +1,102 @@
+using ContextWeaver.Core;
+
+namespace ContextWeaver.Utilities;
+
+/// <summary>
+///     Calcula métricas de inestabilidad arquitectónica (I = Ce / (Ca + Ce)).
+///     Basado en los principios de paquetes de Robert C. Martin.
+/// </summary>
+public class InstabilityCalculator
+{
+    /// <summary>
+    ///     Calcula las métricas de inestabilidad para cada módulo en los resultados del análisis.
+    /// </summary>
+    /// <param name="results">Lista de resultados de análisis de archivos que contienen información de dependencias.</param>
+    /// <returns>Un diccionario mapeando nombres de módulos a sus métricas (Aferente, Eferente, Inestabilidad).</returns>
+    public static Dictionary<string, (int Ca, int Ce, double Instability)> Calculate(List<FileAnalysisResult> results)
+    {
+        var typeToModuleMap = new Dictionary<string, string>();
+        var moduleNames = new HashSet<string>();
+
+        // 1. Construir mapa: Tipo -> Módulo
+        foreach (var result in results)
+        {
+            var moduleName = result.ModuleName;
+            moduleNames.Add(moduleName);
+
+            if (result.DefinedTypes != null)
+            {
+                foreach (var type in result.DefinedTypes)
+                {
+                    // Asumimos unicidad de nombre de tipo por simplicidad en este contexto,
+                    // o "último gana" si hay duplicados (partial classes en mismo módulo ok).
+                    typeToModuleMap[type] = moduleName;
+                }
+            }
+        }
+
+        var moduleEfferentDependencies = new Dictionary<string, HashSet<string>>();
+
+        // Inicializar
+        foreach (var module in moduleNames)
+        {
+            moduleEfferentDependencies[module] = new HashSet<string>();
+        }
+
+        // 2. Analizar dependencias de CLASE (Source -> Target)
+        foreach (var result in results)
+        {
+            var sourceModule = result.ModuleName;
+
+            if (result.ClassDependencies != null)
+            {
+                foreach (var dep in result.ClassDependencies)
+                {
+                    var relation = DependencyRelation.Parse(dep);
+                    if (relation == null)
+                        continue;
+
+                    if (typeToModuleMap.TryGetValue(relation.Target, out var targetModule))
+                    {
+                        if (!string.Equals(sourceModule, targetModule, StringComparison.OrdinalIgnoreCase))
+                        {
+                            moduleEfferentDependencies[sourceModule].Add(targetModule);
+                        }
+                    }
+                }
+            }
+        }
+
+        var moduleMetrics = moduleNames.ToDictionary(m => m, m => (Ca: 0, Ce: 0));
+
+        // 3. Calcular Ce (Eferentes) y Ca (Aferentes)
+        foreach (var (module, dependencies) in moduleEfferentDependencies)
+        {
+            // Ce = Número de módulos de los que dependo
+            var ce = dependencies.Count;
+            var currentMetrics = moduleMetrics[module];
+            moduleMetrics[module] = (currentMetrics.Ca, ce);
+
+            // Ca = Número de módulos que dependen de mí
+            foreach (var dependentModule in dependencies)
+            {
+                if (moduleMetrics.TryGetValue(dependentModule, out var depMetrics))
+                {
+                    moduleMetrics[dependentModule] = (depMetrics.Ca + 1, depMetrics.Ce);
+                }
+            }
+        }
+
+        // 4. Calcular Inestabilidad (I)
+        return moduleMetrics.ToDictionary(
+            kvp => kvp.Key,
+            kvp =>
+            {
+                var (ca, ce) = kvp.Value;
+                // I = Ce / (Ca + Ce)
+                // Rango: [0, 1]. 0 = Muy Estable (Abstracto), 1 = Muy Inestable (Concreto)
+                var instability = ca + ce == 0 ? 0.0 : (double)ce / (ca + ce);
+                return (ca, ce, instability);
+            });
+    }
+}
