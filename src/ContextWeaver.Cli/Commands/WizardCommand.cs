@@ -133,8 +133,43 @@ public class WizardCommand : AsyncCommand<WizardSettings>
 
         var outputFile = new FileInfo(Path.Combine(directoryInfo.FullName, outputFileName));
 
-        // 5. Ejecución
-        await _service.AnalyzeFiles(selectedFiles, directoryInfo, outputFile, format, enabledSectionNames);
+        // 5. Resumen de confirmación
+        var requiredSectionNames = _availableSections
+            .Where(s => s.IsRequired)
+            .Select(s => s.Name);
+        var allSectionNames = requiredSectionNames.Concat(enabledSectionNames).Distinct().ToList();
+
+        var summaryTable = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn("[bold]Configuración[/]")
+            .AddColumn("[bold]Valor[/]");
+
+        summaryTable.AddRow("📂 Archivos seleccionados", $"[green]{selectedFiles.Count}[/]");
+        summaryTable.AddRow("📝 Secciones del reporte", string.Join("\n", allSectionNames.Select(n => $"  • {n}")));
+        summaryTable.AddRow("💾 Archivo de salida", $"[blue]{outputFile.FullName}[/]");
+        summaryTable.AddRow("📄 Formato", $"[blue]{format}[/]");
+
+        AnsiConsole.Write(new Rule("[yellow]Resumen[/]").RuleStyle("grey"));
+        AnsiConsole.Write(summaryTable);
+        AnsiConsole.WriteLine();
+
+        var confirm = AnsiConsole.Confirm("¿Desea continuar con la ejecución?", defaultValue: true);
+        if (!confirm)
+        {
+            AnsiConsole.MarkupLine("[yellow]Operación cancelada por el usuario.[/]");
+            return 0;
+        }
+
+        // 6. Ejecución con indicador de progreso
+        await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .SpinnerStyle(Style.Parse("green bold"))
+            .StartAsync("Analizando archivos y generando reporte...", async ctx =>
+            {
+                await _service.AnalyzeFiles(selectedFiles, directoryInfo, outputFile, format, enabledSectionNames);
+            });
+
+        AnsiConsole.MarkupLine($"\n[green]✅ Reporte generado exitosamente en:[/] [link]{outputFile.FullName}[/]");
 
         return 0;
     }
