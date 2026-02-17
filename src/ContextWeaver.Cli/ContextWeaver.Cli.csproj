@@ -17,10 +17,18 @@
         <Authors>Manuel Soberano</Authors>
         <Description>Una herramienta CLI para analizar repositorios de código .NET y generar un contexto consolidado, optimizado para LLMs.</Description>
         <PackageTags>cli;dotnet;tool;llm;codegen;ai;context;prompt</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
 
         <PackageProjectUrl>https://github.com/t-mansoberano/ContextWeaver</PackageProjectUrl>
         <RepositoryUrl>https://github.com/t-mansoberano/ContextWeaver.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+
+        <!-- Best Practices: SourceLink & Symbols -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageIcon>ContextWeaver.png</PackageIcon>
@@ -46,6 +54,7 @@
 
     <ItemGroup>
         <None Include="ContextWeaver.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
