@@ -17,8 +17,10 @@ public class MarkdownReportGenerator : IReportGenerator
         new HeaderSection(),
         new HotspotSection(),
         new InstabilitySection(),
-        new DependencyGraphSection(),
-        new ModuleDiagramSection(),
+        new MermaidDependencyGraphSection(),
+        new PlantUmlDependencyGraphSection(),
+        new MermaidModuleDiagramSection(),
+        new PlantUmlModuleDiagramSection(),
         new DirectoryTreeSection(),
         new FileContentSection()
     };
