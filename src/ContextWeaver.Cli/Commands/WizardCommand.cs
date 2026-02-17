@@ -185,14 +185,12 @@ public class WizardCommand : AsyncCommand<WizardSettings>
                 : null;
 
             var sectionPrompt = new MultiSelectionPrompt<string>()
-                .Title("Seleccione las [green]secciones[/] que desea incluir en el reporte:")
+                .Title("Seleccione las [green]secciones opcionales[/] que desea incluir en el reporte:\n[grey](Las secciones obligatorias como 'Header' se incluirán automáticamente)[/]")
                 .PageSize(10)
                 .MoreChoicesText("[grey](Muevase arriba y abajo para ver más secciones)[/]")
                 .InstructionsText(
                     "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]")
-                .AddChoiceGroup(
-                    "✅ Obligatorias (siempre incluidas)",
-                    _availableSections.Where(s => s.IsRequired).Select(s => $"{s.Name} — {s.Description}"));
+                .Required(); // Validar que se seleccione al menos una
 
             foreach (var section in optionalSections)
             {
