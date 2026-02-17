@@ -10,9 +10,6 @@ namespace ContextWeaver.Engine.Tests.Utilities;
 /// </summary>
 public class CSharpMetricsCalculatorTests
 {
-    private static Microsoft.CodeAnalysis.SyntaxNode ParseRoot(string code)
-        => CSharpSyntaxTree.ParseText(code).GetRoot();
-
     // ─── Complejidad Ciclomática ───
 
     /// <summary>Verifica que un método vacío tenga una complejidad de 1.</summary>
@@ -254,4 +251,7 @@ class C {
         var result = CSharpMetricsCalculator.CalculateMaxNestingDepth(ParseRoot(code));
         result.Should().Be(4);
     }
+
+    private static Microsoft.CodeAnalysis.SyntaxNode ParseRoot(string code)
+        => CSharpSyntaxTree.ParseText(code).GetRoot();
 }

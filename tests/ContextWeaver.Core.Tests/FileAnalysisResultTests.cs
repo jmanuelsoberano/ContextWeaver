@@ -34,7 +34,7 @@ public class FileAnalysisResultTests
     [Fact]
     public void ModuleName_EmptyPath_ReturnsRoot()
     {
-        var result = new FileAnalysisResult { RelativePath = "" };
+        var result = new FileAnalysisResult { RelativePath = string.Empty };
         result.ModuleName.Should().Be("Root");
     }
 

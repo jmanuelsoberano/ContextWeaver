@@ -49,7 +49,7 @@ public class GenericFileAnalyzerTests
     /// <summary>Verifica que las extensiones no soportadas o delegadas retornan false.</summary>
     /// <param name="extension">La extensión de archivo a probar.</param>
     [Theory]
-    [InlineData(".cs")]   // Manejado por CSharpFileAnalyzer
+    [InlineData(".cs")] // Manejado por CSharpFileAnalyzer
     [InlineData(".py")]
     [InlineData(".java")]
     [InlineData(".exe")]
@@ -134,7 +134,7 @@ public class GenericFileAnalyzerTests
     public async Task AnalyzeAsync_EmptyFile_Returns1()
     {
         // Cadena vacía dividida por '\n' produce 1 parte vacía
-        using var tmp = new TempFile(".json", "");
+        using var tmp = new TempFile(".json", string.Empty);
 
         var result = await _analyzer.AnalyzeAsync(new FileInfo(tmp.Path));
 

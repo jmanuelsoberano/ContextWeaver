@@ -10,19 +10,6 @@ namespace ContextWeaver.Engine.Tests.Utilities;
 /// </summary>
 public class InstabilityCalculatorTests
 {
-    // ─── Helpers ───
-
-    private static FileAnalysisResult CreateResult(string relativePath, List<string>? definedTypes = null,
-        List<string>? classDependencies = null)
-    {
-        return new FileAnalysisResult
-        {
-            RelativePath = relativePath,
-            DefinedTypes = definedTypes ?? new List<string>(),
-            ClassDependencies = classDependencies ?? new List<string>()
-        };
-    }
-
     // ─── Escenarios Básicos ───
 
     /// <summary>Verifica que los resultados vacíos retornen un diccionario vacío.</summary>
@@ -277,5 +264,16 @@ public class InstabilityCalculatorTests
         metrics.Should().ContainKey("Core");
         metrics["Core"].Ce.Should().Be(0);
     }
-}
 
+    // ─── Helpers ───
+    private static FileAnalysisResult CreateResult(string relativePath, List<string>? definedTypes = null,
+        List<string>? classDependencies = null)
+    {
+        return new FileAnalysisResult
+        {
+            RelativePath = relativePath,
+            DefinedTypes = definedTypes ?? new List<string>(),
+            ClassDependencies = classDependencies ?? new List<string>()
+        };
+    }
+}

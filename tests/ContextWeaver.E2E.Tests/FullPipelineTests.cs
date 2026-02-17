@@ -50,41 +50,6 @@ public class FullPipelineTests : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private static void CopyDirectory(DirectoryInfo source, DirectoryInfo destination)
-    {
-        if (!destination.Exists)
-            destination.Create();
-
-        foreach (var file in source.GetFiles())
-        {
-            file.CopyTo(Path.Combine(destination.FullName, file.Name), true);
-        }
-
-        foreach (var subDir in source.GetDirectories())
-        {
-            var nextDest = destination.CreateSubdirectory(subDir.Name);
-            CopyDirectory(subDir, nextDest);
-        }
-    }
-
-    private CodeAnalyzerService BuildService()
-    {
-        var settingsProvider = new SettingsProvider(
-            NullLogger<SettingsProvider>.Instance);
-        var analyzers = new IFileAnalyzer[]
-        {
-            new CSharpFileAnalyzer(NullLogger<CSharpFileAnalyzer>.Instance),
-            new GenericFileAnalyzer()
-        };
-        var generators = new IReportGenerator[] { new MarkdownReportGenerator() };
-
-        return new CodeAnalyzerService(
-            settingsProvider,
-            analyzers,
-            generators,
-            NullLogger<CodeAnalyzerService>.Instance);
-    }
-
     /// <summary>
     ///     Verifica que el pipeline completo produce un archivo markdown válido.
     /// </summary>
@@ -171,5 +136,40 @@ public class FullPipelineTests : IDisposable
         // Afirmar — relaciones de dependencia detectadas
         content.Should().Contain("Calculator", "Calculator debe aparecer en el reporte");
         content.Should().Contain("MathService", "MathService debe aparecer en el reporte");
+    }
+
+    private static void CopyDirectory(DirectoryInfo source, DirectoryInfo destination)
+    {
+        if (!destination.Exists)
+            destination.Create();
+
+        foreach (var file in source.GetFiles())
+        {
+            file.CopyTo(Path.Combine(destination.FullName, file.Name), true);
+        }
+
+        foreach (var subDir in source.GetDirectories())
+        {
+            var nextDest = destination.CreateSubdirectory(subDir.Name);
+            CopyDirectory(subDir, nextDest);
+        }
+    }
+
+    private static CodeAnalyzerService BuildService()
+    {
+        var settingsProvider = new SettingsProvider(
+            NullLogger<SettingsProvider>.Instance);
+        var analyzers = new IFileAnalyzer[]
+        {
+            new CSharpFileAnalyzer(NullLogger<CSharpFileAnalyzer>.Instance),
+            new GenericFileAnalyzer()
+        };
+        var generators = new IReportGenerator[] { new MarkdownReportGenerator() };
+
+        return new CodeAnalyzerService(
+            settingsProvider,
+            analyzers,
+            generators,
+            NullLogger<CodeAnalyzerService>.Instance);
     }
 }

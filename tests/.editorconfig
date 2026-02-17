@@ -1,22 +1,10 @@
-
-
 [*.cs]
 # Allow underscores in test method names
 dotnet_diagnostic.CA1707.severity = none
 
 # Disable "ConfigureAwait" warning for tests
 dotnet_diagnostic.CA2007.severity = none
-
-# StyleCop suppressions for tests
-dotnet_diagnostic.SA1512.severity = none
-dotnet_diagnostic.SA1122.severity = none
-dotnet_diagnostic.CA1822.severity = none
-dotnet_diagnostic.SA1518.severity = none
-dotnet_diagnostic.SA1202.severity = none
-dotnet_diagnostic.SA1025.severity = none
-dotnet_diagnostic.SA1201.severity = none
-dotnet_diagnostic.CA1816.severity = none
-dotnet_diagnostic.CA1861.severity = none
-dotnet_diagnostic.SA1402.severity = none
-dotnet_diagnostic.SA1204.severity = none
 dotnet_diagnostic.SA1028.severity = none
+
+# Disable Documentation warning for tests
+dotnet_diagnostic.SA1600.severity = none

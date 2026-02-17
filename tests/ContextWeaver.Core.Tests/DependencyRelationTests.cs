@@ -62,10 +62,10 @@ public class DependencyRelationTests
     /// <param name="input">La cadena de entrada a verificar.</param>
     [Theory]
     [InlineData("ClassA")]
-    [InlineData("ClassA -> ClassB")]      // Wrong arrow
-    [InlineData("--> ClassB")]            // Missing source
-    [InlineData("ClassA -->")]            // Missing target
-    [InlineData("A --> B --> C")]         // Too many parts
+    [InlineData("ClassA -> ClassB")] // Wrong arrow
+    [InlineData("--> ClassB")] // Missing source
+    [InlineData("ClassA -->")] // Missing target
+    [InlineData("A --> B --> C")] // Too many parts
     public void Parse_MalformedInput_ReturnsNull(string input)
     {
         var result = DependencyRelation.Parse(input);

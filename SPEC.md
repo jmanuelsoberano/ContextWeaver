@@ -55,14 +55,25 @@ Siguiendo la misma filosofía de separación:
 
 ## 4. Estándares de Ingeniería y Calidad (QA)
 
-La calidad no es un acto, es un hábito automatizado.
+La calidad no es un acto, es un hábito automatizado. Hemos implementado una estrategia de **"Defensa en Profundidad"**:
 
-### 4.1 Automatización con Husky.NET y Git Hooks
-Para garantizar que "lo correcto" sea también "lo fácil", utilizamos **Husky**:
+### 4.1 Arquitectura como Código (Architecture Tests)
+No confiamos solo en la disciplina humana para mantener la arquitectura. Utilizamos `NetArchTest` para **imponer** las reglas de diseño en cada build:
 
-*   **Antes de confirmar (Pre-commit)**: El sistema se auto-corrige. Formateadores automáticos (`dotnet format`) arreglan inconsistencias de estilo (espacios, llaves) en los archivos modificados. Esto evita discusiones triviales en las revisiones de código.
+*   **Reglas de Dependencia**: `Core` nunca puede depender de `Engine` o `Cli`. `Engine` nunca puede depender de `Cli`.
+*   **Reglas de Diseño**: Las interfaces deben empezar con `I`. Los servicios deben ser `sealed`.
+*   **Reglas de Encapsulamiento**: Los modelos de dominio no pueden tener campos públicos.
 
-### 4.2 Configuración de Editor Contextual
+Si violas estas reglas, el build falla.
+
+### 4.2 Automatización con Husky.NET (Git Hooks)
+Para garantizar que "lo correcto" sea inevitable, utilizamos **Husky** con una política de **Tolesancia Cero**:
+
+*   **Pre-commit (Estricto)**:
+    1.  **Build Check**: Ejecuta `dotnet build --warnaserror`. Si tu código tiene errores o *warnings* (variables no usadas, etc.), el commit se bloquea.
+    2.  **Auto-Format**: Ejecuta `dotnet format`. Si hay problemas de estilo arreglables (espacios), los corrige y los stagea.
+
+### 4.3 Configuración de Editor Contextual
 Reconocemos que el código de producción y el código de prueba tienen necesidades diferentes:
 
 *   **Producción (.editorconfig raíz)**: Prioriza la uniformidad y la documentación pública.

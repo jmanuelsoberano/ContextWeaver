@@ -7,6 +7,11 @@ namespace ContextWeaver.Core.Tests;
 /// <summary>Pruebas para <see cref="DefaultSettings"/>.</summary>
 public class DefaultSettingsTests
 {
+    private static readonly string[] ExpectedExtensions =
+    {
+        ".cs", ".csproj", ".sln", ".json", ".ts", ".html", ".scss", ".css", ".md"
+    };
+
     /// <summary>Verifica que la configuración por defecto no sea nula.</summary>
     [Fact]
     public void Get_ReturnsNonNullSettings()
@@ -28,10 +33,7 @@ public class DefaultSettingsTests
     public void Get_IncludedExtensions_ContainsAllExpected()
     {
         var settings = DefaultSettings.Get();
-        settings.IncludedExtensions.Should().Contain(new[]
-        {
-            ".cs", ".csproj", ".sln", ".json", ".ts", ".html", ".scss", ".css", ".md"
-        });
+        settings.IncludedExtensions.Should().Contain(ExpectedExtensions);
     }
 
     /// <summary>Verifica que bin y obj estén excluidos por defecto.</summary>

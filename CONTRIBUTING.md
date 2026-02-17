@@ -32,10 +32,12 @@ Utilizamos `dotnet format` para asegurar consistencia.
 - **`tests/.editorconfig`**: Reglas adaptadas para pruebas (ej. `Metodo_Escenario_Resultado`).
 
 ### Hooks Automáticos (Husky.NET)
-Hemos configurado **Husky** para proteger la calidad del código:
-- **Pre-commit**: Ejecuta automáticamente `dotnet format` en los archivos que vas a subir (staged files).
-    - Si el error es corregible (espacios, indentación), se arregla y se incluye en el commit.
-    - Si el error requiere intervención manual, el commit fallará para que lo revises.
+Hemos configurado **Husky** en modo estricto para proteger la calidad del código:
+- **Pre-commit**:
+    1. **Verificación de Build**: Intenta compilar tu código *antes* de confirmar. Si hay errores o warnings, el commit **falla**.
+    2. **Formato Automático**: Ejecuta `dotnet format`. Arregla estilos automáticamente.
+
+> **Nota**: Si tienes errores de documentación en código de producción (`SA1600`), el commit fallará. En los tests, la documentación es opcional.
 
 ### Ejecutar Pruebas
 Para correr toda la suite de pruebas (Unitarias + E2E):
