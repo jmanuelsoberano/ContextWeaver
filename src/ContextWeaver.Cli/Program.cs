@@ -48,7 +48,9 @@ var app = new CommandApp<WizardCommand>(registrar);
 app.Configure(config =>
 {
     config.SetApplicationName("contextweaver");
-    config.SetApplicationVersion("1.0.7");
+
+    var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+    config.SetApplicationVersion(version?.ToString(3) ?? "1.0.0");
 
     config.AddCommand<AnalyzeCommand>("analyze")
         .WithDescription("Ejecuta el análisis automático sin interacción (ideal para CI/CD).");
