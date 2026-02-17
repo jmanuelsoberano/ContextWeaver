@@ -25,10 +25,12 @@ public class WizardCommand : AsyncCommand<WizardSettings>
     };
 
     private readonly CodeAnalyzerService _service;
+    private readonly SettingsProvider _settingsProvider;
 
-    public WizardCommand(CodeAnalyzerService service)
+    public WizardCommand(CodeAnalyzerService service, SettingsProvider settingsProvider)
     {
         _service = service;
+        _settingsProvider = settingsProvider;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, WizardSettings settings, CancellationToken cancellationToken)
@@ -44,35 +46,86 @@ public class WizardCommand : AsyncCommand<WizardSettings>
             return 1;
         }
 
+        // 1b. Filtro opcional por extensión
+        if (!settings.All)
+        {
+            var extensions = files.Select(f => f.Extension.ToLowerInvariant()).Distinct().OrderBy(e => e).ToList();
+            if (extensions.Count > 1)
+            {
+                var extPrompt = new MultiSelectionPrompt<string>()
+                    .Title("¿Desea filtrar por [green]extensión[/]? (deseleccione las que no necesite)")
+                    .PageSize(15)
+                    .InstructionsText(
+                        "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]");
+
+                foreach (var ext in extensions)
+                {
+                    var count = files.Count(f => f.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase));
+                    extPrompt.AddChoice($"{ext} ({count} archivos)");
+                    extPrompt.Select($"{ext} ({count} archivos)");
+                }
+
+                var selectedExtLabels = AnsiConsole.Prompt(extPrompt);
+                var selectedExtensions = selectedExtLabels
+                    .Select(label => label.Split(' ')[0])
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                files = files.Where(f => selectedExtensions.Contains(f.Extension.ToLowerInvariant())).ToList();
+
+                if (files.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[yellow]No hay archivos con las extensiones seleccionadas. Operación cancelada.[/]");
+                    return 0;
+                }
+            }
+        }
+
         // 2. Construir árbol de selección
         var rootNode = BuildFileTree(files, directoryInfo);
 
         // 2b. Pregunta previa: ¿Seleccionar todos o ninguno?
-        var selectionMode = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("¿Cómo desea empezar la [green]selección de archivos[/]?")
-                .AddChoices("Todos seleccionados (deseleccionar lo que no quiero)",
-                    "Ninguno seleccionado (seleccionar lo que quiero)"));
+        bool selectAll;
+        if (settings.All)
+        {
+            selectAll = true;
+        }
+        else
+        {
+            var selectionMode = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("¿Cómo desea empezar la [green]selección de archivos[/]?")
+                    .AddChoices("Todos seleccionados (deseleccionar lo que no quiero)",
+                        "Ninguno seleccionado (seleccionar lo que quiero)"));
 
-        var selectAll = selectionMode.StartsWith("Todos", StringComparison.Ordinal);
+            selectAll = selectionMode.StartsWith("Todos", StringComparison.Ordinal);
+        }
 
         // 3. Interacción: Selección de archivos (Árbol)
-        var prompt = new MultiSelectionPrompt<FileSystemInfo>()
-            .Title("Seleccione los [green]archivos[/] que desea incluir en el contexto:")
-            .PageSize(20)
-            .MoreChoicesText("[grey](Muevase arriba y abajo para ver más archivos)[/]")
-            .InstructionsText(
-                "[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar, " +
-                "[blue]<i>[/] para invertir selección, " +
-                "[green]<enter>[/] para confirmar)[/]")
-            .UseConverter(item => item.Name);
+        List<FileInfo> selectedFiles;
+        if (settings.All)
+        {
+            // --all flag: selecciona todo y omite el prompt
+            selectedFiles = files;
+        }
+        else
+        {
+            var prompt = new MultiSelectionPrompt<FileSystemInfo>()
+                .Title("Seleccione los [green]archivos[/] que desea incluir en el contexto:")
+                .PageSize(20)
+                .MoreChoicesText("[grey](Muevase arriba y abajo para ver más archivos)[/]")
+                .InstructionsText(
+                    "[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar, " +
+                    "[blue]<i>[/] para invertir selección, " +
+                    "[green]<enter>[/] para confirmar)[/]")
+                .UseConverter(item => item.Name);
 
-        // Añadir nodos al prompt recursivamente
-        AddNodesToPrompt(prompt, rootNode, selectAll);
+            // Añadir nodos al prompt recursivamente
+            AddNodesToPrompt(prompt, rootNode, selectAll);
 
-        var selectedItems = AnsiConsole.Prompt(prompt);
-        // Filtrar solo los archivos (ignorar carpetas seleccionadas que son grupos)
-        var selectedFiles = selectedItems.OfType<FileInfo>().ToList();
+            var selectedItems = AnsiConsole.Prompt(prompt);
+            // Filtrar solo los archivos (ignorar carpetas seleccionadas que son grupos)
+            selectedFiles = selectedItems.OfType<FileInfo>().ToList();
+        }
 
         if (selectedFiles.Count == 0)
         {
@@ -80,31 +133,97 @@ public class WizardCommand : AsyncCommand<WizardSettings>
             return 0;
         }
 
-        // 3b. Interacción: Selección de secciones del reporte
+        // 3b. Selección de secciones del reporte
         var optionalSections = _availableSections.Where(s => !s.IsRequired).ToList();
+        List<string> enabledSectionNames;
 
-        var sectionPrompt = new MultiSelectionPrompt<string>()
-            .Title("Seleccione las [green]secciones[/] que desea incluir en el reporte:")
-            .PageSize(10)
-            .MoreChoicesText("[grey](Muevase arriba y abajo para ver más secciones)[/]")
-            .InstructionsText(
-                "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]")
-            .AddChoiceGroup(
-                "✅ Obligatorias (siempre incluidas)",
-                _availableSections.Where(s => s.IsRequired).Select(s => $"{s.Name} — {s.Description}"));
-
-        foreach (var section in optionalSections)
+        if (!string.IsNullOrEmpty(settings.Sections))
         {
-            sectionPrompt.AddChoice($"{section.Name} — {section.Description}");
-            sectionPrompt.Select($"{section.Name} — {section.Description}");
+            // --sections flag: incluir solo las especificadas (fuzzy match)
+            var inputs = settings.Sections
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            enabledSectionNames = new List<string>();
+            foreach (var input in inputs)
+            {
+                var match = _availableSections.FirstOrDefault(s => s.Name.Contains(input, StringComparison.OrdinalIgnoreCase));
+                if (match != null)
+                {
+                    enabledSectionNames.Add(match.Name);
+                }
+            }
         }
+        else if (!string.IsNullOrEmpty(settings.ExcludeSections))
+        {
+            // --exclude-sections flag: incluir todas menos las excluidas (fuzzy match)
+            var excludedInputs = settings.ExcludeSections
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        var selectedSectionLabels = AnsiConsole.Prompt(sectionPrompt);
+            var excludedNames = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var input in excludedInputs)
+            {
+                var match = _availableSections.FirstOrDefault(s => s.Name.Contains(input, StringComparison.OrdinalIgnoreCase));
+                if (match != null)
+                {
+                    excludedNames.Add(match.Name);
+                }
+            }
 
-        // Extraer nombres de sección (antes del " — ")
-        var enabledSectionNames = selectedSectionLabels
-            .Select(label => label.Split(" — ")[0])
-            .ToList();
+            enabledSectionNames = optionalSections
+                .Where(s => !excludedNames.Contains(s.Name))
+                .Select(s => s.Name)
+                .ToList();
+        }
+        else
+        {
+            // Modo interactivo: mostrar selector
+            // Verificar si hay preferencias guardadas
+            var savedSections = config.EnabledSections != null
+                ? new HashSet<string>(config.EnabledSections, StringComparer.Ordinal)
+                : null;
+
+            var sectionPrompt = new MultiSelectionPrompt<string>()
+                .Title("Seleccione las [green]secciones[/] que desea incluir en el reporte:")
+                .PageSize(10)
+                .MoreChoicesText("[grey](Muevase arriba y abajo para ver más secciones)[/]")
+                .InstructionsText(
+                    "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]")
+                .AddChoiceGroup(
+                    "✅ Obligatorias (siempre incluidas)",
+                    _availableSections.Where(s => s.IsRequired).Select(s => $"{s.Name} — {s.Description}"));
+
+            foreach (var section in optionalSections)
+            {
+                var label = $"{section.Name} — {section.Description}";
+                sectionPrompt.AddChoice(label);
+
+                // Pre-seleccionar: si hay preferencias guardadas, usar esas; si no, seleccionar todas
+                if (savedSections == null || savedSections.Contains(section.Name))
+                    sectionPrompt.Select(label);
+            }
+
+            if (savedSections != null)
+                AnsiConsole.MarkupLine("[grey]  (Se cargaron preferencias de secciones guardadas)[/]");
+
+            var selectedSectionLabels = AnsiConsole.Prompt(sectionPrompt);
+
+            enabledSectionNames = selectedSectionLabels
+                .Select(label => label.Split(" — ")[0])
+                .ToList();
+
+            // Ofrecer guardar preferencias si difieren del default (todos)
+            var allOptionalSelected = enabledSectionNames.Count >= optionalSections.Count;
+            if (!allOptionalSelected)
+            {
+                var savePref = AnsiConsole.Confirm("¿Guardar estas preferencias de secciones para futuros análisis?", defaultValue: false);
+                if (savePref)
+                {
+                    config.EnabledSections = enabledSectionNames.ToArray();
+                    _settingsProvider.SaveSettings(directoryInfo, config);
+                    AnsiConsole.MarkupLine("[green]Preferencias guardadas en .contextweaver.json[/]");
+                }
+            }
+        }
 
         // Validar: al menos 1 sección opcional seleccionada
         var optionalSelectedCount = enabledSectionNames
@@ -116,8 +235,8 @@ public class WizardCommand : AsyncCommand<WizardSettings>
             return 1;
         }
 
-        // 4. Interacción: Configuración de salida
-        var outputFileName = AnsiConsole.Prompt(
+        // 4. Configuración de salida
+        var outputFileName = settings.Output ?? AnsiConsole.Prompt(
             new TextPrompt<string>("Ingrese el nombre del [green]archivo de salida[/]:")
                 .DefaultValue("context.md")
                 .Validate(name =>
@@ -125,7 +244,7 @@ public class WizardCommand : AsyncCommand<WizardSettings>
                     ? ValidationResult.Success()
                     : ValidationResult.Error("[red]El nombre del archivo no puede estar vacío[/]")));
 
-        var format = AnsiConsole.Prompt(
+        var format = settings.Format ?? AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Seleccione el [green]formato de salida[/]:")
                 .PageSize(3)
@@ -153,11 +272,14 @@ public class WizardCommand : AsyncCommand<WizardSettings>
         AnsiConsole.Write(summaryTable);
         AnsiConsole.WriteLine();
 
-        var confirm = AnsiConsole.Confirm("¿Desea continuar con la ejecución?", defaultValue: true);
-        if (!confirm)
+        if (AnsiConsole.Profile.Capabilities.Interactive)
         {
-            AnsiConsole.MarkupLine("[yellow]Operación cancelada por el usuario.[/]");
-            return 0;
+            var confirm = AnsiConsole.Confirm("¿Desea continuar con la ejecución?", defaultValue: true);
+            if (!confirm)
+            {
+                AnsiConsole.MarkupLine("[yellow]Operación cancelada por el usuario.[/]");
+                return 0;
+            }
         }
 
         // 6. Ejecución con indicador de progreso

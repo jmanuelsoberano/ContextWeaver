@@ -97,4 +97,37 @@ public sealed class SettingsProvider
 
         return defaultSettings;
     }
+
+    /// <summary>
+    ///     Guarda la configuración actualizada en .contextweaver.json.
+    /// </summary>
+    /// <param name="directory">Directorio raíz del análisis.</param>
+    /// <param name="settings">La configuración a persistir.</param>
+    public void SaveSettings(DirectoryInfo directory, AnalysisSettings settings)
+    {
+        var localConfigPath = Path.Combine(directory.FullName, ".contextweaver.json");
+
+        try
+        {
+            var resolvedPath = Path.GetFullPath(localConfigPath);
+            var resolvedDir = Path.GetFullPath(directory.FullName);
+            if (!resolvedPath.StartsWith(resolvedDir, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("Ruta de configuración resuelta '{ResolvedPath}' está fuera del directorio objetivo.", resolvedPath);
+                return;
+            }
+
+            var jsonString = JsonSerializer.Serialize(new { AnalysisSettings = settings }, _jsonOptions);
+            File.WriteAllText(resolvedPath, jsonString);
+
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Configuración guardada en: {ConfigPath}", resolvedPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo guardar la configuración en '{ConfigPath}'.", localConfigPath);
+        }
+    }
 }
