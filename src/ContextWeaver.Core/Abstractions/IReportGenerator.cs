@@ -17,7 +17,12 @@ public interface IReportGenerator
     /// <param name="directory">El directorio raíz que fue analizado.</param>
     /// <param name="results">La lista de resultados del análisis para cada archivo.</param>
     /// <param name="instabilityMetrics">Métricas de inestabilidad calculadas para los módulos.</param>
+    /// <param name="enabledSections">
+    ///     Nombres de las secciones a incluir en el reporte. Si es null, se incluyen todas las secciones.
+    ///     Los nombres deben coincidir con la propiedad Name de cada sección del reporte.
+    /// </param>
     /// <returns>El contenido del reporte generado como una cadena de texto.</returns>
     string Generate(DirectoryInfo directory, List<FileAnalysisResult> results,
-        Dictionary<string, (int Ca, int Ce, double Instability)> instabilityMetrics);
+        Dictionary<string, (int Ca, int Ce, double Instability)> instabilityMetrics,
+        IEnumerable<string>? enabledSections = null);
 }

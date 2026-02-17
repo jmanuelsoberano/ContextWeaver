@@ -9,6 +9,15 @@ namespace ContextWeaver.Reporters.Sections;
 public class HeaderSection : IReportSection
 {
     /// <inheritdoc />
+    public string Name => "📄 Header";
+
+    /// <inheritdoc />
+    public string Description => "Encabezado introductorio con instrucciones de uso";
+
+    /// <inheritdoc />
+    public bool IsRequired => true;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         return $"""

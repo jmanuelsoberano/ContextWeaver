@@ -78,8 +78,9 @@ public sealed class CodeAnalyzerService
     /// <param name="directory">Directorio raíz (para rutas relativas).</param>
     /// <param name="outputFile">Archivo de salida.</param>
     /// <param name="format">Formato del reporte.</param>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-    public async Task AnalyzeFiles(IEnumerable<FileInfo> files, DirectoryInfo directory, FileInfo outputFile, string format)
+    /// <param name="enabledSections">Nombres de secciones a incluir. Si es null, se incluyen todas.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task AnalyzeFiles(IEnumerable<FileInfo> files, DirectoryInfo directory, FileInfo outputFile, string format, IEnumerable<string>? enabledSections = null)
     {
         var generator = _generators.FirstOrDefault(g => g.Format.Equals(format, StringComparison.OrdinalIgnoreCase));
         if (generator == null)
@@ -156,7 +157,7 @@ public sealed class CodeAnalyzerService
         var instabilityMetrics = InstabilityCalculator.Calculate(resultsList);
 
         // 6. Generar y escribir el reporte
-        var reportContent = generator.Generate(directory, resultsList, instabilityMetrics);
+        var reportContent = generator.Generate(directory, resultsList, instabilityMetrics, enabledSections);
         await File.WriteAllTextAsync(outputFile.FullName, reportContent);
 
         if (_logger.IsEnabled(LogLevel.Information))

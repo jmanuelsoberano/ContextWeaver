@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ContextWeaver.Core;
+using ContextWeaver.Reporters;
+using ContextWeaver.Reporters.Sections;
 using ContextWeaver.Services;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -10,6 +12,18 @@ namespace ContextWeaver.Cli.Commands;
 public class WizardCommand : AsyncCommand<WizardSettings>
 {
     private static readonly string[] _supportedFormats = { "markdown", "json", "xml" };
+
+    private static readonly IReportSection[] _availableSections =
+    {
+        new HeaderSection(),
+        new HotspotSection(),
+        new InstabilitySection(),
+        new DependencyGraphSection(),
+        new ModuleDiagramSection(),
+        new DirectoryTreeSection(),
+        new FileContentSection()
+    };
+
     private readonly CodeAnalyzerService _service;
 
     public WizardCommand(CodeAnalyzerService service)
@@ -33,18 +47,28 @@ public class WizardCommand : AsyncCommand<WizardSettings>
         // 2. Construir árbol de selección
         var rootNode = BuildFileTree(files, directoryInfo);
 
+        // 2b. Pregunta previa: ¿Seleccionar todos o ninguno?
+        var selectionMode = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("¿Cómo desea empezar la [green]selección de archivos[/]?")
+                .AddChoices("Todos seleccionados (deseleccionar lo que no quiero)",
+                    "Ninguno seleccionado (seleccionar lo que quiero)"));
+
+        var selectAll = selectionMode.StartsWith("Todos", StringComparison.Ordinal);
+
         // 3. Interacción: Selección de archivos (Árbol)
         var prompt = new MultiSelectionPrompt<FileSystemInfo>()
             .Title("Seleccione los [green]archivos[/] que desea incluir en el contexto:")
             .PageSize(20)
             .MoreChoicesText("[grey](Muevase arriba y abajo para ver más archivos)[/]")
             .InstructionsText(
-                "[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar carpetas o archivos, " +
+                "[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar, " +
+                "[blue]<i>[/] para invertir selección, " +
                 "[green]<enter>[/] para confirmar)[/]")
             .UseConverter(item => item.Name);
 
         // Añadir nodos al prompt recursivamente
-        AddNodesToPrompt(prompt, rootNode);
+        AddNodesToPrompt(prompt, rootNode, selectAll);
 
         var selectedItems = AnsiConsole.Prompt(prompt);
         // Filtrar solo los archivos (ignorar carpetas seleccionadas que son grupos)
@@ -54,6 +78,42 @@ public class WizardCommand : AsyncCommand<WizardSettings>
         {
             AnsiConsole.MarkupLine("[yellow]No se seleccionaron archivos. Operación cancelada.[/]");
             return 0;
+        }
+
+        // 3b. Interacción: Selección de secciones del reporte
+        var optionalSections = _availableSections.Where(s => !s.IsRequired).ToList();
+
+        var sectionPrompt = new MultiSelectionPrompt<string>()
+            .Title("Seleccione las [green]secciones[/] que desea incluir en el reporte:")
+            .PageSize(10)
+            .MoreChoicesText("[grey](Muevase arriba y abajo para ver más secciones)[/]")
+            .InstructionsText(
+                "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]")
+            .AddChoiceGroup(
+                "✅ Obligatorias (siempre incluidas)",
+                _availableSections.Where(s => s.IsRequired).Select(s => $"{s.Name} — {s.Description}"));
+
+        foreach (var section in optionalSections)
+        {
+            sectionPrompt.AddChoice($"{section.Name} — {section.Description}");
+            sectionPrompt.Select($"{section.Name} — {section.Description}");
+        }
+
+        var selectedSectionLabels = AnsiConsole.Prompt(sectionPrompt);
+
+        // Extraer nombres de sección (antes del " — ")
+        var enabledSectionNames = selectedSectionLabels
+            .Select(label => label.Split(" — ")[0])
+            .ToList();
+
+        // Validar: al menos 1 sección opcional seleccionada
+        var optionalSelectedCount = enabledSectionNames
+            .Count(name => optionalSections.Any(s => s.Name == name));
+
+        if (optionalSelectedCount == 0)
+        {
+            AnsiConsole.MarkupLine("[red]Debe seleccionar al menos una sección opcional. Operación cancelada.[/]");
+            return 1;
         }
 
         // 4. Interacción: Configuración de salida
@@ -74,7 +134,7 @@ public class WizardCommand : AsyncCommand<WizardSettings>
         var outputFile = new FileInfo(Path.Combine(directoryInfo.FullName, outputFileName));
 
         // 5. Ejecución
-        await _service.AnalyzeFiles(selectedFiles, directoryInfo, outputFile, format);
+        await _service.AnalyzeFiles(selectedFiles, directoryInfo, outputFile, format, enabledSectionNames);
 
         return 0;
     }
@@ -111,17 +171,21 @@ public class WizardCommand : AsyncCommand<WizardSettings>
         return root;
     }
 
-    private static void AddNodesToPrompt(MultiSelectionPrompt<FileSystemInfo> prompt, FileNode node)
+    private static void AddNodesToPrompt(MultiSelectionPrompt<FileSystemInfo> prompt, FileNode node, bool selectAll)
     {
         // Carpetas primero (Nivel Raíz)
         foreach (var child in node.Children.OrderBy(c => c.Item is FileInfo))
         {
             var item = prompt.AddChoice(child.Item);
-            AddNodesToPromptRecursive(item, child);
+
+            if (selectAll)
+                item.Select();
+
+            AddNodesToPromptRecursive(item, child, selectAll);
         }
     }
 
-    private static void AddNodesToPromptRecursive(IMultiSelectionItem<FileSystemInfo> parent, FileNode node)
+    private static void AddNodesToPromptRecursive(IMultiSelectionItem<FileSystemInfo> parent, FileNode node, bool selectAll)
     {
         // Carpetas primero (Nivel Hijo)
         foreach (var child in node.Children.OrderBy(c => c.Item is FileInfo))
@@ -131,7 +195,11 @@ public class WizardCommand : AsyncCommand<WizardSettings>
             if (addChildMethod != null)
             {
                 var childItem = (IMultiSelectionItem<FileSystemInfo>)addChildMethod.Invoke(parent, new object[] { child.Item })!;
-                AddNodesToPromptRecursive(childItem, child);
+
+                if (selectAll)
+                    childItem.Select();
+
+                AddNodesToPromptRecursive(childItem, child, selectAll);
             }
             else
             {

@@ -9,6 +9,15 @@ namespace ContextWeaver.Reporters.Sections;
 public class HotspotSection : IReportSection
 {
     /// <inheritdoc />
+    public string Name => "🔥 Hotspots";
+
+    /// <inheritdoc />
+    public string Description => "Top 5 archivos por LOC e importaciones";
+
+    /// <inheritdoc />
+    public bool IsRequired => false;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

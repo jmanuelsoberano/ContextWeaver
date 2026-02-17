@@ -9,6 +9,15 @@ namespace ContextWeaver.Reporters.Sections;
 public class DependencyGraphSection : IReportSection
 {
     /// <inheritdoc />
+    public string Name => "📈 Grafo de Dependencias";
+
+    /// <inheritdoc />
+    public string Description => "Diagrama global de dependencias (Mermaid + PlantUML)";
+
+    /// <inheritdoc />
+    public bool IsRequired => false;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var allDependencies = new HashSet<string>();

@@ -9,6 +9,15 @@ namespace ContextWeaver.Reporters.Sections;
 public class ModuleDiagramSection : IReportSection
 {
     /// <inheritdoc />
+    public string Name => "🧩 Diagramas por Módulo";
+
+    /// <inheritdoc />
+    public string Description => "Diagramas de dependencia por carpeta de primer nivel";
+
+    /// <inheritdoc />
+    public bool IsRequired => false;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

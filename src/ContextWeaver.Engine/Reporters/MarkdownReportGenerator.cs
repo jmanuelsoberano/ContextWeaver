@@ -28,15 +28,20 @@ public class MarkdownReportGenerator : IReportGenerator
 
     /// <inheritdoc />
     public string Generate(DirectoryInfo directory, List<FileAnalysisResult> results,
-        Dictionary<string, (int Ca, int Ce, double Instability)> instabilityMetrics)
+        Dictionary<string, (int Ca, int Ce, double Instability)> instabilityMetrics,
+        IEnumerable<string>? enabledSections = null)
     {
         var sortedResults = results.OrderBy(r => r.RelativePath).ToList();
         var typeKindMap = BuildTypeKindMap(sortedResults);
 
         var context = new ReportContext(directory, sortedResults, instabilityMetrics, typeKindMap);
 
+        var sectionsToRender = enabledSections != null
+            ? FilterSections(enabledSections)
+            : _sections;
+
         var reportBuilder = new StringBuilder();
-        foreach (var section in _sections)
+        foreach (var section in sectionsToRender)
             reportBuilder.Append(section.Render(context));
 
         return reportBuilder.ToString();
@@ -55,5 +60,11 @@ public class MarkdownReportGenerator : IReportGenerator
         }
 
         return map;
+    }
+
+    private IEnumerable<IReportSection> FilterSections(IEnumerable<string> enabledSections)
+    {
+        var enabledSet = new HashSet<string>(enabledSections, StringComparer.Ordinal);
+        return _sections.Where(s => s.IsRequired || enabledSet.Contains(s.Name));
     }
 }

@@ -12,6 +12,15 @@ public class DirectoryTreeSection : IReportSection
     private static readonly char[] PathSeparators = { '/', '\\' };
 
     /// <inheritdoc />
+    public string Name => "🌲 Árbol de Directorios";
+
+    /// <inheritdoc />
+    public string Description => "Estructura de directorios con enlaces a secciones";
+
+    /// <inheritdoc />
+    public bool IsRequired => false;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();
