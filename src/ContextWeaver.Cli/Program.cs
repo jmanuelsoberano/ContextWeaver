@@ -8,9 +8,17 @@ using Spectre.Console.Cli;
 
 [assembly: NeutralResourcesLanguage("en")]
 
+// ARQUITECTURA: Top-Level Statements
+// Este archivo actúa como el "Application Entry Point". Reduce el ruido visual ("boilerplate")
+// de la declaración explícita de namespace y clase Program.Main.
+
+// PRINCIPIO: Composition Root
+// Aquí es donde ensamblamos todo el grafo de dependencias de la aplicación.
+// Es el ÚNICO lugar donde se conocen las implementaciones concretas y se vinculan a sus interfaces.
 var services = new ServiceCollection();
 
-// Configurar Logging básico para la CLI
+// BEST PRACTICE: Logging Configurado Explícitamente
+// Configuramos el logging antes de cualquier otra cosa para asegurar observabilidad desde el inicio.
 services.AddLogging(configure =>
 {
     configure.ClearProviders();
@@ -18,17 +26,29 @@ services.AddLogging(configure =>
     configure.SetMinimumLevel(LogLevel.Information);
 });
 
-// Registrar los servicios de la aplicación reusando la lógica existente
+// PRINCIPIO: DRY (Don't Repeat Yourself) & Modularity
+// Reutilizamos la configuración de servicios centralizada en HostBuilderExtensions.
+// Esto nos permite compartir la misma configuración de inyección de dependencias
+// entre diferentes "Hosts" (por ejemplo, si tuviéramos una API y una CLI).
 HostBuilderExtensions.ConfigureServices(services);
 
-// Configurar la integración de DI con Spectre.Console
+// PATRÓN DE DISEÑO: Adapter Pattern
+// `TypeRegistrar` actúa como un adaptador que permite a Spectre.Console.Cli (el cliente)
+// interactuar con Microsoft.Extensions.DependencyInjection (el adaptado).
+// Esto nos permite usar nuestro contenedor de DI preferido dentro de la librería de CLI.
 var registrar = new TypeRegistrar(services);
+
+// PATRÓN DE DISEÑO: Command Pattern
+// Spectre.Console.Cli implementa el patrón Command.
+// `CommandApp` encapsula la solicitud (argumentos de CLI) como un objeto (`AnalyzeCommand`).
+// Esto desacopla el objeto que invoca la operación (el usuario/terminal) del objeto que sabe cómo realizarla.
 var app = new CommandApp<AnalyzeCommand>(registrar);
 
 app.Configure(config =>
 {
     config.SetApplicationName("contextweaver");
     config.SetApplicationVersion("1.0.7");
+    // Aquí se podrían añadir más comandos o sub-comandos para escalar la CLI.
 });
 
 return await app.RunAsync(args);
