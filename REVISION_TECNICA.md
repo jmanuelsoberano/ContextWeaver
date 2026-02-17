@@ -138,8 +138,26 @@ ContextWeaver ha evolucionado de una herramienta de concatenación simple a un g
     -   Se lista explícitamente qué otros archivos dependen del archivo actual.
     -   Proporciona contexto instantáneo sobre el impacto de los cambios.
 
-**Verificación:**
--   Comprobado en `verification_report_v10.md` mediante auto-análisis.
--   `CSharpFileAnalyzer` muestra correctamente `Implements: IFileAnalyzer`.
--   `NestingWalker` muestra una profundidad adecuada.
 -   `CodeAnalyzerService` muestra múltiples referencias en "Used By".
+
+### 4. Evolución de Usabilidad (Fases 4-7)
+**Estado:** COMPLETADO
+**Impacto:** Crítico (Adopción de usuario y experiencia de desarrollador).
+
+**Mejoras Implementadas:**
+1.  **Wizard Interactivo Mejorado:**
+    -   Se implementó un flujo guiado robusto con `Spectre.Console`.
+    -   Soporte para selección recursiva de archivos y filtrado por extensión.
+    -   **Selección Masiva:** Opción inicial para "Seleccionar Todo/Nada" o usar defaults.
+2.  **Granularidad de Diagramas:**
+    -   Refactorización de `DependencyGraphSection` y `ModuleDiagramSection` en componentes granulares.
+    -   Ahora es posible generar reportes con **solo Mermaid** o **solo PlantUML**, reduciendo ruido.
+3.  **Persistencia de Configuración:**
+    -   El sistema recuerda la última selección de secciones del usuario en `.contextweaver.json`.
+    -   Soporte para perfiles de proyecto (`.contextweaver.json` en raíz del repo analizado).
+
+---
+
+## 5. Conclusión
+
+ContextWeaver ha evolucionado de una herramienta de concatenación simple a un generador de documentación técnica avanzado y altamente usable. La arquitectura basada en plugins (`IReportSection`) demostró su valor al permitir la adición de nuevas capacidades de diagramación y granularidad sin tocar el núcleo. La herramienta está lista para producción.
