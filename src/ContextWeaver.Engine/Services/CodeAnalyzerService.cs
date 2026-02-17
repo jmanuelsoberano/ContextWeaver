@@ -44,14 +44,21 @@ public sealed class CodeAnalyzerService
     /// <returns>Una task que representa la operación asíncrona.</returns>
     public async Task AnalyzeAndGenerateReport(DirectoryInfo directory, FileInfo outputFile, string format)
     {
-        var generator = _generators.FirstOrDefault(g => g.Format.Equals(format, StringComparison.OrdinalIgnoreCase));
-        if (generator == null)
-        {
-            _logger.LogError("El formato de salida '{Format}' no es soportado.", format);
-            return;
-        }
+        // 1. Obtener archivos
+        var (files, config) = GetManagedFiles(directory);
 
-        // 1. Cargar configuración (responsabilidad delegada)
+        // 2. Analizar y generar reporte
+        await AnalyzeFiles(files, directory, outputFile, format);
+    }
+
+    /// <summary>
+    ///     Obtiene la lista de archivos gestionados por la configuración del proyecto.
+    /// </summary>
+    /// <param name="directory">Directorio raíz.</param>
+    /// <returns>Una tupla con la lista de archivos y la configuración cargada.</returns>
+    public (List<FileInfo> Files, AnalysisSettings Settings) GetManagedFiles(DirectoryInfo directory)
+    {
+        // 1. Cargar configuración
         var settings = _settingsProvider.LoadSettingsFor(directory);
 
         // 2. Encontrar y filtrar archivos
@@ -61,16 +68,38 @@ public sealed class CodeAnalyzerService
             .Where(f => settings.IncludedExtensions.Contains(f.Extension.ToLowerInvariant()))
             .ToList();
 
+        return (allFiles, settings);
+    }
+
+    /// <summary>
+    ///     Analiza una lista específica de archivos y genera el reporte.
+    /// </summary>
+    /// <param name="files">Lista de archivos a analizar.</param>
+    /// <param name="directory">Directorio raíz (para rutas relativas).</param>
+    /// <param name="outputFile">Archivo de salida.</param>
+    /// <param name="format">Formato del reporte.</param>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+    public async Task AnalyzeFiles(IEnumerable<FileInfo> files, DirectoryInfo directory, FileInfo outputFile, string format)
+    {
+        var generator = _generators.FirstOrDefault(g => g.Format.Equals(format, StringComparison.OrdinalIgnoreCase));
+        if (generator == null)
+        {
+            _logger.LogError("El formato de salida '{Format}' no es soportado.", format);
+            return;
+        }
+
+        var fileList = files.ToList();
+
         // 3. Inicializar Analizadores (Pre-carga de contexto global)
         foreach (var analyzer in _analyzers)
         {
-            await analyzer.InitializeAsync(allFiles);
+            await analyzer.InitializeAsync(fileList);
         }
 
         // 4. Analizar archivos (Paralelizado)
         var analysisResults = new System.Collections.Concurrent.ConcurrentBag<FileAnalysisResult>();
 
-        await Parallel.ForEachAsync(allFiles, async (file, ct) =>
+        await Parallel.ForEachAsync(fileList, async (file, ct) =>
         {
             var analyzer = _analyzers.FirstOrDefault(a => a.CanAnalyze(file));
             if (analyzer != null)

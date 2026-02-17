@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Resources;
 using ContextWeaver.Cli.Commands;
 using ContextWeaver.Cli.Infrastructure;
@@ -40,15 +41,17 @@ var registrar = new TypeRegistrar(services);
 
 // PATRÓN DE DISEÑO: Command Pattern
 // Spectre.Console.Cli implementa el patrón Command.
-// `CommandApp` encapsula la solicitud (argumentos de CLI) como un objeto (`AnalyzeCommand`).
-// Esto desacopla el objeto que invoca la operación (el usuario/terminal) del objeto que sabe cómo realizarla.
-var app = new CommandApp<AnalyzeCommand>(registrar);
+// `CommandApp` encapsula la solicitud.
+// CAMBIO: WizardCommand es ahora el comando por defecto para mejorar la experiencia de usuario.
+var app = new CommandApp<WizardCommand>(registrar);
 
 app.Configure(config =>
 {
     config.SetApplicationName("contextweaver");
     config.SetApplicationVersion("1.0.7");
-    // Aquí se podrían añadir más comandos o sub-comandos para escalar la CLI.
+
+    config.AddCommand<AnalyzeCommand>("analyze")
+        .WithDescription("Ejecuta el análisis automático sin interacción (ideal para CI/CD).");
 });
 
 return await app.RunAsync(args);
