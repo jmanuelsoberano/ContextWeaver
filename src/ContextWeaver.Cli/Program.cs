@@ -1,50 +1,34 @@
-using System.CommandLine;
 using System.Resources;
-using ContextWeaver.Cli;
+using ContextWeaver.Cli.Commands;
+using ContextWeaver.Cli.Infrastructure;
 using ContextWeaver.Extensions;
-using ContextWeaver.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Spectre.Console.Cli;
 
 [assembly: NeutralResourcesLanguage("en")]
 
-// ARQUITECTURA: Top-Level Statements.
-// Este archivo ahora actúa como el punto de entrada directo de la aplicación.
-// Todo el código aquí se ejecuta dentro del "Main" implícito.
+var services = new ServiceCollection();
 
-// BUENA PRÁCTICA: Usar una librería robusta como System.CommandLine para la
-// interfaz de línea de comandos (CLI). Evita parsear 'args' manualmente,
-// lo que es propenso a errores y poco mantenible.
-var rootCommand = new RootCommand("Herramienta de análisis y extracción de código para LLMs.");
-
-var directoryOption = new Option<DirectoryInfo>(
-    CliConstants.DirectoryAliases,
-    // La función getDefaultValue se ejecuta si el usuario no provee este parámetro.
-    // "." es una forma universal de referirse al directorio actual.
-    () => new DirectoryInfo("."),
-    "El directorio raíz del proyecto a analizar. Por defecto, es el directorio actual.");
-
-var outputOption = new Option<FileInfo>(
-    CliConstants.OutputAliases,
-    () => new FileInfo("analysis_report.md"),
-    "El archivo de salida para el reporte consolidado.");
-
-var formatOption = new Option<string>(
-    CliConstants.FormatAliases,
-    () => "markdown",
-    "El formato del reporte de salida.");
-
-rootCommand.AddOption(directoryOption);
-rootCommand.AddOption(outputOption);
-rootCommand.AddOption(formatOption);
-
-rootCommand.SetHandler(async (directory, outputFile, format) =>
+// Configurar Logging básico para la CLI
+services.AddLogging(configure =>
 {
-    // BUENA PRÁCTICA: Usar el "Generic Host" de .NET para configurar la aplicación.
-    // Llamamos al método de extensión para crear el host.
-    var host = HostBuilderExtensions.CreateHostBuilder(args).Build();
-    var service = host.Services.GetRequiredService<CodeAnalyzerService>();
-    await service.AnalyzeAndGenerateReport(directory, outputFile, format);
-}, directoryOption, outputOption, formatOption);
+    configure.ClearProviders();
+    configure.AddConsole();
+    configure.SetMinimumLevel(LogLevel.Information);
+});
 
-// La llamada final al comando ejecuta la lógica.
-return await rootCommand.InvokeAsync(args);
+// Registrar los servicios de la aplicación reusando la lógica existente
+HostBuilderExtensions.ConfigureServices(services);
+
+// Configurar la integración de DI con Spectre.Console
+var registrar = new TypeRegistrar(services);
+var app = new CommandApp<AnalyzeCommand>(registrar);
+
+app.Configure(config =>
+{
+    config.SetApplicationName("contextweaver");
+    config.SetApplicationVersion("1.0.7");
+});
+
+return await app.RunAsync(args);

@@ -24,13 +24,18 @@ public static class HostBuilderExtensions
         return Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddSingleton<SettingsProvider>();
-                services.AddSingleton<CodeAnalyzerService>();
-
-                services.AddSingleton<IFileAnalyzer, CSharpFileAnalyzer>();
-                services.AddSingleton<IFileAnalyzer, GenericFileAnalyzer>();
-
-                services.AddSingleton<IReportGenerator, MarkdownReportGenerator>();
+                ConfigureServices(services);
             });
+    }
+
+    public static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<SettingsProvider>();
+        services.AddSingleton<CodeAnalyzerService>();
+
+        services.AddSingleton<IFileAnalyzer, CSharpFileAnalyzer>();
+        services.AddSingleton<IFileAnalyzer, GenericFileAnalyzer>();
+
+        services.AddSingleton<IReportGenerator, MarkdownReportGenerator>();
     }
 }
