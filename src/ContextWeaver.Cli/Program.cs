@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Resources;
 using ContextWeaver.Cli.Commands;
@@ -8,6 +9,9 @@ using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 [assembly: NeutralResourcesLanguage("en")]
+
+// Setting the output encoding to UTF-8 ensures that icons and emojis are displayed correctly in modern terminals.
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 // ARQUITECTURA: Top-Level Statements
 // Este archivo actúa como el "Application Entry Point". Reduce el ruido visual ("boilerplate")
