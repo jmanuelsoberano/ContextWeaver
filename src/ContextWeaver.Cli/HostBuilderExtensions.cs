@@ -28,6 +28,10 @@ public static class HostBuilderExtensions
             });
     }
 
+    /// <summary>
+    ///     Registra los servicios de la aplicación en el contenedor de dependencias.
+    /// </summary>
+    /// <param name="services">Colección de servicios.</param>
     public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<SettingsProvider>();

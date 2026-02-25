@@ -32,8 +32,11 @@ public abstract class BaseDependencyGraphSection : IReportSection
     }
 
     /// <summary>
-    ///     Renders the specific diagram syntax (Mermaid, PlantUML, etc.)
+    ///     Renders the specific diagram syntax (Mermaid, PlantUML, etc.).
     /// </summary>
+    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="data">The graph data to render.</param>
+    /// <param name="context">The report context.</param>
     protected abstract void RenderDiagram(StringBuilder sb, DependencyGraphData data, ReportContext context);
 
     private static DependencyGraphData BuildGraphData(ReportContext context)

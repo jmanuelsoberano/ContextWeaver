@@ -9,6 +9,9 @@ using Spectre.Console.Cli;
 
 namespace ContextWeaver.Cli.Commands;
 
+/// <summary>
+///     Command that starts the interactive wizard to configure the analysis.
+/// </summary>
 public class WizardCommand : AsyncCommand<WizardSettings>
 {
     private static readonly string[] _supportedFormats = { "markdown", "json", "xml" };
@@ -36,12 +39,18 @@ public class WizardCommand : AsyncCommand<WizardSettings>
     private readonly CodeAnalyzerService _service;
     private readonly SettingsProvider _settingsProvider;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="WizardCommand"/> class.
+    /// </summary>
+    /// <param name="service">Code analyzer service.</param>
+    /// <param name="settingsProvider">Settings provider.</param>
     public WizardCommand(CodeAnalyzerService service, SettingsProvider settingsProvider)
     {
         _service = service;
         _settingsProvider = settingsProvider;
     }
 
+    /// <inheritdoc />
     public override async Task<int> ExecuteAsync(CommandContext context, WizardSettings settings, CancellationToken cancellationToken)
     {
         var directoryInfo = new DirectoryInfo(settings.Directory ?? ".");

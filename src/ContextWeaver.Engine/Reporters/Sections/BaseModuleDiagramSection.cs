@@ -40,11 +40,15 @@ public abstract class BaseModuleDiagramSection : IReportSection
     /// <summary>
     ///     Renders the introductory text for the section.
     /// </summary>
+    /// <param name="sb">The string builder to write to.</param>
     protected abstract void RenderPrologue(StringBuilder sb);
 
     /// <summary>
     ///     Renders the diagram for a single module.
     /// </summary>
+    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="moduleData">The data for the module diagram.</param>
+    /// <param name="context">The report context.</param>
     protected abstract void RenderModuleDiagram(StringBuilder sb, ModuleDiagramData moduleData, ReportContext context);
 
     private static List<ModuleDiagramData> BuildModuleData(ReportContext context)
