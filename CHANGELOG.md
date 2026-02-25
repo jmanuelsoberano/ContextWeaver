@@ -16,6 +16,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Cambiado
 - Refactorización masiva de pruebas: Separación de `ContextWeaver.Tests` en `Core.Tests`, `Engine.Tests` y `E2E.Tests`.
 - Actualización de `FullPipelineTests` para usar directorios temporales aislados.
+- Renombrado del parámetro `--directorio` a `--directory` para mayor consistencia.
 - Consolidación de reglas de `.editorconfig`.
 
 ### Eliminado

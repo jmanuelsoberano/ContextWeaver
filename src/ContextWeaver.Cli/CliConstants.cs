@@ -6,7 +6,7 @@ namespace ContextWeaver.Cli;
 internal static class CliConstants
 {
     /// <summary>Alias para el argumento de directorio.</summary>
-    public static readonly string[] DirectoryAliases = { "-d", "--directorio" };
+    public static readonly string[] DirectoryAliases = { "-d", "--directory" };
 
     /// <summary>Alias para el argumento de archivo de salida.</summary>
     public static readonly string[] OutputAliases = { "-o", "--output" };
