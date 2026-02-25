@@ -1,50 +1,59 @@
-using System.CommandLine;
+using System.Linq;
 using System.Resources;
-using ContextWeaver.Cli;
+using ContextWeaver.Cli.Commands;
+using ContextWeaver.Cli.Infrastructure;
 using ContextWeaver.Extensions;
-using ContextWeaver.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Spectre.Console.Cli;
 
 [assembly: NeutralResourcesLanguage("en")]
 
-// ARQUITECTURA: Top-Level Statements.
-// Este archivo ahora actúa como el punto de entrada directo de la aplicación.
-// Todo el código aquí se ejecuta dentro del "Main" implícito.
+// ARQUITECTURA: Top-Level Statements
+// Este archivo actúa como el "Application Entry Point". Reduce el ruido visual ("boilerplate")
+// de la declaración explícita de namespace y clase Program.Main.
 
-// BUENA PRÁCTICA: Usar una librería robusta como System.CommandLine para la
-// interfaz de línea de comandos (CLI). Evita parsear 'args' manualmente,
-// lo que es propenso a errores y poco mantenible.
-var rootCommand = new RootCommand("Herramienta de análisis y extracción de código para LLMs.");
+// PRINCIPIO: Composition Root
+// Aquí es donde ensamblamos todo el grafo de dependencias de la aplicación.
+// Es el ÚNICO lugar donde se conocen las implementaciones concretas y se vinculan a sus interfaces.
+var services = new ServiceCollection();
 
-var directoryOption = new Option<DirectoryInfo>(
-    CliConstants.DirectoryAliases,
-    // La función getDefaultValue se ejecuta si el usuario no provee este parámetro.
-    // "." es una forma universal de referirse al directorio actual.
-    () => new DirectoryInfo("."),
-    "El directorio raíz del proyecto a analizar. Por defecto, es el directorio actual.");
-
-var outputOption = new Option<FileInfo>(
-    CliConstants.OutputAliases,
-    () => new FileInfo("analysis_report.md"),
-    "El archivo de salida para el reporte consolidado.");
-
-var formatOption = new Option<string>(
-    CliConstants.FormatAliases,
-    () => "markdown",
-    "El formato del reporte de salida.");
-
-rootCommand.AddOption(directoryOption);
-rootCommand.AddOption(outputOption);
-rootCommand.AddOption(formatOption);
-
-rootCommand.SetHandler(async (directory, outputFile, format) =>
+// BEST PRACTICE: Logging Configurado Explícitamente
+// Configuramos el logging antes de cualquier otra cosa para asegurar observabilidad desde el inicio.
+services.AddLogging(configure =>
 {
-    // BUENA PRÁCTICA: Usar el "Generic Host" de .NET para configurar la aplicación.
-    // Llamamos al método de extensión para crear el host.
-    var host = HostBuilderExtensions.CreateHostBuilder(args).Build();
-    var service = host.Services.GetRequiredService<CodeAnalyzerService>();
-    await service.AnalyzeAndGenerateReport(directory, outputFile, format);
-}, directoryOption, outputOption, formatOption);
+    configure.ClearProviders();
+    configure.AddConsole();
+    configure.SetMinimumLevel(LogLevel.Information);
+});
 
-// La llamada final al comando ejecuta la lógica.
-return await rootCommand.InvokeAsync(args);
+// PRINCIPIO: DRY (Don't Repeat Yourself) & Modularity
+// Reutilizamos la configuración de servicios centralizada en HostBuilderExtensions.
+// Esto nos permite compartir la misma configuración de inyección de dependencias
+// entre diferentes "Hosts" (por ejemplo, si tuviéramos una API y una CLI).
+HostBuilderExtensions.ConfigureServices(services);
+
+// PATRÓN DE DISEÑO: Adapter Pattern
+// `TypeRegistrar` actúa como un adaptador que permite a Spectre.Console.Cli (el cliente)
+// interactuar con Microsoft.Extensions.DependencyInjection (el adaptado).
+// Esto nos permite usar nuestro contenedor de DI preferido dentro de la librería de CLI.
+var registrar = new TypeRegistrar(services);
+
+// PATRÓN DE DISEÑO: Command Pattern
+// Spectre.Console.Cli implementa el patrón Command.
+// `CommandApp` encapsula la solicitud.
+// CAMBIO: WizardCommand es ahora el comando por defecto para mejorar la experiencia de usuario.
+var app = new CommandApp<WizardCommand>(registrar);
+
+app.Configure(config =>
+{
+    config.SetApplicationName("contextweaver");
+
+    var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+    config.SetApplicationVersion(version?.ToString(3) ?? "1.0.0");
+
+    config.AddCommand<AnalyzeCommand>("analyze")
+        .WithDescription("Ejecuta el análisis automático sin interacción (ideal para CI/CD).");
+});
+
+return await app.RunAsync(args);

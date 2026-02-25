@@ -12,6 +12,15 @@ public class FileContentSection : IReportSection
     private static readonly char[] Separators = { ' ', ':' };
 
     /// <inheritdoc />
+    public string Name => "📁 Contenido de Archivos";
+
+    /// <inheritdoc />
+    public string Description => "Código fuente con métricas, Repo Map y diagramas";
+
+    /// <inheritdoc />
+    public bool IsRequired => false;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

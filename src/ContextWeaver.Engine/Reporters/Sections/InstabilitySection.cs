@@ -8,6 +8,15 @@ namespace ContextWeaver.Reporters.Sections;
 public class InstabilitySection : IReportSection
 {
     /// <inheritdoc />
+    public string Name => "📊 Inestabilidad";
+
+    /// <inheritdoc />
+    public string Description => "Métrica I de Robert C. Martin por módulo";
+
+    /// <inheritdoc />
+    public bool IsRequired => false;
+
+    /// <inheritdoc />
     public string Render(ReportContext context)
     {
         var sb = new StringBuilder();

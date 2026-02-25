@@ -87,26 +87,45 @@ Si deseas probar la herramienta sin instalarla globalmente o contribuir al desar
     dotnet run --project src/ContextWeaver.Cli/ContextWeaver.Cli.csproj -- -d . -o reporte.md
     ```
 
-#### Uso Básico (Recomendado)
+#### Uso del Wizard Interactivo (Recomendado)
 
-La forma más sencilla de usar la herramienta es navegar hasta el directorio raíz de tu proyecto y ejecutar el comando.
-`ContextWeaver` analizará el directorio actual.
+Al ejecutar `contextweaver` sin argumentos (o `dotnet run --project ... -- wizard`), se iniciará el asistente interactivo:
+
+1.  **Selección de Archivos**:
+    -   **Modo**: Elegir al inicio entre "Añadir todos recursivamente" o "Selección manual vacía".
+    -   **Navegación**: Use árbol de directorios interactivo.
+    -   **Teclas**: `<Espacio>` para selec/deselec, `<i>` para invertir selección en carpeta actual.
+
+2.  **Selección de Secciones**:
+    -   **Modo Inicial**: "Usar Default/Guardada", "Seleccionar TODAS", o "Seleccionar NINGUNA".
+    -   **Granularidad**: Ahora puede elegir independientemente entre grafos **Mermaid** o **PlantUML**.
+    -   **Persistencia**: El wizard recordará su última selección de secciones para futuras ejecuciones.
+
+3.  **Confirmación**:
+    -   Resumen claro de archivos y secciones antes de proceder.
+
+#### Uso Avanzado (CLI Non-Interactive)
+
+Para integración en scripts (CI/CD), use los flags para saltar el wizard:
 
 ```bash
-# 1. Navega a tu proyecto
-cd C:\ruta\a\tu\repositorio
+# Generar reporte completo (todas las secciones) automáticamente
+contextweaver --all -d . -o full_report.md
 
-# 2. Ejecuta el comando (generará un analysis_report.md)
-contextweaver
+# Generar reporte seleccionando secciones específicas
+# (Mermaid sí, PlantUML no)
+contextweaver --sections "Header, Mermaid" -d . -o graph_report.md
+
+# Excluir secciones específicas
+contextweaver --exclude-sections "PlantUML, Hotspot" --all
 ```
 
-#### Uso Explícito
-
-También puedes especificar todas las opciones manualmente desde cualquier ubicación.
-
-```bash
-contextweaver --directorio "C:\ruta\a\tu\repositorio" --output "reporte_personalizado.md" --format "markdown"
-```
+**Flags Disponibles:**
+- `--all`: Selecciona todas las secciones y todos los archivos (salta el wizard).
+- `--sections <lista>`: Lista separada por comas de secciones a incluir (búsqueda flexible, e.g., "mermaid" coincide con "Mermaid Dependency Graph").
+- `--exclude-sections <lista>`: Lista de secciones a excluir.
+- `--output <archivo>`: Nombre del archivo de salida.
+- `--format <fmt>`: `markdown`, `json` (beta).
 
 #### Configuración por Proyecto (Opcional)
 

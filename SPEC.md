@@ -84,17 +84,27 @@ Tratamos las advertencias del compilador como errores (`TreatWarningsAsErrors`).
 
 ## 5. Especificaciones Funcionales (Resumen)
 
-### 5.1 CLI
-*   **Argumentos**: `-d` (directorio), `-o` (salida), `-f` (formato).
-*   **Smart Defaults**: Si no se especifica nada, asume que quieres analizar "aquí y ahora".
+### 5.1 CLI y Wizard Interactivo
+- **Modo Interactivo (Default)**: Guía paso a paso para la selección de archivos (árbol recursivo) y secciones.
+    - **Selección de Archivos**: Permite elegir entre "Todos" o "Selección Manual".
+    - **Selección de Secciones**: Permite "Seleccionar Todo", "Nada" o usar preferencias guardadas.
+    - **Persistencia**: Recuerda las preferencias del usuario (`.contextweaver.json`) para agilizar ejecuciones futuras.
+- **Modo Desatendido (Scriptable)**:
+    - Flags robustos: `--all`, `--sections`, `--exclude-sections`.
+    - Matching difuso ("fuzzy match") para nombres de secciones (e.g., "mermaid" selecciona los gráficos pertinentes).
 
 ### 5.2 Análisis Semántico (C#)
-*   No leemos el código como texto plano; lo entendemos como estructura (AST).
-*   Extraemos la **intención** (firmas, atributos, herencia) y métricas objetivas (complejidad, anidamiento) para dar una radiografía real del código.
+- No leemos el código como texto plano; lo entendemos como estructura (AST).
+- Extraemos la **intención** (firmas, atributos, herencia) y métricas objetivas (complejidad, anidamiento) para dar una radiografía real del código.
 
-### 5.3 Análisis Arquitectónico
-*   Calculamos métricas fundamentales como la **Inestabilidad** ($I = Ce / (Ca + Ce)$).
-*   Esto nos permite visualizar objetivamente qué partes del sistema son el "núcleo estable" y cuáles son las "zonas de cambio", ayudando a tomar decisiones de refactorización basadas en datos.
+### 5.3 Análisis Arquitectónico y Diagramación
+- **Granularidad de Diagramas**: Generación independiente de gráficos **Mermaid** y **PlantUML**.
+    - El usuario puede elegir generar solo uno de los dos formatos para reducir el ruido en el reporte.
+- **Métricas Fundamentales**: Cálculo de la **Inestabilidad** ($I = Ce / (Ca + Ce)$) para detectar zonas de cambio.
+- **Visualización Jerárquica**:
+    - **Grafo de Dependencias**: Vista de pájaro de todo el sistema.
+    - **Diagramas de Módulo**: Enfoque en subsistemas específicos (carpetas de primer nivel).
+    - **Contexto de Archivo**: Vista microscópica de las dependencias directas de cada archivo.
 
 ## 6. Documentación y Comunidad
 

@@ -6,6 +6,15 @@ namespace ContextWeaver.Reporters;
 /// </summary>
 public interface IReportSection
 {
+    /// <summary>Gets the display name a human-readable label shown in the wizard selector.</summary>
+    string Name { get; }
+
+    /// <summary>Gets the short description of what this section generates.</summary>
+    string Description { get; }
+
+    /// <summary>Gets a value indicating whether this section is mandatory and cannot be deselected.</summary>
+    bool IsRequired { get; }
+
     /// <summary>
     ///     Renderiza el contenido de la sección usando el contexto de reporte proporcionado.
     /// </summary>

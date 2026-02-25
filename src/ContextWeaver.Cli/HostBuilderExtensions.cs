@@ -24,13 +24,22 @@ public static class HostBuilderExtensions
         return Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddSingleton<SettingsProvider>();
-                services.AddSingleton<CodeAnalyzerService>();
-
-                services.AddSingleton<IFileAnalyzer, CSharpFileAnalyzer>();
-                services.AddSingleton<IFileAnalyzer, GenericFileAnalyzer>();
-
-                services.AddSingleton<IReportGenerator, MarkdownReportGenerator>();
+                ConfigureServices(services);
             });
+    }
+
+    /// <summary>
+    ///     Registra los servicios de la aplicación en el contenedor de dependencias.
+    /// </summary>
+    /// <param name="services">Colección de servicios.</param>
+    public static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<SettingsProvider>();
+        services.AddSingleton<CodeAnalyzerService>();
+
+        services.AddSingleton<IFileAnalyzer, CSharpFileAnalyzer>();
+        services.AddSingleton<IFileAnalyzer, GenericFileAnalyzer>();
+
+        services.AddSingleton<IReportGenerator, MarkdownReportGenerator>();
     }
 }
