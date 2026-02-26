@@ -26,8 +26,11 @@ public class FileSelectionStep : IWizardStep
             .InstructionsText("[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar, [blue]<i>[/] para invertir selección, [green]<enter>[/] para confirmar)[/]")
             .UseConverter(item => item is FileSystemInfo fsi ? fsi.Name : item.ToString()!);
 
-        // Add back option at the top
-        prompt.AddChoice(WizardConstants.BackOption);
+        // Add back option at the top if it's not the first step
+        if (!context.IsFirstInteractiveStep)
+        {
+            prompt.AddChoice(WizardConstants.BackOption);
+        }
 
         // Recursively add choices
         AddNodesToPrompt(prompt, rootNode, context.SelectAllFilesByDefault);
@@ -47,6 +50,8 @@ public class FileSelectionStep : IWizardStep
             AnsiConsole.MarkupLine("[yellow]No se seleccionaron archivos. Operación cancelada.[/]");
             return Task.FromResult(StepResult.Cancel);
         }
+
+        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }

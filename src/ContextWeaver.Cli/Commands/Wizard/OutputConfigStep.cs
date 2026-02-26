@@ -18,7 +18,7 @@ public class OutputConfigStep : IWizardStep
     {
         if (string.IsNullOrEmpty(context.Settings.Output))
         {
-            var fileNamePrompt = new TextPrompt<string>("Ingrese el nombre del [green]archivo de salida[/] (o '<' para volver):")
+            var fileNamePrompt = new TextPrompt<string>("Ingrese el nombre del [green]archivo de salida[/]:")
                 .DefaultValue(context.OutputFileName ?? "context.md")
                 .Validate(name =>
                     string.IsNullOrWhiteSpace(name)
@@ -27,12 +27,8 @@ public class OutputConfigStep : IWizardStep
 
             var outputFileName = AnsiConsole.Prompt(fileNamePrompt);
 
-            if (outputFileName == "<")
-            {
-                return Task.FromResult(StepResult.Previous);
-            }
-
             context.OutputFileName = outputFileName;
+            context.IsFirstInteractiveStep = false;
         }
         else
         {
@@ -43,9 +39,14 @@ public class OutputConfigStep : IWizardStep
         {
             var formatPrompt = new SelectionPrompt<string>()
                 .Title("Seleccione el [green]formato de salida[/]:")
-                .PageSize(4)
-                .AddChoices(WizardConstants.BackOption)
-                .AddChoices(_supportedFormats);
+                .PageSize(4);
+
+            if (!context.IsFirstInteractiveStep)
+            {
+                formatPrompt.AddChoice(WizardConstants.BackOption);
+            }
+
+            formatPrompt.AddChoices(_supportedFormats);
 
             var format = AnsiConsole.Prompt(formatPrompt);
 
@@ -64,6 +65,8 @@ public class OutputConfigStep : IWizardStep
         {
             context.OutputFormat = context.Settings.Format;
         }
+
+        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }

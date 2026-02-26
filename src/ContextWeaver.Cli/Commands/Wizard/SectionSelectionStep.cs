@@ -91,7 +91,10 @@ public class SectionSelectionStep : IWizardStep
             .InstructionsText(
                 "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]");
         // Note: removed .Required() to let the user select 'Back' without forcing selection.
-        sectionPrompt.AddChoice(WizardConstants.BackOption);
+        if (!context.IsFirstInteractiveStep)
+        {
+            sectionPrompt.AddChoice(WizardConstants.BackOption);
+        }
 
         foreach (var section in optionalSections)
         {
@@ -157,6 +160,8 @@ public class SectionSelectionStep : IWizardStep
         }
 
         context.EnabledSections = enabledSectionNames;
+        context.IsFirstInteractiveStep = false;
+
         return Task.FromResult(StepResult.Next);
     }
 }

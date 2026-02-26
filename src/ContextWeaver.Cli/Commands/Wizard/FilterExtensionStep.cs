@@ -29,7 +29,10 @@ public class FilterExtensionStep : IWizardStep
             .InstructionsText(
                 "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]");
 
-        extPrompt.AddChoice(WizardConstants.BackOption);
+        if (!context.IsFirstInteractiveStep)
+        {
+            extPrompt.AddChoice(WizardConstants.BackOption);
+        }
 
         foreach (var ext in extensions)
         {
@@ -60,6 +63,8 @@ public class FilterExtensionStep : IWizardStep
             AnsiConsole.MarkupLine("[yellow]No hay archivos con las extensiones seleccionadas. Operación cancelada.[/]");
             return Task.FromResult(StepResult.Cancel);
         }
+
+        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }

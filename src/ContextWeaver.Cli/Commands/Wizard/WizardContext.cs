@@ -41,6 +41,7 @@ public class WizardContext
         ManagedFiles = new List<FileInfo>();
         SelectedFiles = new List<FileInfo>();
         EnabledSections = new List<string>();
+        IsFirstInteractiveStep = true;
     }
 
     /// <summary>
@@ -92,4 +93,10 @@ public class WizardContext
     ///     Gets or sets the output format.
     /// </summary>
     public string? OutputFormat { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the current step is the first interactive step shown to the user.
+    ///     This is used to determine whether a "Back" option should be displayed.
+    /// </summary>
+    public bool IsFirstInteractiveStep { get; set; }
 }

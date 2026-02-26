@@ -18,10 +18,16 @@ public class SelectionModeStep : IWizardStep
     /// <inheritdoc/>
     public Task<StepResult> ExecuteAsync(WizardContext context)
     {
-        var selectionMode = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("¿Cómo desea empezar la [green]selección de archivos[/]?")
-                .AddChoices(OptionAll, OptionNone, WizardConstants.BackOption));
+        var prompt = new SelectionPrompt<string>()
+            .Title("¿Cómo desea empezar la [green]selección de archivos[/]?")
+            .AddChoices(OptionAll, OptionNone);
+
+        if (!context.IsFirstInteractiveStep)
+        {
+            prompt.AddChoice(WizardConstants.BackOption);
+        }
+
+        var selectionMode = AnsiConsole.Prompt(prompt);
 
         if (selectionMode == WizardConstants.BackOption)
         {
@@ -29,6 +35,7 @@ public class SelectionModeStep : IWizardStep
         }
 
         context.SelectAllFilesByDefault = selectionMode.StartsWith("Todos", StringComparison.Ordinal);
+        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }
