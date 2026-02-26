@@ -8,28 +8,6 @@ namespace ContextWeaver.Cli.Tests;
 
 public class WizardOrchestratorTests
 {
-    private class MockStep : IWizardStep
-    {
-        public bool ShouldEx = true;
-        public StepResult Result = StepResult.Next;
-        public int ExecuteCount = 0;
-
-        public bool ShouldExecute(WizardContext context) => ShouldEx;
-
-        public Task<StepResult> ExecuteAsync(WizardContext context)
-        {
-            ExecuteCount++;
-            return Task.FromResult(Result);
-        }
-    }
-
-    private WizardContext CreateContext()
-    {
-        var settings = new Commands.WizardSettings();
-        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
-        return new WizardContext(settings, dir);
-    }
-
     [Fact]
     public async Task ExecuteAsync_AllNext_ShouldCompleteSuccessfully()
     {
@@ -125,11 +103,37 @@ public class WizardOrchestratorTests
         Assert.Equal(0, step3.ExecuteCount); // Never reached
     }
 
+    private WizardContext CreateContext()
+    {
+        var settings = new Commands.WizardSettings();
+        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+        return new WizardContext(settings, dir);
+    }
+
+    private class MockStep : IWizardStep
+    {
+        public bool ShouldEx { get; set; } = true;
+
+        public StepResult Result { get; set; } = StepResult.Next;
+
+        public int ExecuteCount { get; set; } = 0;
+
+        public bool ShouldExecute(WizardContext context) => ShouldEx;
+
+        public Task<StepResult> ExecuteAsync(WizardContext context)
+        {
+            ExecuteCount++;
+            return Task.FromResult(Result);
+        }
+    }
+
     private class CustomMockStep : IWizardStep
     {
-        public bool ShouldEx = true;
-        public System.Func<WizardContext, Task<StepResult>> OnExecute = null!;
-        public int ExecuteCount = 0;
+        public bool ShouldEx { get; set; } = true;
+
+        public System.Func<WizardContext, Task<StepResult>> OnExecute { get; set; } = null!;
+
+        public int ExecuteCount { get; set; } = 0;
 
         public bool ShouldExecute(WizardContext context) => ShouldEx;
 

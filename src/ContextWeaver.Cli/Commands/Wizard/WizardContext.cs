@@ -3,10 +3,24 @@ using System.IO;
 
 namespace ContextWeaver.Cli.Commands.Wizard;
 
+/// <summary>
+///     Specifies the mode for selecting sections in the interactive wizard.
+/// </summary>
 public enum SectionSelectionMode
 {
+    /// <summary>
+    ///     Use sections saved in the configuration file, or defaults if none exist.
+    /// </summary>
     SavedOrDefault,
+
+    /// <summary>
+    ///     Select all available report sections.
+    /// </summary>
     All,
+
+    /// <summary>
+    ///     Select none of the sections initially, allowing manual selection.
+    /// </summary>
     None
 }
 
