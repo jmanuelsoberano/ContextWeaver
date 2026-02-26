@@ -107,7 +107,6 @@ public class WizardOrchestratorTests
     public async Task ExecuteAsync_GoBackToStepWithDynamicShouldExecuteFalse_ShouldForceExecute()
     {
         // Arrange
-        bool step1FirstRun = true;
         var customStep1 = new CustomMockStep
         {
             ShouldEx = true, // Initially true, executed normally
@@ -145,14 +144,14 @@ public class WizardOrchestratorTests
         Assert.Equal(2, customStep2.ExecuteCount);
     }
 
-    private WizardContext CreateContext()
+    private static WizardContext CreateContext()
     {
         var settings = new Commands.WizardSettings();
         var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
         return new WizardContext(settings, dir);
     }
 
-    private class MockStep : IWizardStep
+    private sealed class MockStep : IWizardStep
     {
         public bool ShouldEx { get; set; } = true;
 
@@ -169,7 +168,7 @@ public class WizardOrchestratorTests
         }
     }
 
-    private class CustomMockStep : IWizardStep
+    private sealed class CustomMockStep : IWizardStep
     {
         public bool ShouldEx { get; set; } = true;
 
