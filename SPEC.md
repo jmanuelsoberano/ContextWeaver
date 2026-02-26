@@ -85,7 +85,9 @@ Tratamos las advertencias del compilador como errores (`TreatWarningsAsErrors`).
 ## 5. Especificaciones Funcionales (Resumen)
 
 ### 5.1 CLI y Wizard Interactivo
-- **Modo Interactivo (Default)**: Guía paso a paso para la selección de archivos (árbol recursivo) y secciones.
+El Wizard interactivo se rige bajo un patrón de diseño **State Orchestrator Pipeline**. Este patrón se adoptó para favorecer el *Single Responsibility Principle (SRP)* en la terminal.
+- **Navegación Histórica**: Otorga al usuario la posibilidad de rectificar decisiones mediante la opción `🔙 [Volver al paso anterior]` o tecleando `<` en *Text Prompts*. El orquestador mantiene una pila (*Stack*) de navegación.
+- **Modo Interactivo (Default)**: Guía paso a paso dividida en módulos discretos para la selección de archivos (árbol recursivo), formatos y secciones.
     - **Selección de Archivos**: Permite elegir entre "Todos" o "Selección Manual".
     - **Selección de Secciones**: Permite "Seleccionar Todo", "Nada" o usar preferencias guardadas.
     - **Persistencia**: Recuerda las preferencias del usuario (`.contextweaver.json`) para agilizar ejecuciones futuras.
