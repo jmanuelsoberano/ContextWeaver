@@ -57,7 +57,7 @@ public class SummaryStep : IWizardStep
                 .Title("¿Desea continuar con la ejecución?")
                 .AddChoices("✅ Sí, ejecutar");
 
-            if (!context.IsFirstInteractiveStep)
+            if (context.ShowBackButton)
             {
                 summaryPrompt.AddChoice(WizardConstants.BackOption);
             }
@@ -76,8 +76,6 @@ public class SummaryStep : IWizardStep
                 return Task.FromResult(StepResult.Cancel);
             }
         }
-
-        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Finish);
     }

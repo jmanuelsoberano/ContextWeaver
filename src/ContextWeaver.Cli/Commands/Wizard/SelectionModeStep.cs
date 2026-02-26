@@ -22,7 +22,7 @@ public class SelectionModeStep : IWizardStep
             .Title("¿Cómo desea empezar la [green]selección de archivos[/]?")
             .AddChoices(OptionAll, OptionNone);
 
-        if (!context.IsFirstInteractiveStep)
+        if (context.ShowBackButton)
         {
             prompt.AddChoice(WizardConstants.BackOption);
         }
@@ -35,7 +35,6 @@ public class SelectionModeStep : IWizardStep
         }
 
         context.SelectAllFilesByDefault = selectionMode.StartsWith("Todos", StringComparison.Ordinal);
-        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }

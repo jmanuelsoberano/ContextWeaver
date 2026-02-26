@@ -21,6 +21,9 @@ public class FileDiscoveryStep : IWizardStep
     }
 
     /// <inheritdoc/>
+    public bool IsInteractive => false;
+
+    /// <inheritdoc/>
     public bool ShouldExecute(WizardContext context) => true; // Always execute first
 
     /// <inheritdoc/>
@@ -34,7 +37,8 @@ public class FileDiscoveryStep : IWizardStep
             return Task.FromResult(StepResult.Cancel);
         }
 
-        context.ManagedFiles = files;
+        context.DiscoveredFiles = new System.Collections.Generic.List<System.IO.FileInfo>(files);
+        context.ManagedFiles = new System.Collections.Generic.List<System.IO.FileInfo>(files);
         context.Config = config;
 
         return Task.FromResult(StepResult.Next);

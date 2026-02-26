@@ -29,19 +29,39 @@ public class WizardOrchestrator
     {
         var history = new Stack<int>();
         int currentIndex = 0;
+        bool movingBackward = false;
+
+        var logPath = System.IO.Path.Combine(context.Directory.FullName, "wizard-debug.log");
+        if (!System.IO.File.Exists(logPath))
+        {
+            System.IO.File.WriteAllText(logPath, $"--- Inicia Wizard ({System.DateTime.Now}) ---\n");
+        }
 
         while (currentIndex >= 0 && currentIndex < _steps.Count)
         {
             var step = _steps[currentIndex];
 
-            if (!step.ShouldExecute(context))
+            // If we are moving backwards, we MUST execute the step we landed on,
+            // because it was already executed previously (it's in history).
+            if (!movingBackward && !step.ShouldExecute(context))
             {
+                System.IO.File.AppendAllText(logPath, $"[Salto] Index {currentIndex} ({step.GetType().Name}) omitido (ShouldExecute=false)\n");
                 // Skip this step and move forward
                 currentIndex++;
                 continue;
             }
 
+            // Calculate if the Back button should be shown.
+            // It should be shown if there is ANY step in history that is Interactive.
+            context.ShowBackButton = System.Linq.Enumerable.Any(history, idx => _steps[idx].IsInteractive);
+
+            System.IO.File.AppendAllText(logPath, $"[Entra] Index {currentIndex} ({step.GetType().Name}) | History={history.Count} | ShowBack={context.ShowBackButton} | MovingBack={movingBackward}\n");
+
+            movingBackward = false;
+
             var result = await step.ExecuteAsync(context);
+
+            System.IO.File.AppendAllText(logPath, $"[Sale]  Index {currentIndex} ({step.GetType().Name}) | Result={result}\n");
 
             switch (result)
             {
@@ -53,6 +73,7 @@ public class WizardOrchestrator
                     if (history.Count > 0)
                     {
                         currentIndex = history.Pop();
+                        movingBackward = true;
                     }
                     else
                     {

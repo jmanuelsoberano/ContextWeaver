@@ -8,6 +8,12 @@ namespace ContextWeaver.Cli.Commands.Wizard;
 public interface IWizardStep
 {
     /// <summary>
+    ///     Gets a value indicating whether this step has an interactive UI.
+    ///     Used to determine if backwards navigation is possible from subsequent steps.
+    /// </summary>
+    bool IsInteractive => true;
+
+    /// <summary>
     ///     Determines if this step should be executed based on the current context.
     /// </summary>
     /// <param name="context">The wizard context.</param>

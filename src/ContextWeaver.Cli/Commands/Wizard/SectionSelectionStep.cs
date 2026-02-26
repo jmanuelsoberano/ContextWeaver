@@ -89,9 +89,9 @@ public class SectionSelectionStep : IWizardStep
             .PageSize(10)
             .MoreChoicesText("[grey](Muevase arriba y abajo para ver más secciones)[/]")
             .InstructionsText(
-                "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]");
+                "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]\n[yellow]⚠️ ATENCIÓN: Si desea Volver, primero debe MARCAR la opción '[/][blue]🔙[/][yellow]' con <espacio>.[/]");
         // Note: removed .Required() to let the user select 'Back' without forcing selection.
-        if (!context.IsFirstInteractiveStep)
+        if (context.ShowBackButton)
         {
             sectionPrompt.AddChoice(WizardConstants.BackOption);
         }
@@ -160,7 +160,6 @@ public class SectionSelectionStep : IWizardStep
         }
 
         context.EnabledSections = enabledSectionNames;
-        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }

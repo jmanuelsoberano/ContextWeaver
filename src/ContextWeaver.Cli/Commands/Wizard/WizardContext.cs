@@ -38,10 +38,10 @@ public class WizardContext
     {
         Settings = settings;
         Directory = directory;
+        DiscoveredFiles = new List<FileInfo>();
         ManagedFiles = new List<FileInfo>();
         SelectedFiles = new List<FileInfo>();
         EnabledSections = new List<string>();
-        IsFirstInteractiveStep = true;
     }
 
     /// <summary>
@@ -55,7 +55,12 @@ public class WizardContext
     public DirectoryInfo Directory { get; }
 
     /// <summary>
-    ///     Gets or sets the list of all files managed by the analyzer in the directory.
+    ///     Gets or sets the original full list of discovered files before filtering.
+    /// </summary>
+    public List<FileInfo> DiscoveredFiles { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the list of all files managed by the analyzer in the directory (active filtered list).
     /// </summary>
     public List<FileInfo> ManagedFiles { get; set; }
 
@@ -95,8 +100,8 @@ public class WizardContext
     public string? OutputFormat { get; set; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether the current step is the first interactive step shown to the user.
-    ///     This is used to determine whether a "Back" option should be displayed.
+    ///     Gets or sets a value indicating whether a "Back" option should be displayed in the current step.
+    ///     This is dynamically managed by the WizardOrchestrator.
     /// </summary>
-    public bool IsFirstInteractiveStep { get; set; }
+    public bool ShowBackButton { get; set; }
 }

@@ -20,14 +20,13 @@ public class OutputConfigStep : IWizardStep
         {
             var formatPrompt = new SelectionPrompt<string>()
                 .Title("Seleccione el [green]formato de salida[/]:")
-                .PageSize(4);
+                .PageSize(4)
+                .AddChoices(_supportedFormats);
 
-            if (!context.IsFirstInteractiveStep)
+            if (context.ShowBackButton)
             {
                 formatPrompt.AddChoice(WizardConstants.BackOption);
             }
-
-            formatPrompt.AddChoices(_supportedFormats);
 
             var format = AnsiConsole.Prompt(formatPrompt);
 
@@ -37,7 +36,6 @@ public class OutputConfigStep : IWizardStep
             }
 
             context.OutputFormat = format;
-            context.IsFirstInteractiveStep = false;
         }
         else
         {
@@ -56,14 +54,11 @@ public class OutputConfigStep : IWizardStep
             var outputFileName = AnsiConsole.Prompt(fileNamePrompt);
 
             context.OutputFileName = outputFileName;
-            context.IsFirstInteractiveStep = false;
         }
         else
         {
             context.OutputFileName = context.Settings.Output;
         }
-
-        context.IsFirstInteractiveStep = false;
 
         return Task.FromResult(StepResult.Next);
     }
