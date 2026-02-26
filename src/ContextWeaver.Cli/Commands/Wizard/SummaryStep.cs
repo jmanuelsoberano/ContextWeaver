@@ -53,10 +53,18 @@ public class SummaryStep : IWizardStep
 
         if (AnsiConsole.Profile.Capabilities.Interactive)
         {
-            var confirmChoice = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("¿Desea continuar con la ejecución?")
-                    .AddChoices("✅ Sí, ejecutar", WizardConstants.BackOption, "❌ No, cancelar"));
+            var summaryPrompt = new SelectionPrompt<string>()
+                .Title("¿Desea continuar con la ejecución?")
+                .AddChoices("✅ Sí, ejecutar");
+
+            if (context.ShowBackButton)
+            {
+                summaryPrompt.AddChoice(WizardConstants.BackOption);
+            }
+
+            summaryPrompt.AddChoice("❌ No, cancelar");
+
+            var confirmChoice = AnsiConsole.Prompt(summaryPrompt);
 
             if (confirmChoice == WizardConstants.BackOption)
             {

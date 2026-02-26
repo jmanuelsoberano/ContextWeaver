@@ -23,11 +23,13 @@ public class FileSelectionStep : IWizardStep
             .Title("Seleccione los [green]archivos[/] que desea incluir en el contexto:")
             .PageSize(20)
             .MoreChoicesText("[grey](Muevase arriba y abajo para ver más archivos)[/]")
-            .InstructionsText("[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar, [blue]<i>[/] para invertir selección, [green]<enter>[/] para confirmar)[/]")
+            .InstructionsText("[grey](Presione [blue]<espacio>[/] para seleccionar/deseleccionar, [green]<enter>[/] para confirmar)[/]\n[yellow]⚠️ ATENCIÓN: Si desea Volver, primero debe MARCAR la opción '[/][blue]🔙[/][yellow]' con <espacio>.[/]")
             .UseConverter(item => item is FileSystemInfo fsi ? fsi.Name : item.ToString()!);
 
-        // Add back option at the top
-        prompt.AddChoice(WizardConstants.BackOption);
+        if (context.ShowBackButton)
+        {
+            prompt.AddChoice(WizardConstants.BackOption);
+        }
 
         // Recursively add choices
         AddNodesToPrompt(prompt, rootNode, context.SelectAllFilesByDefault);

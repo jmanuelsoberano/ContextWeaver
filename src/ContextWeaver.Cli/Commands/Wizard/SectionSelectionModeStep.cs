@@ -23,10 +23,16 @@ public class SectionSelectionModeStep : IWizardStep
     /// <inheritdoc/>
     public Task<StepResult> ExecuteAsync(WizardContext context)
     {
-        var selectionMode = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("¿Cómo desea comenzar la selección de secciones?")
-                .AddChoices(BulkSelectionOptions[0], BulkSelectionOptions[1], BulkSelectionOptions[2], WizardConstants.BackOption));
+        var prompt = new SelectionPrompt<string>()
+            .Title("¿Cómo desea comenzar la selección de secciones?")
+            .AddChoices(BulkSelectionOptions[0], BulkSelectionOptions[1], BulkSelectionOptions[2]);
+
+        if (context.ShowBackButton)
+        {
+            prompt.AddChoice(WizardConstants.BackOption);
+        }
+
+        var selectionMode = AnsiConsole.Prompt(prompt);
 
         if (selectionMode == WizardConstants.BackOption)
         {

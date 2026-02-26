@@ -12,12 +12,12 @@ public class FilterExtensionStep : IWizardStep
 {
     /// <inheritdoc/>
     public bool ShouldExecute(WizardContext context)
-        => !context.Settings.All && context.ManagedFiles.Select(f => f.Extension.ToLowerInvariant()).Distinct().Count() > 1;
+        => !context.Settings.All && context.DiscoveredFiles.Select(f => f.Extension.ToLowerInvariant()).Distinct().Count() > 1;
 
     /// <inheritdoc/>
     public Task<StepResult> ExecuteAsync(WizardContext context)
     {
-        var extensions = context.ManagedFiles
+        var extensions = context.DiscoveredFiles
             .Select(f => f.Extension.ToLowerInvariant())
             .Distinct()
             .OrderBy(e => e)
@@ -27,16 +27,24 @@ public class FilterExtensionStep : IWizardStep
             .Title("¿Desea filtrar por [green]extensión[/]? (deseleccione las que no necesite)")
             .PageSize(15)
             .InstructionsText(
-                "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]");
+                "[grey]([blue]<espacio>[/] seleccionar/deseleccionar, [green]<enter>[/] confirmar)[/]\n[yellow]⚠️ ATENCIÓN: Si desea Volver, primero debe MARCAR la opción '[/][blue]🔙[/][yellow]' con <espacio>.[/]");
 
-        extPrompt.AddChoice(WizardConstants.BackOption);
+        if (context.ShowBackButton)
+        {
+            extPrompt.AddChoice(WizardConstants.BackOption);
+        }
 
         foreach (var ext in extensions)
         {
-            var count = context.ManagedFiles.Count(f => f.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase));
+            var count = context.DiscoveredFiles.Count(f => f.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase));
             var choice = $"{ext} ({count} archivos)";
             extPrompt.AddChoice(choice);
-            extPrompt.Select(choice);
+
+            // PRE-SELECT only if it's currently in ManagedFiles (remembers previous selection natively)
+            if (context.ManagedFiles.Any(f => f.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase)))
+            {
+                extPrompt.Select(choice);
+            }
         }
 
         var selectedExtLabels = AnsiConsole.Prompt(extPrompt);
@@ -50,8 +58,8 @@ public class FilterExtensionStep : IWizardStep
             .Select(label => label.Split(' ')[0])
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        // Update the managed files based on selection
-        context.ManagedFiles = context.ManagedFiles
+        // Update the managed files based on selection from the full DiscoveredFiles list
+        context.ManagedFiles = context.DiscoveredFiles
             .Where(f => selectedExtensions.Contains(f.Extension.ToLowerInvariant()))
             .ToList();
 
