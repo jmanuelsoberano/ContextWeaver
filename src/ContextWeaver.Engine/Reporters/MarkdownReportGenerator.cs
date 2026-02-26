@@ -21,6 +21,7 @@ public class MarkdownReportGenerator : IReportGenerator
         new PlantUmlDependencyGraphSection(),
         new MermaidModuleDiagramSection(),
         new PlantUmlModuleDiagramSection(),
+        new ModuleAdjacencyListSection(),
         new DirectoryTreeSection(),
         new FileContentSection()
     };
