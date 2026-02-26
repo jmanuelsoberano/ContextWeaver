@@ -11,7 +11,6 @@ namespace ContextWeaver.Cli.Commands.Wizard;
 public class FilterExtensionStep : IWizardStep
 {
     /// <inheritdoc/>
-    /// <inheritdoc/>
     public bool ShouldExecute(WizardContext context)
         => !context.Settings.All && context.DiscoveredFiles.Select(f => f.Extension.ToLowerInvariant()).Distinct().Count() > 1;
 
