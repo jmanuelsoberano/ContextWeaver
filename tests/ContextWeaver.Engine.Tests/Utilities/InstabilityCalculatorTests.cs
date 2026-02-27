@@ -269,9 +269,13 @@ public class InstabilityCalculatorTests
     private static FileAnalysisResult CreateResult(string relativePath, List<string>? definedTypes = null,
         List<string>? classDependencies = null)
     {
+        var parts = relativePath.Split('/');
+        var moduleName = parts.Length > 1 ? parts[0] : "Root";
+
         return new FileAnalysisResult
         {
             RelativePath = relativePath,
+            ModuleName = moduleName,
             DefinedTypes = definedTypes ?? new List<string>(),
             ClassDependencies = classDependencies ?? new List<string>()
         };

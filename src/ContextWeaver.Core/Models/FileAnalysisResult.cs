@@ -40,17 +40,8 @@ public class FileAnalysisResult
     /// <summary>Gets a dictionary mapping type names to their kind (class, interface, etc.).</summary>
     public Dictionary<string, string> DefinedTypeKinds { get; init; } = new();
 
-    /// <summary>Gets the module name derived from the file path.</summary>
-    public string ModuleName
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(RelativePath))
-                return "Root";
-            var parts = RelativePath.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-            return parts.Length > 1 ? parts[0] : "Root";
-        }
-    }
+    /// <summary>Gets or sets the module name derived from the file path.</summary>
+    public string ModuleName { get; set; } = "Root";
 
     /// <summary>Gets a dictionary mapping type names to their semantic details (modifiers, interfaces).</summary>
     public Dictionary<string, TypeSemantics> DefinedTypeSemantics { get; init; } = new();
