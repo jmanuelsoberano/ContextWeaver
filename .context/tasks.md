@@ -1,7 +1,9 @@
-# Tareas Activas
+# Tareas activas
 
-- [x] Adaptación inicial de reglas para ContextWeaver completada
-- [x] Analizar y corregir la heurística de `ModuleName` para que la Lista de Adyacencia sea útil.
+- [x] Corregir filtrado en `HotspotSection.cs`
+- [x] Corregir filtrado en `InstabilityCalculator.cs`
+- [x] Corregir filtrado en `ModuleAdjacencyListSection.cs`
+- [x] Construir y ejecutar tests/validación manual
 
 ## Backlog / Futuras Mejoras
 - [ ] Implementar un nivel de profundidad configurable (`MaxModuleDepth`) para que la "Lista de Adyacencia de Módulos" pueda ser recursiva a petición del usuario.

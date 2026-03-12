@@ -63,6 +63,11 @@ public class ModuleAdjacencyListSection : IReportSection
         // Initialize all modules
         foreach (var result in context.SortedResults)
         {
+            if (result.Language != "csharp" && result.Metrics == null && (result.DefinedTypes == null || result.DefinedTypes.Count == 0))
+            {
+                continue;
+            }
+
             if (!adjacencyList.ContainsKey(result.ModuleName))
             {
                 adjacencyList[result.ModuleName] = new HashSet<string>();

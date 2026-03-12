@@ -2,7 +2,8 @@
 
 [Estado oficial de los pasos del plan]
 
-## Fix: ModuleAdjacencyList
-1. **Analizar causa raíz**: Determinado que `ModuleName` tomaba solo `src/` como módulo único.
-2. **Mejorar heurística `ModuleName`**: Modificar `FileAnalysisResult.cs` para soportar estructuras `src/Modulo`.
-3. **Verificar**: Asegurar que los grafos y YAMLs de Módulos generen resultados no vacíos al agrupar adecuadamente.
+# Plan actual: Ejecución de ContextWeaver sobre el repositorio
+
+1.  **Fase de Preparación**: Verificar entorno .NET 8.
+2.  **Fase de Ejecución**: Correr `dotnet run --project src/ContextWeaver.Cli/ContextWeaver.Cli.csproj -- --all -d . -o reporte.md`.
+3.  **Fase de Validación**: Revisar el archivo `reporte.md` generado.

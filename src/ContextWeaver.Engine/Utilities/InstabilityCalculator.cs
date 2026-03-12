@@ -22,6 +22,14 @@ public class InstabilityCalculator
         foreach (var result in results)
         {
             var moduleName = result.ModuleName;
+
+            // Filtramos archivos sin métricas (ej. Markdown, Json)
+            // para que no cuenten como módulos estables artificiales a menos que tengan dependencias
+            if (result.Language != "csharp" && result.Metrics == null && (result.DefinedTypes == null || result.DefinedTypes.Count == 0))
+            {
+                continue;
+            }
+
             moduleNames.Add(moduleName);
 
             if (result.DefinedTypes != null)
