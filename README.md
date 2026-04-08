@@ -39,8 +39,8 @@ desafío al:
    Ce / (Ca + Ce)) a nivel de módulos (carpetas/proyectos) para ayudar a entender la dirección y la salud de las
    dependencias arquitectónicas. Identifica módulos estables (núcleo) e inestables (implementaciones).
 8. **Configuración Flexible y por Proyecto**: La herramienta busca un archivo `.contextweaver.json` en el directorio
-   analizado para usar configuraciones específicas del proyecto. Si no lo encuentra, utiliza la configuración global por
-   defecto, permitiendo una gran adaptabilidad.
+   analizado para usar configuraciones específicas del proyecto. Si no lo encuentra, creará automáticamente uno con los
+   valores por defecto, permitiendo una gran adaptabilidad.
 
 ### Calidad de Código y Arquitectura
 
@@ -125,7 +125,7 @@ contextweaver --exclude-sections "PlantUML, Hotspot" --all
 - `--sections <lista>`: Lista separada por comas de secciones a incluir (búsqueda flexible, e.g., "mermaid" coincide con "Mermaid Dependency Graph").
 - `--exclude-sections <lista>`: Lista de secciones a excluir.
 - `--output <archivo>`: Nombre del archivo de salida.
-- `--format <fmt>`: `markdown`, `json` (beta).
+- `--format <fmt>`: `markdown` (actualmente el único formato soportado completamente).
 
 #### Configuración por Proyecto (Opcional)
 

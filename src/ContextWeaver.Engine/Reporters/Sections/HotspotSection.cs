@@ -26,7 +26,9 @@ public class HotspotSection : IReportSection
 
         // --- Top 5 por Líneas de Código (LOC) ---
         sb.AppendLine("## 5 Principales Archivos por Líneas de Código (LOC)");
-        var topByLoc = context.SortedResults.OrderByDescending(r => r.LinesOfCode).Take(5);
+        var topByLoc = context.SortedResults
+            .Where(r => r.Language == "csharp" || r.Metrics != null)
+            .OrderByDescending(r => r.LinesOfCode).Take(5);
         foreach (var result in topByLoc)
         {
             var headerText = $"Archivo: {result.RelativePath}";
@@ -39,6 +41,7 @@ public class HotspotSection : IReportSection
         // --- Top 5 por Número de Imports ---
         sb.AppendLine("## 5 Principales Archivos por Número de Importaciones");
         var topByImports = context.SortedResults
+            .Where(r => r.Language == "csharp" || r.Metrics != null)
             .Select(r => new { Result = r, ImportCount = r.Usings.Count })
             .Where(x => x.ImportCount > 0)
             .OrderByDescending(x => x.ImportCount)

@@ -7,53 +7,6 @@ namespace ContextWeaver.Core.Tests;
 /// <summary>Pruebas para <see cref="FileAnalysisResult"/>.</summary>
 public class FileAnalysisResultTests
 {
-    // ─── Nombre del Módulo (propiedad calculada) ───
-
-    /// <summary>Verifica que los archivos en subdirectorios se asignen al módulo correcto.</summary>
-    /// <param name="path">La ruta relativa del archivo.</param>
-    /// <param name="expectedModule">El nombre del módulo esperado.</param>
-    [Theory]
-    [InlineData("Core/ClassA.cs", "Core")]
-    [InlineData("Services/SettingsProvider.cs", "Services")]
-    [InlineData("Analyzers/CSharpFileAnalyzer.cs", "Analyzers")]
-    public void ModuleName_FileInSubdirectory_ReturnsFirstPathSegment(string path, string expectedModule)
-    {
-        var result = new FileAnalysisResult { RelativePath = path };
-        result.ModuleName.Should().Be(expectedModule);
-    }
-
-    /// <summary>Verifica que los archivos en la raíz retornen "Root" como nombre del módulo.</summary>
-    [Fact]
-    public void ModuleName_FileAtRoot_ReturnsRoot()
-    {
-        var result = new FileAnalysisResult { RelativePath = "Program.cs" };
-        result.ModuleName.Should().Be("Root");
-    }
-
-    /// <summary>Verifica que una ruta vacía retorne "Root".</summary>
-    [Fact]
-    public void ModuleName_EmptyPath_ReturnsRoot()
-    {
-        var result = new FileAnalysisResult { RelativePath = string.Empty };
-        result.ModuleName.Should().Be("Root");
-    }
-
-    /// <summary>Verifica que las rutas estilo Windows se manejen correctamente.</summary>
-    [Fact]
-    public void ModuleName_WindowsStylePath_ReturnsFirstSegment()
-    {
-        var result = new FileAnalysisResult { RelativePath = "Core\\FileAnalysisResult.cs" };
-        result.ModuleName.Should().Be("Core");
-    }
-
-    /// <summary>Verifica que los archivos profundamente anidados retornen la carpeta de nivel superior como módulo.</summary>
-    [Fact]
-    public void ModuleName_DeeplyNestedPath_ReturnsTopLevel()
-    {
-        var result = new FileAnalysisResult { RelativePath = "Core/Models/SubFolder/File.cs" };
-        result.ModuleName.Should().Be("Core");
-    }
-
     // ─── Valores Por Defecto ───
 
     /// <summary>Verifica que una nueva instancia tenga los valores predeterminados esperados.</summary>

@@ -283,6 +283,7 @@ public class CSharpFileAnalyzer : IFileAnalyzer
         foreach (var sourceTypeSymbol in declaredTypeSymbols)
         {
             var sourceTypeName = sourceTypeSymbol.Name;
+            var inheritances = new HashSet<string>();
 
             // --- Análisis de HERENCIA / IMPLEMENTACIÓN ---
             var baseTypes = sourceTypeSymbol.Interfaces.Concat(new[] { sourceTypeSymbol.BaseType });
@@ -295,8 +296,11 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                 // ✅ FIX: Solo añadir si el destino es relevante (no es del sistema y no está vacío).
                 var targetNs = baseTypeSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(targetTypeName) && !targetNs.StartsWith("System", StringComparison.Ordinal))
+                {
                     // ✅ FIX: Usar sintaxis de línea punteada para herencia en 'graph TD'
                     dependencies.Add($"{sourceTypeName} -.-> {targetTypeName}");
+                    inheritances.Add(targetTypeName);
+                }
             }
 
             var typeDeclarationSyntax = sourceTypeSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
@@ -318,7 +322,8 @@ public class CSharpFileAnalyzer : IFileAnalyzer
                 // Usamos _allProjectTypes para validar si el destino pertenece al proyecto.
                 if (!string.IsNullOrWhiteSpace(targetTypeName) &&
                     _allProjectTypes.Contains(targetTypeName) &&
-                    targetTypeName != sourceTypeName)
+                    targetTypeName != sourceTypeName &&
+                    !inheritances.Contains(targetTypeName))
                     dependencies.Add($"{sourceTypeName} --> {targetTypeName}");
             }
         }

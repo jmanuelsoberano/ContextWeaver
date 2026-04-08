@@ -89,6 +89,7 @@ public sealed class CodeAnalyzerService
             return;
         }
 
+        var settings = _settingsProvider.LoadSettingsFor(directory);
         var fileList = files.ToList();
 
         // 3. Inicializar Analizadores (Pre-carga de contexto global)
@@ -106,8 +107,13 @@ public sealed class CodeAnalyzerService
             if (analyzer != null)
             {
                 var result = await analyzer.AnalyzeAsync(file);
-                result.RelativePath = file.FullName.Replace(directory.FullName, string.Empty)
+
+                var relativePath = file.FullName.Replace(directory.FullName, string.Empty)
                     .Replace(Path.DirectorySeparatorChar, '/').TrimStart('/');
+
+                result.RelativePath = relativePath;
+                result.ModuleName = CalculateModuleName(relativePath, settings.WrapperDirectories);
+
                 analysisResults.Add(result);
             }
         });
@@ -164,5 +170,34 @@ public sealed class CodeAnalyzerService
         {
             _logger.LogInformation("Reporte en formato '{Format}' generado exitosamente en: {OutputPath}", format, outputFile.FullName);
         }
+    }
+
+    /// <summary>
+    ///     Calcula el nombre del módulo basado en su ruta relativa y los directorios contenedores configurados.
+    /// </summary>
+    private static string CalculateModuleName(string relativePath, string[] wrapperDirectories)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            return "Root";
+        }
+
+        var parts = relativePath.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 0)
+        {
+            return "Root";
+        }
+
+        // Si el primer nivel es un directorio contenedor (ej. "src") y existe un subnivel (ej. "ContextWeaver.Core")
+        // el módulo se considera la combinación de ambos.
+        if (parts.Length > 1 && wrapperDirectories.Contains(parts[0], StringComparer.OrdinalIgnoreCase))
+        {
+            return $"{parts[0]}/{parts[1]}";
+        }
+
+        // De lo contrario, el módulo es el primer nivel.
+        // Los archivos aislados en la raíz del repositorio se agrupan en "Root" (parts.Length == 1).
+        return parts.Length > 1 ? parts[0] : "Root";
     }
 }

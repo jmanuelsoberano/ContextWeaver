@@ -57,23 +57,27 @@ public class ModuleAdjacencyListSectionTests
             new FileAnalysisResult
             {
                 RelativePath = "Core/Config.cs",
+                ModuleName = "Core",
                 DefinedTypes = new List<string> { "Config" }
             },
             new FileAnalysisResult
             {
                 RelativePath = "Api/Controller.cs",
+                ModuleName = "Api",
                 ClassDependencies = new List<string> { "Controller --> Config" }, // Api depends on Core
                 DefinedTypes = new List<string> { "Controller" }
             },
             new FileAnalysisResult
             {
                 RelativePath = "Api/Models.cs",
+                ModuleName = "Api",
                 ClassDependencies = new List<string> { "Models --> Auth" }, // Api depends on Shared
                 DefinedTypes = new List<string> { "Models" }
             },
             new FileAnalysisResult
             {
                 RelativePath = "Shared/Auth.cs",
+                ModuleName = "Shared",
                 ClassDependencies = new List<string> { "Auth --> Config" }, // Shared depends on Core
                 DefinedTypes = new List<string> { "Auth" }
             }
