@@ -93,7 +93,7 @@ El Wizard interactivo se rige bajo un patrón de diseño **State Orchestrator Pi
     - **Persistencia**: Recuerda las preferencias del usuario (`.contextweaver.json`) para agilizar ejecuciones futuras.
 - **Modo Desatendido (Scriptable)**:
     - Flags robustos: `--all`, `--sections`, `--exclude-sections`.
-    - Matching difuso ("fuzzy match") para nombres de secciones (e.g., "mermaid" selecciona los gráficos pertinentes).
+    - Búsqueda de coincidencia parcial (`Contains`) para nombres de secciones (e.g., "mermaid" selecciona los gráficos pertinentes).
 
 ### 5.2 Análisis Semántico (C#)
 - No leemos el código como texto plano; lo entendemos como estructura (AST).
